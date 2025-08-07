@@ -1,22 +1,54 @@
 'use client'
-import { useAuth } from '@/contexts/AuthContext'
-import AuthForm from '@/components/AuthForm'
-import Dashboard from '@/components/Dashboard'
 
-export default function Home() {
-  const { user, loading } = useAuth()
+import { useEffect } from 'react'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
+import HeroSection from '@/components/landing/HeroSection'
+import FeaturesSection from '@/components/landing/FeaturesSection'
+import ServicesSection from '@/components/landing/ServicesSection'
+import StatsSection from '@/components/landing/StatsSection'
+import TestimonialsSection from '@/components/landing/TestimonialsSection'
+import CTASection from '@/components/landing/CTASection'
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
-    )
-  }
+export default function HomePage() {
+  useEffect(() => {
+    // Initialize scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view')
+        }
+      })
+    }, observerOptions)
+
+    // Observe all animate-on-scroll elements
+    const animateElements = document.querySelectorAll('.animate-on-scroll')
+    animateElements.forEach((el) => observer.observe(el))
+
+    return () => {
+      animateElements.forEach((el) => observer.unobserve(el))
+    }
+  }, [])
 
   return (
-    <main className="min-h-screen bg-gray-100">
-      {user ? <Dashboard /> : <AuthForm />}
-    </main>
+    <div className="min-h-screen">
+      <Header />
+      
+      <main>
+        <HeroSection />
+        <FeaturesSection />
+        <ServicesSection />
+        <StatsSection />
+        <TestimonialsSection />
+        <CTASection />
+      </main>
+
+      <Footer />
+    </div>
   )
 }
