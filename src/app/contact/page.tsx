@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
   Phone, 
@@ -15,7 +16,7 @@ import {
   Shield
 } from 'lucide-react'
 import Header from '@/components/layout/header'
-import Footer from '@/components/layout/footer'
+import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
@@ -42,7 +43,7 @@ export default function ContactPage() {
     // Show success message
   }
 
-  const handleInputChange = (field: string) => (value: string) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -193,7 +194,7 @@ export default function ContactPage() {
                           label="Full Name"
                           placeholder="Enter your name"
                           value={formData.name}
-                          onChange={handleInputChange('name')}
+                          onChange={(value) => handleInputChange('name', value)}
                           required
                         />
                         <Input
@@ -201,7 +202,7 @@ export default function ContactPage() {
                           type="email"
                           placeholder="your@email.com"
                           value={formData.email}
-                          onChange={handleInputChange('email')}
+                          onChange={(value) => handleInputChange('email', value)}
                           required
                         />
                       </div>
@@ -212,7 +213,7 @@ export default function ContactPage() {
                           type="tel"
                           placeholder="+91 9999-XXX-XXX"
                           value={formData.phone}
-                          onChange={handleInputChange('phone')}
+                          onChange={(value) => handleInputChange('phone', value)}
                           required
                         />
                         <div className="form-group">
@@ -234,12 +235,15 @@ export default function ContactPage() {
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Input
-                          label="Event Date"
-                          type="date"
-                          value={formData.eventDate}
-                          onChange={handleInputChange('eventDate')}
-                        />
+                        <div className="form-group">
+                          <label className="form-label">Event Date</label>
+                          <input
+                            type="date"
+                            className="input-base"
+                            value={formData.eventDate}
+                            onChange={(e) => handleInputChange('eventDate', e.target.value)}
+                          />
+                        </div>
                         <div className="form-group">
                           <label className="form-label">Budget Range</label>
                           <select
@@ -270,11 +274,11 @@ export default function ContactPage() {
                       </div>
 
                       <Button 
-                        type="submit" 
                         variant="primary" 
                         size="lg" 
                         loading={isSubmitting}
                         className="w-full group"
+                        type="submit"
                       >
                         <Send className="h-5 w-5 mr-2 group-hover:translate-x-1 transition-transform" />
                         Send Message

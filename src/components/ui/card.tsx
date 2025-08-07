@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { CardProps } from '@/types'
+import { CardProps } from '@/lib'
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ variant = 'default', className, children, onClick, ...props }, ref) => {

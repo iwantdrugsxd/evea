@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { 
   Shield, 
   Search, 
@@ -18,7 +19,7 @@ import {
   Smartphone
 } from 'lucide-react'
 import { siteContent } from '@/data/content'
-import SectionHeader from '@/components/common/section-header'
+import SectionHeader from '@/components/common/SectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 

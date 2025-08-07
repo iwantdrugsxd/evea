@@ -14,11 +14,11 @@ import {
   Clock
 } from 'lucide-react'
 import Header from '@/components/layout/header'
-import Footer from '@/components/layout/footer'
-import SectionHeader from '@/components/common/section-header'
+import Footer from '@/components/layout/Footer'
+import SectionHeader from '@/components/common/SectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import Button from '@/components/ui/button'
-import AnimatedCounter from '@/components/common/animated-counter'
+import AnimatedCounter from '@/components/common/AnimatedCounter'
 import Link from 'next/link'
 
 export default function AboutPage() {
@@ -279,7 +279,7 @@ export default function AboutPage() {
                     Start Planning
                   </Button>
                 </Link>
-                <Link href="/vendor-onboarding">
+                <Link href="/vendor">
                   <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary-600">
                     Become a Vendor
                   </Button>

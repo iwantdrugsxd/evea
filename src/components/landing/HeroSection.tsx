@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { siteContent } from '@/data/content'
 import Button from '@/components/ui/button'
-import AnimatedCounter from '@/components/common/animated-counter'
+import AnimatedCounter from '@/components/common/AnimatedCounter'
 
 const HeroSection = () => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
@@ -296,45 +296,45 @@ const HeroSection = () => {
       </div>
 
       {/* Video Modal */}
-      <AnimatePresence>
-        {isVideoPlaying && (
+      {isVideoPlaying && (
+        <motion.div
+          key="video-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setIsVideoPlaying(false)}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setIsVideoPlaying(false)}
+            key="video-modal-content"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-2xl p-6 max-w-4xl w-full"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl p-6 max-w-4xl w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center mb-6 relative overflow-hidden">
-                <div className="text-white text-center z-10">
-                  <Play className="h-20 w-20 mx-auto mb-4 text-primary-400" />
-                  <h3 className="text-xl font-semibold mb-2">Platform Demo Video</h3>
-                  <p className="text-gray-300">See how Evea transforms event planning</p>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-transparent"></div>
+            <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center mb-6 relative overflow-hidden">
+              <div className="text-white text-center z-10">
+                <Play className="h-20 w-20 mx-auto mb-4 text-primary-400" />
+                <h3 className="text-xl font-semibold mb-2">Platform Demo Video</h3>
+                <p className="text-gray-300">See how Evea transforms event planning</p>
               </div>
-              
-              <div className="flex justify-center">
-                <Button
-                  variant="primary"
-                  onClick={() => setIsVideoPlaying(false)}
-                  className="px-8"
-                >
-                  Close Preview
-                </Button>
-              </div>
-            </motion.div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-transparent"></div>
+            </div>
+            
+            <div className="flex justify-center">
+              <Button
+                variant="primary"
+                onClick={() => setIsVideoPlaying(false)}
+                className="px-8"
+              >
+                Close Preview
+              </Button>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
 
       {/* Scroll Indicator */}
       <motion.div

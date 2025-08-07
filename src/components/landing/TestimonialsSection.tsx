@@ -14,7 +14,7 @@ import {
   Award
 } from 'lucide-react'
 import { siteContent } from '@/data/content'
-import SectionHeader from '@/components/common/section-header'
+import SectionHeader from '@/components/common/SectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import Badge from '@/components/ui/badge'
 
@@ -63,6 +63,7 @@ const TestimonialsSection = () => {
               onClick={prevTestimonial}
               className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white rounded-full shadow-elegant flex items-center justify-center hover:shadow-elegant-hover transition-all duration-200 z-10"
               aria-label="Previous testimonial"
+              suppressHydrationWarning={true}
             >
               <ChevronLeft className="h-5 w-5 text-gray-600" />
             </button>
@@ -71,6 +72,7 @@ const TestimonialsSection = () => {
               onClick={nextTestimonial}
               className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white rounded-full shadow-elegant flex items-center justify-center hover:shadow-elegant-hover transition-all duration-200 z-10"
               aria-label="Next testimonial"
+              suppressHydrationWarning={true}
             >
               <ChevronRight className="h-5 w-5 text-gray-600" />
             </button>
@@ -172,6 +174,7 @@ const TestimonialsSection = () => {
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}
                 aria-label={`Go to testimonial ${index + 1}`}
+                suppressHydrationWarning={true}
               />
             ))}
           </div>

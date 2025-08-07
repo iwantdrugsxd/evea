@@ -34,9 +34,10 @@ const Header = () => {
   return (
     <>
       {/* Top Bar - Contact Info */}
-      <div className="bg-primary-600 text-white py-3 text-sm hidden lg:block">
+      <div className="bg-primary-600 text-white py-2 lg:py-3 text-sm">
         <div className="container-custom">
-          <div className="flex justify-between items-center">
+          {/* Desktop View */}
+          <div className="hidden lg:flex justify-between items-center">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
@@ -53,7 +54,7 @@ const Header = () => {
             </div>
             <div className="flex items-center space-x-6">
               <Link 
-                href="/vendor-onboarding" 
+                href="/vendor" 
                 className="hover:text-primary-200 transition-colors font-medium"
               >
                 Become a Vendor
@@ -66,6 +67,32 @@ const Header = () => {
                 24/7 Support
               </Link>
             </div>
+          </div>
+
+          {/* Mobile View */}
+          <div className="lg:hidden flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <Link 
+                href={`tel:${contactInfo.phone}`}
+                className="flex items-center space-x-1"
+              >
+                <Phone className="h-3.5 w-3.5" />
+                <span className="font-medium text-xs">{contactInfo.phone}</span>
+              </Link>
+              <span className="text-primary-300">|</span>
+              <Link 
+                href="/vendor" 
+                className="font-medium text-xs hover:text-primary-200 transition-colors"
+              >
+                Become a Vendor
+              </Link>
+            </div>
+            <Link 
+              href="/support" 
+              className="font-medium text-xs hover:text-primary-200 transition-colors"
+            >
+              24/7 Support
+            </Link>
           </div>
         </div>
       </div>
@@ -103,6 +130,7 @@ const Header = () => {
                       <button
                         onClick={() => handleDropdown(item.name)}
                         className="nav-link flex items-center space-x-1 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                        suppressHydrationWarning={true}
                       >
                         <span className="font-medium">{item.name}</span>
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
@@ -147,11 +175,11 @@ const Header = () => {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
-              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative">
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative" suppressHydrationWarning={true}>
                 <Search className="h-5 w-5 text-gray-600" />
               </button>
               
-              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative">
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative" suppressHydrationWarning={true}>
                 <Bell className="h-5 w-5 text-gray-600" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary-500 rounded-full"></span>
               </button>
@@ -178,6 +206,7 @@ const Header = () => {
               onClick={toggleMenu}
               className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               aria-label="Toggle menu"
+              suppressHydrationWarning={true}
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6 text-gray-900" />

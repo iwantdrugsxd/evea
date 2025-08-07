@@ -1,45 +1,24 @@
 'use client'
 
-import { useEffect } from 'react'
-import Header from '@/components/layout/Header'
+import { useIntersectionObserver } from '@/hooks/use-intersection'
+import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/landing/HeroSection'
-import FeaturesSection from '@/components/landing/FeaturesSection'
+import FeaturesSection from '@/components/landing/FeaturesSection' 
 import ServicesSection from '@/components/landing/ServicesSection'
 import StatsSection from '@/components/landing/StatsSection'
 import TestimonialsSection from '@/components/landing/TestimonialsSection'
 import CTASection from '@/components/landing/CTASection'
 
 export default function HomePage() {
-  useEffect(() => {
-    // Initialize scroll animations
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-fade-in')
-        }
-      })
-    }, observerOptions)
-
-    // Observe all animate-on-scroll elements
-    const animateElements = document.querySelectorAll('.animate-on-scroll')
-    animateElements.forEach((el) => observer.observe(el))
-
-    return () => {
-      animateElements.forEach((el) => observer.unobserve(el))
-    }
-  }, [])
+  // Initialize scroll animations
+  useIntersectionObserver()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
       <Header />
       
-      <main>
+      <main className="space-y-enterprise">
         <HeroSection />
         <FeaturesSection />
         <ServicesSection />

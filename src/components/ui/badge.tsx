@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { BadgeProps } from '@/types'
+import { BadgeProps } from '@/lib'
 
 const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
   ({ variant = 'primary', children, className, ...props }, ref) => {

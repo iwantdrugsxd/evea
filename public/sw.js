@@ -179,6 +179,9 @@ async function staleWhileRevalidate(request, cacheName) {
       cache.put(request, response.clone())
     }
     return response
+  }).catch((error) => {
+    console.warn('Service Worker: Fetch failed for', request.url, error)
+    return null
   })
   
   // Return cached version immediately if available
@@ -187,7 +190,13 @@ async function staleWhileRevalidate(request, cacheName) {
   }
   
   // Otherwise wait for network
-  return await fetchPromise
+  const response = await fetchPromise
+  if (response) {
+    return response
+  }
+  
+  // If both cache and network fail, return a fallback
+  return new Response('', { status: 404 })
 }
 
 async function cacheFirstWithFallback(request, cacheName) {

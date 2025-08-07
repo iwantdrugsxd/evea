@@ -12,8 +12,8 @@ import {
   Shield
 } from 'lucide-react'
 import { siteContent } from '@/data/content'
-import SectionHeader from '@/components/common/section-header'
-import AnimatedCounter from '@/components/common/animated-counter'
+import SectionHeader from '@/components/common/SectionHeader'
+import AnimatedCounter from '@/components/common/AnimatedCounter'
 import { Card, CardContent } from '@/components/ui/card'
 
 const StatsSection = () => {

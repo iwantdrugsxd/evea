@@ -154,7 +154,7 @@ export interface Notification {
 }
 
 // Component Props Types
-export interface ButtonProps {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean

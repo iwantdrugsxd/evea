@@ -115,9 +115,7 @@ export default function RootLayout({
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta httpEquiv="Referrer-Policy" content="origin-when-cross-origin" />
         
-        {/* Performance Hints */}
-        <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/poppins.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        {/* Performance Hints - Using Google Fonts instead of local files */}
       </head>
       
       <body className={`${inter.className} antialiased bg-white text-gray-900 overflow-x-hidden layout-enterprise`}>
@@ -187,7 +185,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator && 'PushManager' in window) {
+              if ('serviceWorker' in navigator && 'PushManager' in window && window.location.hostname !== 'localhost') {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {

@@ -18,8 +18,8 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Header from '@/components/layout/header'
-import Footer from '@/components/layout/footer'
-import SectionHeader from '@/components/common/section-header'
+import Footer from '@/components/layout/Footer'
+import SectionHeader from '@/components/common/SectionHeader'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 import Badge from '@/components/ui/badge'

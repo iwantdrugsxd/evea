@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { InputProps } from '@/types'
+import { InputProps } from '@/lib'
 import { AlertCircle } from 'lucide-react'
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -44,6 +44,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               disabled && 'opacity-50 cursor-not-allowed',
               className
             )}
+            // Suppress hydration warnings for browser extension attributes
+            suppressHydrationWarning={true}
             {...props}
           />
           

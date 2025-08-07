@@ -4,15 +4,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
-  ArrowLeft,
-  User,
-  Building2,
-  Mail,
-  Phone,
-  MapPin,
-  FileText,
-  Eye,
-  EyeOff
+  User, 
+  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  UserPlus,
+  Phone
 } from 'lucide-react'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
@@ -20,16 +18,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
 
-export default function VendorRegistrationPage() {
+export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    businessName: '',
     fullName: '',
     email: '',
     phone: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
     password: '',
     confirmPassword: ''
   })
@@ -56,15 +49,7 @@ export default function VendorRegistrationPage() {
       
       <main className="section-padding">
         <div className="container-custom">
-          <div className="max-w-xl mx-auto">
-            <Link 
-              href="/vendor"
-              className="inline-flex items-center text-gray-600 hover:text-primary-600 transition-colors mb-8"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Vendor Page
-            </Link>
-
+          <div className="max-w-md mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -72,10 +57,10 @@ export default function VendorRegistrationPage() {
               className="text-center mb-8"
             >
               <h1 className="text-3xl font-bold text-gray-900 mb-4 font-heading">
-                Start Your Vendor Journey
+                Get Started
               </h1>
               <p className="text-gray-600">
-                Create your vendor account and start growing your business with Evea
+                Create your account to start planning amazing events
               </p>
             </motion.div>
 
@@ -86,19 +71,10 @@ export default function VendorRegistrationPage() {
             >
               <Card className="card-elegant">
                 <CardHeader>
-                  <CardTitle className="text-center">Vendor Registration</CardTitle>
+                  <CardTitle className="text-center">Create Account</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <Input
-                      type="text"
-                      label="Business Name"
-                      value={formData.businessName}
-                      onChange={(value) => handleInputChange('businessName', value)}
-                      placeholder="Enter your business name"
-                      required
-                    />
-
                     <Input
                       type="text"
                       label="Full Name"
@@ -108,63 +84,23 @@ export default function VendorRegistrationPage() {
                       required
                     />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Input
-                        type="email"
-                        label="Email Address"
-                        value={formData.email}
-                        onChange={(value) => handleInputChange('email', value)}
-                        placeholder="Enter your email"
-                        required
-                      />
-
-                      <Input
-                        type="tel"
-                        label="Phone Number"
-                        value={formData.phone}
-                        onChange={(value) => handleInputChange('phone', value)}
-                        placeholder="Enter your phone number"
-                        required
-                      />
-                    </div>
-
                     <Input
-                      type="text"
-                      label="Address"
-                      value={formData.address}
-                      onChange={(value) => handleInputChange('address', value)}
-                      placeholder="Enter your business address"
+                      type="email"
+                      label="Email Address"
+                      value={formData.email}
+                      onChange={(value) => handleInputChange('email', value)}
+                      placeholder="Enter your email"
                       required
                     />
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                      <Input
-                        type="text"
-                        label="City"
-                        value={formData.city}
-                        onChange={(value) => handleInputChange('city', value)}
-                        placeholder="City"
-                        required
-                      />
-
-                      <Input
-                        type="text"
-                        label="State"
-                        value={formData.state}
-                        onChange={(value) => handleInputChange('state', value)}
-                        placeholder="State"
-                        required
-                      />
-
-                      <Input
-                        type="text"
-                        label="PIN Code"
-                        value={formData.pincode}
-                        onChange={(value) => handleInputChange('pincode', value)}
-                        placeholder="PIN Code"
-                        required
-                      />
-                    </div>
+                    <Input
+                      type="tel"
+                      label="Phone Number"
+                      value={formData.phone}
+                      onChange={(value) => handleInputChange('phone', value)}
+                      placeholder="Enter your phone number"
+                      required
+                    />
 
                     <div className="relative">
                       <Input
@@ -235,15 +171,16 @@ export default function VendorRegistrationPage() {
                       className="w-full"
                       loading={isLoading}
                     >
-                      Create Vendor Account
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Create Account
                     </Button>
                   </form>
 
                   <div className="mt-6 text-center">
                     <p className="text-gray-600">
-                      Already have a vendor account?{' '}
+                      Already have an account?{' '}
                       <Link
-                        href="/vendor/login"
+                        href="/auth/login"
                         className="text-primary-600 hover:text-primary-700 font-medium"
                       >
                         Sign in
