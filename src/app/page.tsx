@@ -21,7 +21,7 @@ export default function HomePage() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('in-view')
+          entry.target.classList.add('animate-fade-in')
         }
       })
     }, observerOptions)
@@ -36,7 +36,7 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
       <Header />
       
       <main>

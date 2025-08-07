@@ -1,0 +1,24 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60.44444444444444" fill="url(#gradient)" stroke="#dc2626" stroke-width="3.5555555555555554"/>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Letter E -->
+  <text x="64" y="71.11111111111111" 
+        font-family="Arial, sans-serif" 
+        font-size="21.333333333333332" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="white">E</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="32" cy="32" r="8" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="96" cy="96" r="6.4" fill="rgba(255,255,255,0.2)"/>
+</svg>
