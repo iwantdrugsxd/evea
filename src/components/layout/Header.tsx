@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -12,39 +12,18 @@ import {
   MapPin,
   User,
   ShoppingBag,
-  LogIn
+  LogIn,
+  Search,
+  Bell
 } from 'lucide-react'
+import { useScroll } from '@/hooks/use-scroll'
+import { navigationData, contactInfo } from '@/data/content'
+import Button from '@/components/ui/button'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const navigation = [
-    { name: 'Home', href: '/' },
-    {
-      name: 'Services',
-      href: '/services',
-      dropdown: [
-        { name: 'Wedding Services', href: '/services/wedding' },
-        { name: 'Corporate Events', href: '/services/corporate' },
-        { name: 'Birthday Parties', href: '/services/birthday' },
-        { name: 'Festivals & Celebrations', href: '/services/festivals' },
-      ]
-    },
-    { name: 'Marketplace', href: '/marketplace' },
-    { name: 'About', href: '/about' },
-    { name: 'Features', href: '/features' },
-    { name: 'Contact', href: '/contact' },
-  ]
+  const { isScrolled } = useScroll(20)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   
@@ -55,30 +34,36 @@ const Header = () => {
   return (
     <>
       {/* Top Bar - Contact Info */}
-      <div className="bg-primary-600 text-white py-2 text-sm hidden lg:block">
+      <div className="bg-primary-600 text-white py-3 text-sm hidden lg:block">
         <div className="container-custom">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>+91 9999-XXX-XXX</span>
+                <span className="font-medium">{contactInfo.phone}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>hello@evea.com</span>
+                <span className="font-medium">{contactInfo.email}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Mumbai, Maharashtra</span>
+                <span className="font-medium">{contactInfo.address}</span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/vendor-onboarding" className="hover:text-primary-200 transition-colors">
+            <div className="flex items-center space-x-6">
+              <Link 
+                href="/vendor-onboarding" 
+                className="hover:text-primary-200 transition-colors font-medium"
+              >
                 Become a Vendor
               </Link>
               <span className="text-primary-300">|</span>
-              <Link href="/support" className="hover:text-primary-200 transition-colors">
-                Support
+              <Link 
+                href="/support" 
+                className="hover:text-primary-200 transition-colors font-medium"
+              >
+                24/7 Support
               </Link>
             </div>
           </div>
@@ -88,63 +73,60 @@ const Header = () => {
       {/* Main Header */}
       <header className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-100' 
-          : 'bg-white'
+          ? 'header-blur shadow-elegant border-b border-gray-200' 
+          : 'bg-transparent'
       }`}>
         <div className="container-custom">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-red rounded-lg flex items-center justify-center">
-                  <span className="text-primary-600 font-bold text-xl">E</span>
+                <div className="w-12 h-12 bg-gradient-red rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                  <span className="text-primary-600 font-bold text-2xl font-heading">E</span>
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 font-heading">
-                  Evea
-                </h1>
+                <h1 className="text-2xl font-bold font-heading text-gray-900">Evea</h1>
                 <p className="text-xs text-gray-500 -mt-1">Event Management</p>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8">
-              {navigation.map((item) => (
+            <nav className="hidden lg:flex items-center space-x-1">
+              {navigationData.main.map((item) => (
                 <div key={item.name} className="relative">
-                  {item.dropdown ? (
-                    <div
-                      className="flex items-center space-x-1 cursor-pointer group"
-                      onMouseEnter={() => handleDropdown(item.name)}
-                      onMouseLeave={() => handleDropdown(item.name)}
-                    >
-                      <Link
-                        href={item.href}
-                        className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                  {'dropdown' in item ? (
+                    <div className="relative">
+                      <button
+                        onClick={() => handleDropdown(item.name)}
+                        className="nav-link flex items-center space-x-1 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
                       >
-                        {item.name}
-                      </Link>
-                      <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-primary-600 transition-colors" />
+                        <span className="font-medium">{item.name}</span>
+                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
+                          activeDropdown === item.name ? 'rotate-180' : ''
+                        }`} />
+                      </button>
                       
                       <AnimatePresence>
                         {activeDropdown === item.name && (
                           <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2"
+                            className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-elegant-large border border-gray-100 py-2 z-50"
                           >
-                            {item.dropdown.map((subItem) => (
+                            {item.dropdown.map((dropdownItem) => (
                               <Link
-                                key={subItem.name}
-                                href={subItem.href}
-                                className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                                key={dropdownItem.name}
+                                href={dropdownItem.href}
+                                className="block px-4 py-3 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors duration-200 font-medium"
+                                onClick={() => setActiveDropdown(null)}
                               >
-                                {subItem.name}
+                                {dropdownItem.name}
                               </Link>
                             ))}
                           </motion.div>
@@ -154,106 +136,148 @@ const Header = () => {
                   ) : (
                     <Link
                       href={item.href}
-                      className="text-gray-700 hover:text-primary-600 font-medium transition-colors relative group"
+                      className="nav-link px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium"
                     >
                       {item.name}
-                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all group-hover:w-full"></span>
                     </Link>
                   )}
                 </div>
               ))}
             </nav>
 
-            {/* Desktop CTA Buttons */}
+            {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 transition-colors"
-              >
-                <User className="h-5 w-5" />
-                <span className="font-medium">Login</span>
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative">
+                <Search className="h-5 w-5 text-gray-600" />
+              </button>
+              
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative">
+                <Bell className="h-5 w-5 text-gray-600" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary-500 rounded-full"></span>
+              </button>
+              
+              <div className="w-px h-6 bg-gray-300"></div>
+              
+              <Link href="/auth/login">
+                <Button variant="ghost" size="sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
               </Link>
-              <Link
-                href="/marketplace"
-                className="btn-primary"
-              >
-                <ShoppingBag className="h-5 w-5 mr-2" />
-                Explore Services
+              
+              <Link href="/auth/register">
+                <Button variant="primary" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Get Started
+                </Button>
               </Link>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               aria-label="Toggle menu"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-gray-900" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-900" />
+              )}
             </button>
           </div>
-        </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="lg:hidden bg-white border-t border-gray-100 shadow-lg"
-            >
-              <div className="container-custom py-4">
-                <nav className="space-y-4">
-                  {navigation.map((item) => (
+          {/* Mobile Navigation */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="lg:hidden border-t border-gray-200 bg-white/95 backdrop-blur-sm"
+              >
+                <div className="py-6 space-y-4">
+                  {navigationData.main.map((item) => (
                     <div key={item.name}>
-                      <Link
-                        href={item.href}
-                        className="block py-2 text-gray-700 hover:text-primary-600 font-medium transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                      {item.dropdown && (
-                        <div className="ml-4 space-y-2 mt-2">
-                          {item.dropdown.map((subItem) => (
-                            <Link
-                              key={subItem.name}
-                              href={subItem.href}
-                              className="block py-1 text-gray-600 hover:text-primary-600 transition-colors"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              {subItem.name}
-                            </Link>
-                          ))}
+                      {'dropdown' in item ? (
+                        <div>
+                          <button
+                            onClick={() => handleDropdown(item.name)}
+                            className="flex items-center justify-between w-full px-4 py-3 text-gray-900 font-medium hover:text-primary-600 transition-colors"
+                          >
+                            <span>{item.name}</span>
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
+                              activeDropdown === item.name ? 'rotate-180' : ''
+                            }`} />
+                          </button>
+                          
+                          <AnimatePresence>
+                            {activeDropdown === item.name && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="bg-gray-50 ml-4 mr-4 rounded-lg overflow-hidden"
+                              >
+                                {item.dropdown.map((dropdownItem) => (
+                                  <Link
+                                    key={dropdownItem.name}
+                                    href={dropdownItem.href}
+                                    className="block px-4 py-3 text-gray-700 hover:text-primary-600 transition-colors font-medium"
+                                    onClick={() => {
+                                      setIsMenuOpen(false)
+                                      setActiveDropdown(null)
+                                    }}
+                                  >
+                                    {dropdownItem.name}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="block px-4 py-3 text-gray-900 font-medium hover:text-primary-600 transition-colors"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {item.name}
+                        </Link>
                       )}
                     </div>
                   ))}
-                </nav>
-                
-                <div className="mt-6 space-y-3">
-                  <Link
-                    href="/login"
-                    className="flex items-center space-x-2 py-2 text-gray-700 hover:text-primary-600 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LogIn className="h-5 w-5" />
-                    <span className="font-medium">Login</span>
-                  </Link>
-                  <Link
-                    href="/marketplace"
-                    className="btn-primary w-full text-center"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Explore Services
-                  </Link>
+                  
+                  {/* Mobile Actions */}
+                  <div className="px-4 pt-6 border-t border-gray-200 space-y-3">
+                    <Link href="/auth/login" className="block w-full">
+                      <Button variant="ghost" size="lg" className="w-full justify-center">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/auth/register" className="block w-full">
+                      <Button variant="primary" size="lg" className="w-full justify-center">
+                        <User className="h-4 w-4 mr-2" />
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
+
+      {/* Click outside to close dropdown */}
+      {activeDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setActiveDropdown(null)}
+        />
+      )}
     </>
   )
 }

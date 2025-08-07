@@ -32,7 +32,9 @@ export const metadata: Metadata = {
     'event planning',
     'birthday parties',
     'celebrations',
-    'vendor services'
+    'vendor services',
+    'event coordination',
+    'professional events'
   ],
   authors: [{ name: 'Evea Team' }],
   creator: 'Evea',
@@ -95,61 +97,46 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
       <head>
-        {/* Favicon and Icons */}
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        
-        {/* PWA Manifest */}
-        <link rel="manifest" href="/manifest.json" />
-        
-        {/* Theme Color */}
+        {/* Performance and SEO Meta Tags */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="theme-color" content="#ef4444" />
         <meta name="msapplication-TileColor" content="#ef4444" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* Viewport and Mobile */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Evea" />
-        
-        {/* Preconnect to external domains */}
+        {/* Preconnect for Performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://images.unsplash.com" />
+        
+        {/* DNS Prefetch */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//images.unsplash.com" />
         
         {/* Security Headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta httpEquiv="Referrer-Policy" content="origin-when-cross-origin" />
         
-        {/* Search Engine Optimization */}
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <meta name="googlebot" content="index, follow" />
-        
         {/* Performance Hints */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//images.unsplash.com" />
+        <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/poppins.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
-      <body className={`${inter.className} antialiased bg-white text-gray-900 overflow-x-hidden min-h-screen`}>
+      
+      <body className={`${inter.className} antialiased bg-white text-gray-900 overflow-x-hidden layout-enterprise`}>
+        {/* Skip Navigation for Accessibility */}
+        <a href="#main-content" className="skip-link focus-ring">
+          Skip to main content
+        </a>
+        
+        {/* Main Content Wrapper */}
         <div id="root" className="min-h-screen flex flex-col">
-          {/* Skip to main content link for accessibility */}
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-          
-          {/* Main content wrapper */}
           <main id="main-content" className="flex-1">
             {children}
           </main>
         </div>
         
-        {/* Toast Notifications */}
+        {/* Toast Notifications with Enterprise Styling */}
         <Toaster
           position="top-right"
-          gutter={8}
+          gutter={12}
           containerClassName="z-50"
           toastOptions={{
             duration: 4000,
@@ -162,12 +149,13 @@ export default function RootLayout({
               borderRadius: '0.75rem',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
               maxWidth: '420px',
-              padding: '16px',
+              padding: '16px 20px',
             },
             success: {
               style: {
                 border: '1px solid #10b981',
                 backgroundColor: '#ecfdf5',
+                color: '#065f46',
               },
               iconTheme: {
                 primary: '#10b981',
@@ -178,6 +166,7 @@ export default function RootLayout({
               style: {
                 border: '1px solid #ef4444',
                 backgroundColor: '#fef2f2',
+                color: '#991b1b',
               },
               iconTheme: {
                 primary: '#ef4444',
@@ -186,25 +175,26 @@ export default function RootLayout({
             },
             loading: {
               style: {
-                border: '1px solid #3b82f6',
-                backgroundColor: '#eff6ff',
+                border: '1px solid #6b7280',
+                backgroundColor: '#f9fafb',
+                color: '#374151',
               },
             },
           }}
         />
         
-        {/* Service Worker Registration Script */}
+        {/* Service Worker Registration for PWA */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
+              if ('serviceWorker' in navigator && 'PushManager' in window) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                      console.log('SW registered: ', registration);
+                      console.log('🚀 SW registered successfully');
                     })
-                    .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
+                    .catch(function(error) {
+                      console.log('❌ SW registration failed:', error);
                     });
                 });
               }
@@ -212,12 +202,12 @@ export default function RootLayout({
           }}
         />
         
-        {/* Analytics (if needed) */}
-        {process.env.NODE_ENV === 'production' && process.env.GOOGLE_ANALYTICS_ID && (
+        {/* Performance Analytics (Production Only) */}
+        {process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_GA_ID && (
           <>
             <script
               async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GOOGLE_ANALYTICS_ID}`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
             />
             <script
               dangerouslySetInnerHTML={{
@@ -225,7 +215,10 @@ export default function RootLayout({
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
-                  gtag('config', '${process.env.GOOGLE_ANALYTICS_ID}');
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                    page_title: document.title,
+                    page_location: window.location.href,
+                  });
                 `,
               }}
             />
