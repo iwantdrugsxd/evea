@@ -1,109 +1,146 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/database/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
+import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import crypto from 'crypto'
-import { sendEmail } from '@/lib/email/sender'
-import { sendOTP } from '@/lib/sms/sender'
 
 const RegisterSchema = z.object({
-  fullName: z.string().min(2, 'Full name is required'),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Invalid email format'),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid phone number'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  businessName: z.string().min(2, 'Business name is required'),
-  otp: z.string().length(6, 'Invalid OTP')
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid phone number format'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  businessName: z.string().min(2, 'Business name must be at least 2 characters')
 })
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    console.log('--- Vendor Registration Start ---')
+    
+    let body
+    try {
+      body = await request.json()
+      console.log('Request body:', body)
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError)
+      console.error('Raw request body:', await request.text())
+      return NextResponse.json(
+        { error: 'Invalid JSON format in request body' },
+        { status: 400 }
+      )
+    }
+    
     const validatedData = RegisterSchema.parse(body)
+    console.log('Data validated successfully')
 
     // Check if email already exists
-    const { data: existingUser } = await supabase
+    console.log('Checking if email already exists...')
+    const { data: existingUser, error: userCheckError } = await supabaseAdmin
       .from('users')
       .select('id')
       .eq('email', validatedData.email)
       .single()
 
     if (existingUser) {
+      console.error('Email already registered:', validatedData.email)
       return NextResponse.json(
         { error: 'Email already registered' },
         { status: 400 }
       )
     }
 
-    // Verify OTP (implement your OTP verification logic)
-    const otpValid = await verifyOTP(validatedData.phone, validatedData.otp)
-    if (!otpValid) {
+    console.log('Email is available')
+
+    // Check if phone already exists
+    console.log('Checking if phone already exists...')
+    const { data: existingPhone, error: phoneCheckError } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('phone', validatedData.phone)
+      .single()
+
+    if (existingPhone) {
+      console.error('Phone already registered:', validatedData.phone)
       return NextResponse.json(
-        { error: 'Invalid OTP' },
+        { error: 'Phone number already registered' },
         { status: 400 }
       )
     }
 
+    console.log('Phone is available')
+
     // Hash password
+    console.log('Hashing password...')
     const passwordHash = await bcrypt.hash(validatedData.password, 10)
+    console.log('Password hashed successfully')
 
-    // Generate email verification token
-    const verificationToken = crypto.randomUUID()
-    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-
-    // Create user
-    const { data: userData, error: userError } = await supabase
+    // Create user first
+    console.log('Creating user...')
+    const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
-        email: validatedData.email,
-        password_hash: passwordHash,
         full_name: validatedData.fullName,
+        email: validatedData.email,
         phone: validatedData.phone,
-        role: 'vendor_pending',
-        phone_verified: true,
-        verification_token: verificationToken,
-        token_expires_at: tokenExpiry.toISOString()
+        password_hash: passwordHash,
+        role: 'vendor',
+        is_active: true,
+        email_verified: true // Auto-verify email for seamless flow
       })
-      .select()
+      .select('id')
       .single()
 
-    if (userError) throw userError
+    if (userError) {
+      console.error('User creation error:', userError)
+      return NextResponse.json(
+        { error: 'Registration failed' },
+        { status: 500 }
+      )
+    }
+
+    console.log('User created successfully:', userData.id)
 
     // Create vendor record
-    const { data: vendorData, error: vendorError } = await supabase
+    console.log('Creating vendor record...')
+    const { data: vendorData, error: vendorError } = await supabaseAdmin
       .from('vendors')
       .insert({
         user_id: userData.id,
         business_name: validatedData.businessName,
-        registration_step: 1,
-        verification_status: 'pending'
+        verification_status: 'pending',
+        registration_step: 2, // Start at step 2 (business details)
+        address: 'Not provided',
+        city: 'Not provided',
+        state: 'Not provided',
+        postal_code: 'Not provided'
       })
-      .select()
+      .select('id')
       .single()
 
-    if (vendorError) throw vendorError
+    if (vendorError) {
+      console.error('Vendor creation error:', vendorError)
+      return NextResponse.json(
+        { error: 'Registration failed' },
+        { status: 500 }
+      )
+    }
 
-    // Send verification email
-    await sendEmail({
-      to: validatedData.email,
-      subject: 'Verify Your EVEA Vendor Account',
-      template: 'email-verification',
-      data: {
-        name: validatedData.fullName,
-        verificationLink: `${process.env.NEXT_PUBLIC_APP_URL}/vendor/verify-email?token=${verificationToken}`
-      }
-    })
+    console.log('Vendor created successfully:', vendorData.id)
 
+    console.log('--- Vendor Registration Success ---')
     return NextResponse.json({
       success: true,
       vendorId: vendorData.id,
-      message: 'Registration successful. Please verify your email.'
+      userId: userData.id,
+      registrationStep: 2,
+      message: 'Registration successful. Please proceed to provide business details.'
     })
 
   } catch (error) {
     console.error('Registration error:', error)
     if (error instanceof z.ZodError) {
+      console.error('Zod validation errors:', error.issues)
       return NextResponse.json(
-        { error: error.errors[0].message },
+        { error: error.issues[0].message },
         { status: 400 }
       )
     }
@@ -112,10 +149,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-async function verifyOTP(phone: string, otp: string): Promise<boolean> {
-  // Implement your OTP verification logic here
-  // This could be with Twilio, AWS SNS, or your SMS provider
-  return true // Placeholder
 }
