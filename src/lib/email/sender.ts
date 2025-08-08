@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { vendorVerificationTemplate } from './templates/vendor-verification'
 
 interface EmailData {
   to: string
@@ -45,6 +46,14 @@ export async function sendEmail({ to, subject, template, data }: EmailData): Pro
 
 function generateEmailTemplate(template: string, data: Record<string, any>): string {
   switch (template) {
+    case 'vendor-verification':
+      return vendorVerificationTemplate({
+        fullName: data.fullName || '',
+        businessName: data.businessName || '',
+        verificationUrl: data.verificationUrl || '',
+        supportEmail: data.supportEmail || 'support@evea.com'
+      })
+
     case 'email-verification':
       return `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

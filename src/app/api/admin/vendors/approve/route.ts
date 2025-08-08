@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
-import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
 import { z } from 'zod'
+import { sendEmail } from '@/lib/email/sender'
 
 const ApproveVendorSchema = z.object({
   vendorId: z.string().uuid('Invalid vendor ID'),
-  adminId: z.string().uuid('Invalid admin ID').optional()
+  adminId: z.string().uuid('Invalid admin ID')
 })
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('--- Admin Vendor Approval Start ---')
+    console.log('--- Vendor Approval Start ---')
     
     const body = await request.json()
     console.log('Request body:', body)
@@ -19,8 +18,8 @@ export async function POST(request: NextRequest) {
     const validatedData = ApproveVendorSchema.parse(body)
     console.log('Data validated successfully')
 
-    // Get vendor and user data
-    console.log('Fetching vendor data...')
+    // Check if vendor exists and get user details
+    console.log('Checking vendor status...')
     const { data: vendorData, error: vendorError } = await supabaseAdmin
       .from('vendors')
       .select(`
@@ -43,8 +42,18 @@ export async function POST(request: NextRequest) {
 
     console.log('Vendor found:', vendorData.id)
 
-    // Get user data
-    console.log('Fetching user data...')
+    // Check if already approved
+    if (vendorData.verification_status === 'approved') {
+      console.log('Vendor already approved')
+      return NextResponse.json({
+        success: true,
+        message: 'Vendor already approved',
+        vendorId: vendorData.id
+      })
+    }
+
+    // Get user details for email
+    console.log('Getting user details...')
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select(`
@@ -64,39 +73,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('User found:', userData.id)
+    console.log('User found:', userData.email)
 
-    // Check if vendor is ready for approval
-    if (vendorData.registration_step < 4) {
-      console.error('Vendor not ready for approval. Step:', vendorData.registration_step)
-      return NextResponse.json(
-        { error: 'Vendor registration not completed' },
-        { status: 400 }
-      )
-    }
-
-    if (vendorData.verification_status === 'verified') {
-      console.log('Vendor already verified')
-      return NextResponse.json({
-        success: true,
-        message: 'Vendor already verified'
-      })
-    }
-
-    // Generate temporary password
-    console.log('Generating temporary password...')
-    const tempPassword = crypto.randomBytes(8).toString('hex')
-    const hashedPassword = await bcrypt.hash(tempPassword, 10)
-    console.log('Temporary password generated')
-
-    // Update vendor status
-    console.log('Updating vendor status...')
+    // Update vendor status to approved
+    console.log('Updating vendor status to approved...')
     const { error: vendorUpdateError } = await supabaseAdmin
       .from('vendors')
       .update({
-        verification_status: 'verified',
+        verification_status: 'approved',
         approved_at: new Date().toISOString(),
-        approved_by: validatedData.adminId || '00000000-0000-0000-0000-000000000000'
+        approved_by: validatedData.adminId
       })
       .eq('id', validatedData.vendorId)
 
@@ -108,57 +94,79 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Vendor status updated')
+    console.log('Vendor status updated to approved')
 
-    // Update user password
-    console.log('Updating user password...')
+    // Update user status to active
+    console.log('Updating user status to active...')
     const { error: userUpdateError } = await supabaseAdmin
       .from('users')
       .update({
-        password_hash: hashedPassword
+        is_active: true
       })
-      .eq('id', userData.id)
+      .eq('id', vendorData.user_id)
 
     if (userUpdateError) {
-      console.error('Failed to update user password:', userUpdateError)
+      console.error('Failed to update user:', userUpdateError)
       return NextResponse.json(
-        { error: 'Failed to update user credentials' },
+        { error: 'Failed to activate user' },
         { status: 500 }
       )
     }
 
-    console.log('User password updated')
+    console.log('User status updated to active')
 
-    // Send credentials email
-    console.log('Sending credentials email...')
+    // Send approval email
+    console.log('Sending approval email...')
     try {
-      const { sendEmail } = await import('@/lib/email/sender')
+      const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/vendor/login`
       
-      const emailResult = await sendEmail({
+      await sendEmail({
         to: userData.email,
-        subject: 'Your EVEA Vendor Account is Approved!',
+        subject: 'Your Vendor Account is Approved - Evea',
         template: 'vendor-approval',
         data: {
           name: userData.full_name,
           businessName: vendorData.business_name,
           email: userData.email,
-          password: tempPassword,
-          loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/vendor/login`
+          password: 'Use the password you set during registration',
+          loginUrl,
+          supportEmail: 'support@evea.com'
+        }
+      })
+      
+      console.log('Approval email sent successfully')
+    } catch (emailError) {
+      console.error('Failed to send approval email:', emailError)
+      // Don't fail the approval process, just log the error
+    }
+
+    // Create notification for vendor
+    console.log('Creating notification for vendor...')
+    const { error: notificationError } = await supabaseAdmin
+      .from('notifications')
+      .insert({
+        user_id: vendorData.user_id,
+        type: 'vendor_approval',
+        title: 'Account Approved',
+        message: `Your vendor account for ${vendorData.business_name} has been approved! You can now log in and start receiving bookings.`,
+        data: {
+          vendorId: vendorData.id,
+          businessName: vendorData.business_name
         }
       })
 
-      console.log('Credentials email sent:', emailResult)
-    } catch (emailError) {
-      console.error('Failed to send credentials email:', emailError)
-      // Don't fail the approval if email fails
+    if (notificationError) {
+      console.error('Failed to create notification:', notificationError)
+      // Don't fail the approval process, just log the error
     }
 
-    console.log('--- Admin Vendor Approval Success ---')
+    console.log('--- Vendor Approval Success ---')
     return NextResponse.json({
       success: true,
-      message: 'Vendor approved successfully. Login credentials sent to vendor email.',
+      message: 'Vendor approved successfully',
       vendorId: vendorData.id,
-      tempPassword: tempPassword
+      businessName: vendorData.business_name,
+      userEmail: userData.email
     })
 
   } catch (error) {

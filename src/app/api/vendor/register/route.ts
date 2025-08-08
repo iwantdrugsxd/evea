@@ -3,13 +3,18 @@ import { supabase, supabaseAdmin } from '@/lib/supabase'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { sendEmail } from '@/lib/email/sender'
 
 const RegisterSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Invalid email format'),
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid phone number format'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  businessName: z.string().min(2, 'Business name must be at least 2 characters')
+  businessName: z.string().min(2, 'Business name must be at least 2 characters'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
+  city: z.string().min(2, 'City must be at least 2 characters'),
+  state: z.string().min(2, 'State must be at least 2 characters'),
+  postalCode: z.string().min(5, 'Postal code must be at least 5 characters')
 })
 
 export async function POST(request: NextRequest) {
@@ -73,6 +78,10 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(validatedData.password, 10)
     console.log('Password hashed successfully')
 
+    // Generate verification token
+    const verificationToken = crypto.randomUUID()
+    console.log('Verification token generated:', verificationToken)
+
     // Create user first
     console.log('Creating user...')
     const { data: userData, error: userError } = await supabaseAdmin
@@ -83,8 +92,10 @@ export async function POST(request: NextRequest) {
         phone: validatedData.phone,
         password_hash: passwordHash,
         role: 'vendor',
-        is_active: true,
-        email_verified: true // Auto-verify email for seamless flow
+        is_active: false, // Will be activated after email verification
+        email_verified: false,
+        verification_token: verificationToken,
+        token_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
       })
       .select('id')
       .single()
@@ -106,12 +117,13 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: userData.id,
         business_name: validatedData.businessName,
+        address: validatedData.address,
+        city: validatedData.city,
+        state: validatedData.state,
+        postal_code: validatedData.postalCode,
         verification_status: 'pending',
-        registration_step: 2, // Start at step 2 (business details)
-        address: 'Not provided',
-        city: 'Not provided',
-        state: 'Not provided',
-        postal_code: 'Not provided'
+        registration_step: 1, // Start at step 1 (email verification)
+        verification_token: verificationToken
       })
       .select('id')
       .single()
@@ -126,13 +138,36 @@ export async function POST(request: NextRequest) {
 
     console.log('Vendor created successfully:', vendorData.id)
 
+    // Send verification email
+    console.log('Sending verification email...')
+    try {
+      const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/vendor/verify-email?token=${verificationToken}`
+      
+      await sendEmail({
+        to: validatedData.email,
+        subject: 'Verify Your Vendor Account - Evea',
+        template: 'vendor-verification',
+        data: {
+          fullName: validatedData.fullName,
+          businessName: validatedData.businessName,
+          verificationUrl,
+          supportEmail: 'support@evea.com'
+        }
+      })
+      
+      console.log('Verification email sent successfully')
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError)
+      // Don't fail the registration, just log the error
+    }
+
     console.log('--- Vendor Registration Success ---')
     return NextResponse.json({
       success: true,
       vendorId: vendorData.id,
       userId: userData.id,
-      registrationStep: 2,
-      message: 'Registration successful. Please proceed to provide business details.'
+      registrationStep: 1,
+      message: 'Registration successful. Please check your email to verify your account.'
     })
 
   } catch (error) {

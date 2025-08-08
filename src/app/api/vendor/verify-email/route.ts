@@ -94,7 +94,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Email verified successfully',
-      registrationStep: 2
+      registrationStep: 2,
+      vendorId: vendorData.id
     })
 
   } catch (error) {
@@ -167,7 +168,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Email already verified',
-        registrationStep: vendorData.registration_step
+        registrationStep: vendorData.registration_step,
+        vendorId: vendorData.id
       })
     }
 
@@ -213,7 +215,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Email verified successfully',
-      registrationStep: 2
+      registrationStep: 2,
+      vendorId: vendorData.id
     })
 
   } catch (error) {

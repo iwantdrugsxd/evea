@@ -12,7 +12,10 @@ import {
   MapPin,
   FileText,
   Eye,
-  EyeOff
+  EyeOff,
+  CheckCircle,
+  XCircle,
+  Loader2
 } from 'lucide-react'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
@@ -29,21 +32,63 @@ export default function VendorRegistrationPage() {
     address: '',
     city: '',
     state: '',
-    pincode: '',
+    postalCode: '',
     password: '',
     confirmPassword: ''
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [message, setMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsLoading(false)
+    if (formData.password !== formData.confirmPassword) {
+      setSubmitStatus('error')
+      setMessage('Passwords do not match')
+      return
+    }
+
+    setIsLoading(true)
+    setSubmitStatus('idle')
+
+    try {
+      const response = await fetch('/api/vendor/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessName: formData.businessName,
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          postalCode: formData.postalCode
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSubmitStatus('success')
+        setMessage(data.message)
+      } else {
+        setSubmitStatus('error')
+        setMessage(data.error || 'Registration failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      setSubmitStatus('error')
+      setMessage('An error occurred during registration. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -159,8 +204,8 @@ export default function VendorRegistrationPage() {
                       <Input
                         type="text"
                         label="PIN Code"
-                        value={formData.pincode}
-                        onChange={(value) => handleInputChange('pincode', value)}
+                        value={formData.postalCode}
+                        onChange={(value) => handleInputChange('postalCode', value)}
                         placeholder="PIN Code"
                         required
                       />
@@ -228,14 +273,40 @@ export default function VendorRegistrationPage() {
                       </span>
                     </div>
 
+                    {submitStatus === 'success' && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                          <span className="text-green-800">{message}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {submitStatus === 'error' && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <XCircle className="h-5 w-5 text-red-600 mr-2" />
+                          <span className="text-red-800">{message}</span>
+                        </div>
+                      </div>
+                    )}
+
                     <Button
                       type="submit"
                       variant="primary"
                       size="lg"
                       className="w-full"
                       loading={isLoading}
+                      disabled={isLoading}
                     >
-                      Create Vendor Account
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        'Create Vendor Account'
+                      )}
                     </Button>
                   </form>
 
