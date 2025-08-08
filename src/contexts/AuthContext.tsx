@@ -121,26 +121,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        // Store token in httpOnly cookie via API call
-        await fetch('/api/auth/set-cookie', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token: data.token }),
-        })
-
+        // Set user data from login response
         setUser(data.user)
         
-        // Redirect based on role
-        const redirectUrl = role === 'vendor' ? '/vendor/dashboard'
-                          : role === 'admin' ? '/admin/dashboard'
-                          : '/customer/dashboard'
+        // Also refresh user data from /api/auth/me to ensure consistency
+        setTimeout(async () => {
+          try {
+            const meResponse = await fetch('/api/auth/me')
+            if (meResponse.ok) {
+              const meData = await meResponse.json()
+              if (meData.success) {
+                setUser(meData.user)
+              }
+            }
+          } catch (error) {
+            console.error('Error refreshing user data:', error)
+          }
+        }, 100)
         
-        router.push(redirectUrl)
         return true
       } else {
-        setError(data.message || 'Login failed')
+        setError(data.error || 'Login failed')
         return false
       }
     } catch (error) {
@@ -153,11 +154,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
+      console.log('🔍 AuthContext: Starting registration...')
+      console.log('📝 User data:', userData)
+      
       setLoading(true)
       setError(null)
 
-      const endpoint = userData.role === 'vendor' ? '/api/auth/vendor-register' : '/api/auth/register'
+      const endpoint = userData.role === 'vendor' ? '/api/vendor/register' : '/api/auth/register'
+      console.log('🌐 API endpoint:', endpoint)
 
+      console.log('📤 Sending request to:', endpoint)
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -166,22 +172,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         body: JSON.stringify(userData),
       })
 
+      console.log('📥 Response status:', response.status)
+      console.log('📥 Response ok:', response.ok)
+
       const data = await response.json()
+      console.log('📊 Response data:', data)
 
       if (response.ok && data.success) {
+        console.log('✅ Registration successful in AuthContext')
         if (userData.role === 'vendor') {
           // Vendor registration requires admin approval
           router.push('/vendor/registration-pending')
         } else {
-          // Auto-login for customer registration
-          await login(userData.email, userData.password)
+          // Customer registration success - redirect to login
+          router.push('/login')
         }
         return true
       } else {
-        setError(data.message || 'Registration failed')
+        console.log('❌ Registration failed in AuthContext')
+        console.log('❌ Error:', data.error)
+        setError(data.error || 'Registration failed')
         return false
       }
     } catch (error) {
+      console.error('💥 AuthContext registration error:', error)
       setError('Network error. Please try again.')
       return false
     } finally {

@@ -68,8 +68,14 @@ const nextConfig = {
   },
 
   // Webpack configuration
-  webpack: (config) => {
-    // Custom webpack rules can be added here
+  webpack: (config, { dev, isServer }) => {
+    // Suppress hydration warnings in development
+    if (dev && !isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      }
+    }
     return config
   },
 

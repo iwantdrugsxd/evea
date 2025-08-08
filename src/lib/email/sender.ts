@@ -48,14 +48,41 @@ function generateEmailTemplate(template: string, data: Record<string, any>): str
     case 'email-verification':
       return `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #333;">Verify Your EVEA Vendor Account</h2>
-          <p>Hello ${data.name},</p>
-          <p>Thank you for registering as a vendor on EVEA. Please verify your email address by clicking the link below:</p>
-          <a href="${data.verificationLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0;">Verify Email</a>
+          <h2 style="color: #333;">Verify Your EVEA Account</h2>
+          <p>Hello ${data.userName},</p>
+          <p>Thank you for registering on EVEA. Please verify your email address by clicking the link below:</p>
+          <a href="${data.verificationLink}" style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0;">Verify Email</a>
           <p>If the button doesn't work, copy and paste this link into your browser:</p>
           <p style="word-break: break-all; color: #666;">${data.verificationLink}</p>
           <p>This link will expire in 24 hours.</p>
           <p>Best regards,<br>The EVEA Team</p>
+        </div>
+      `
+
+    case 'welcome-email':
+      return `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #28a745;">🎉 Welcome to EVEA!</h2>
+          <p>Hello ${data.name},</p>
+          <p>Welcome to EVEA! Your account has been successfully created and verified.</p>
+          
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #333; margin-top: 0;">Get Started:</h3>
+            <p>You can now log in to your account and start exploring amazing event services.</p>
+            <a href="${data.loginLink}" style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;">Login to Your Account</a>
+          </div>
+          
+          <p>What you can do:</p>
+          <ul>
+            <li>Browse and book event services</li>
+            <li>Connect with verified vendors</li>
+            <li>Manage your bookings</li>
+            <li>Get customer support</li>
+          </ul>
+          
+          <p>If you have any questions, please contact our support team.</p>
+          
+          <p>Welcome to EVEA!<br>The EVEA Team</p>
         </div>
       `
 

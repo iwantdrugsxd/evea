@@ -1,0 +1,33 @@
+# Cursor ignore file - files to be ignored by Cursor AI
+# Remove lines to stop ignoring specific files
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Environment files (uncomment to ignore)
+# .env
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Explicitly allow .env.local (don't ignore it)
+!.env.local
