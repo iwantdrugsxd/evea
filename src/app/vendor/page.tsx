@@ -16,12 +16,14 @@ export default function VendorLandingPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 relative overflow-hidden"
+      className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 relative overflow-hidden"
     >
-      {/* Background Elements */}
+      {/* Professional Red Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(139,92,246,0.1),transparent_50%)]" />
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(236,72,153,0.1),transparent_50%)]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(239,68,68,0.1),transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,38,38,0.1),transparent_50%)]" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-red-100 rounded-full opacity-20 animate-pulse-glow"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-red-200 rounded-full opacity-30 animate-float"></div>
       </div>
       
       <Header />

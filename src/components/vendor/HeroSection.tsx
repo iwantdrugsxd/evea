@@ -57,7 +57,7 @@ const ParticleBackground = () => {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute bg-primary-300/20 rounded-full"
+          className="absolute bg-red-300/30 rounded-full"
           style={{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
@@ -94,15 +94,16 @@ export default function VendorHeroSection() {
   return (
     <section 
       ref={containerRef}
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
+      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-red-900 via-red-800 to-red-900"
     >
-      {/* Animated Background */}
+      {/* Professional Red Animated Background */}
       <motion.div 
         className="absolute inset-0"
         style={{ y, opacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-red-900/90 via-red-800/80 to-red-900/90"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(239,68,68,0.3),transparent_50%)]"></div>
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,38,38,0.3),transparent_50%)]"></div>
         <ParticleBackground />
       </motion.div>
 

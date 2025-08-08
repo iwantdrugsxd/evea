@@ -26,17 +26,17 @@ import Link from 'next/link'
 import Button from '@/components/ui/button'
 
 const floatingIcons = [
-  { icon: Zap, color: 'text-yellow-400', delay: 0 },
-  { icon: Shield, color: 'text-green-400', delay: 0.5 },
-  { icon: Rocket, color: 'text-blue-400', delay: 1 },
-  { icon: Globe, color: 'text-purple-400', delay: 1.5 },
-  { icon: Users, color: 'text-pink-400', delay: 2 },
-  { icon: TrendingUp, color: 'text-indigo-400', delay: 2.5 },
-  { icon: Award, color: 'text-orange-400', delay: 3 },
-  { icon: Layers, color: 'text-cyan-400', delay: 3.5 },
-  { icon: Database, color: 'text-emerald-400', delay: 4 },
-  { icon: Smartphone, color: 'text-rose-400', delay: 4.5 },
-  { icon: Cloud, color: 'text-sky-400', delay: 5 }
+  { icon: Zap, color: 'text-red-400', delay: 0 },
+  { icon: Shield, color: 'text-red-500', delay: 0.5 },
+  { icon: Rocket, color: 'text-red-600', delay: 1 },
+  { icon: Globe, color: 'text-red-400', delay: 1.5 },
+  { icon: Users, color: 'text-red-500', delay: 2 },
+  { icon: TrendingUp, color: 'text-red-600', delay: 2.5 },
+  { icon: Award, color: 'text-red-400', delay: 3 },
+  { icon: Layers, color: 'text-red-500', delay: 3.5 },
+  { icon: Database, color: 'text-red-600', delay: 4 },
+  { icon: Smartphone, color: 'text-red-400', delay: 4.5 },
+  { icon: Cloud, color: 'text-red-500', delay: 5 }
 ]
 
 const FeatureCard = ({ feature, index, isHovered, onHover }: {
@@ -226,19 +226,19 @@ export default function FeaturesHeroSection() {
   return (
     <section 
       ref={containerRef}
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white"
+      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-red-900 via-red-800 to-red-900 text-white"
     >
-      {/* Animated Background */}
+      {/* Professional Red Animated Background */}
       <motion.div 
         className="absolute inset-0"
         style={{ y, opacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-red-500/20 to-red-700/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,68,68,0.3),transparent_50%)]" />
         <FloatingIconsBackground />
       </motion.div>
 
-      {/* Grid Pattern Overlay */}
+      {/* Professional Red Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.03)_1px,transparent_1px)] bg-[size:100px_100px]" />
 
       <div className="container-custom relative z-10 pt-32 pb-20">
@@ -250,22 +250,22 @@ export default function FeaturesHeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="space-y-8"
           >
-            {/* Badge */}
+            {/* Professional Red Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl px-6 py-3 rounded-full border border-purple-300/30"
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-red-600/20 backdrop-blur-xl px-6 py-3 rounded-full border border-red-300/30"
             >
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               >
-                <Sparkles className="h-5 w-5 text-purple-300" />
+                <Sparkles className="h-5 w-5 text-red-300" />
               </motion.div>
               <span className="text-white/90 font-medium text-sm">Advanced Features</span>
               <div className="w-px h-4 bg-white/20" />
-              <span className="text-purple-200 font-medium text-sm">Next-Gen Platform</span>
+              <span className="text-red-200 font-medium text-sm">Next-Gen Platform</span>
             </motion.div>
 
             {/* Main Heading */}
