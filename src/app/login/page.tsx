@@ -83,6 +83,9 @@ export default function LoginPage() {
       if (typeof window !== 'undefined' && (window as any).google) {
         const google = (window as any).google
         
+        console.log('🔍 Google SDK found, initializing...')
+        console.log('🔑 Client ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
+        
         // Initialize Google Sign-In
         google.accounts.id.initialize({
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
@@ -91,24 +94,32 @@ export default function LoginPage() {
           cancel_on_tap_outside: true
         })
         
+        console.log('✅ Google Sign-In initialized')
+        
         // Show Google Sign-In prompt
         google.accounts.id.prompt((notification: any) => {
+          console.log('🔔 Google notification:', notification)
+          
           if (notification.isNotDisplayed()) {
-            console.log('Google Sign-In not displayed:', notification.getNotDisplayedReason())
-            setError('Google Sign-In not available. Please use email/password login.')
+            const reason = notification.getNotDisplayedReason()
+            console.log('❌ Google Sign-In not displayed:', reason)
+            setError(`Google Sign-In not available: ${reason}`)
           } else if (notification.isSkippedMoment()) {
-            console.log('Google Sign-In skipped:', notification.getSkippedReason())
-            setError('Google Sign-In was skipped. Please try again.')
+            const reason = notification.getSkippedReason()
+            console.log('⏭️ Google Sign-In skipped:', reason)
+            setError(`Google Sign-In was skipped: ${reason}`)
           } else if (notification.isDismissedMoment()) {
-            console.log('Google Sign-In dismissed:', notification.getDismissedReason())
-            setError('Google Sign-In was dismissed. Please try again.')
+            const reason = notification.getDismissedReason()
+            console.log('❌ Google Sign-In dismissed:', reason)
+            setError(`Google Sign-In was dismissed: ${reason}`)
           }
         })
       } else {
+        console.error('❌ Google SDK not found')
         setError('Google Sign-In not available. Please use email/password login.')
       }
     } catch (error) {
-      console.error('Google login error:', error)
+      console.error('💥 Google login error:', error)
       setError('Google login failed. Please try email/password login instead.')
     } finally {
       setIsLoading(false)
@@ -117,7 +128,13 @@ export default function LoginPage() {
 
   const handleGoogleCallback = async (response: any) => {
     try {
-      console.log('Google callback received:', response)
+      console.log('🔍 Google callback received:', response)
+      
+      if (!response.credential) {
+        console.error('❌ No credential in Google response')
+        setError('Google authentication failed: No credential received')
+        return
+      }
       
       const result = await fetch('/api/auth/google', {
         method: 'POST',
@@ -136,9 +153,10 @@ export default function LoginPage() {
       })
 
       const data = await result.json()
-      console.log('Google auth response:', data)
+      console.log('📥 Google auth response:', data)
 
       if (data.success) {
+        console.log('✅ Google authentication successful')
         // Check for redirect parameter
         const urlParams = new URLSearchParams(window.location.search)
         const redirect = urlParams.get('redirect')
@@ -148,10 +166,11 @@ export default function LoginPage() {
           router.push(redirect || '/marketplace')
         }, 100)
       } else {
+        console.error('❌ Google authentication failed:', data.error)
         setError(data.error || 'Google authentication failed')
       }
     } catch (error) {
-      console.error('Google callback error:', error)
+      console.error('💥 Google callback error:', error)
       setError('Google authentication failed. Please try again.')
     }
   }
