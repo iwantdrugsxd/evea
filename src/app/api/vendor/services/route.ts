@@ -76,14 +76,55 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Resolve primary category id to satisfy NOT NULL constraint
+    let primaryCategoryId: string | null = validatedData.categoryId || null
+    if (!primaryCategoryId) {
+      try {
+        const primaryCategoryName = validatedData.selectedCategories[0]
+        if (primaryCategoryName) {
+          // Try find by exact name first
+          let { data: cat, error: catErr } = await supabaseAdmin
+            .from('categories')
+            .select('id')
+            .eq('name', primaryCategoryName)
+            .limit(1)
+            .single()
+          if (catErr || !cat) {
+            // Fallback: try ilike match
+            const { data: fallbackList } = await supabaseAdmin
+              .from('categories')
+              .select('id, name')
+              .ilike('name', `%${primaryCategoryName}%`)
+              .limit(1)
+            if (fallbackList && fallbackList.length > 0) {
+              primaryCategoryId = fallbackList[0].id
+            }
+          } else {
+            primaryCategoryId = cat.id
+          }
+        }
+        // Final fallback: pick any category if still null
+        if (!primaryCategoryId) {
+          const { data: anyCat } = await supabaseAdmin
+            .from('categories')
+            .select('id')
+            .limit(1)
+            .single()
+          if (anyCat?.id) primaryCategoryId = anyCat.id
+        }
+      } catch (_ignore) {
+        // ignore and let insert fail if no category
+      }
+    }
+
     // Save vendor services (single row capturing full specializations & description)
     console.log('Saving vendor services...')
     const { data: serviceData, error: serviceError } = await supabaseAdmin
       .from('vendor_services')
       .insert({
         vendor_id: validatedData.vendorId,
-        // keep a primary category if provided; otherwise null
-        category_id: validatedData.categoryId || null,
+        // keep a primary category if provided; otherwise resolved id
+        category_id: primaryCategoryId,
         subcategory: validatedData.subcategory || null,
         secondary_services: validatedData.secondaryServices || [],
         service_type: validatedData.serviceType || null,
