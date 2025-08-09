@@ -1,41 +1,54 @@
 require('dotenv').config({ path: '.env.local' });
+const { google } = require('googleapis');
 
-console.log('🔍 Testing Google OAuth Configuration...');
-console.log('');
+console.log('🔍 Checking Google OAuth Configuration...\n');
 
-console.log('📋 Environment Variables:');
-console.log('NEXT_PUBLIC_GOOGLE_CLIENT_ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? '✅ Set' : '❌ Missing');
-console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ Set' : '❌ Missing');
-console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? '✅ Set' : '❌ Missing');
-console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
-console.log('');
+const requiredVars = [
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'GOOGLE_REDIRECT_URI',
+  'GOOGLE_ACCESS_TOKEN',
+  'GOOGLE_REFRESH_TOKEN'
+];
 
-console.log('🌐 Current Configuration:');
-console.log('App URL:', process.env.NEXT_PUBLIC_APP_URL);
-console.log('Google Client ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
-console.log('');
+let missingVars = [];
+requiredVars.forEach(varName => {
+  const value = process.env[varName];
+  if (!value) {
+    console.log(`❌ ${varName}: MISSING`);
+    missingVars.push(varName);
+  } else {
+    console.log(`✅ ${varName}: ${value.substring(0, 20)}...`);
+  }
+});
 
-console.log('📝 Google OAuth Setup Instructions:');
-console.log('1. Go to https://console.cloud.google.com/');
-console.log('2. Select your project or create a new one');
-console.log('3. Go to "APIs & Services" > "Credentials"');
-console.log('4. Find your OAuth 2.0 Client ID or create a new one');
-console.log('5. Add these Authorized JavaScript origins:');
-console.log('   - http://localhost:3000');
-console.log('   - http://localhost:3001');
-console.log('   - http://localhost:3002');
-console.log('   - http://localhost:3003');
-console.log('   - http://localhost:3004');
-console.log('6. Add these Authorized redirect URIs:');
-console.log('   - http://localhost:3000/auth/callback');
-console.log('   - http://localhost:3001/auth/callback');
-console.log('   - http://localhost:3002/auth/callback');
-console.log('   - http://localhost:3003/auth/callback');
-console.log('   - http://localhost:3004/auth/callback');
-console.log('');
+if (missingVars.length > 0) {
+  console.log('\n❌ Missing environment variables. Run: node get-google-tokens.js');
+  process.exit(1);
+}
 
-console.log('🔧 Troubleshooting:');
-console.log('- Make sure your Google OAuth client is configured for the correct domain');
-console.log('- Check that the client ID matches between frontend and backend');
-console.log('- Verify that localhost is in the authorized origins');
-console.log('- Clear browser cache and cookies if needed');
+// Test Google Drive API
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
+
+oauth2Client.setCredentials({
+  access_token: process.env.GOOGLE_ACCESS_TOKEN,
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+});
+
+const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+drive.about.get({ fields: 'user' })
+  .then((response) => {
+    console.log('✅ Google Drive authentication successful!');
+    console.log('User:', response.data.user?.emailAddress);
+  })
+  .catch((error) => {
+    console.error('❌ Authentication failed:', error.message);
+    if (error.message.includes('invalid_grant')) {
+      console.log('\n🔧 Solution: Run node get-google-tokens.js to refresh tokens');
+    }
+  });

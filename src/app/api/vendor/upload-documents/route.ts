@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { z } from 'zod'
 import { google } from 'googleapis'
+import { Readable } from 'stream'
+
+// Ensure Node.js runtime for streaming/file uploads
+export const runtime = 'nodejs'
 
 const UploadDocumentsSchema = z.object({
   vendorId: z.string().uuid('Invalid vendor ID'),
@@ -126,9 +130,10 @@ export async function POST(request: NextRequest) {
       const documentType = documentTypes[i]
       
       try {
-        // Convert file to buffer
+        // Convert to Node.js Readable stream (googleapis expects a stream)
         const buffer = Buffer.from(await file.arrayBuffer())
-        
+        const stream = Readable.from(buffer)
+
         // Upload to Google Drive
         const fileResponse = await drive.files.create({
           requestBody: {
@@ -137,7 +142,7 @@ export async function POST(request: NextRequest) {
           },
           media: {
             mimeType: file.type,
-            body: buffer,
+            body: stream,
           },
           fields: 'id,webViewLink,webContentLink',
         })

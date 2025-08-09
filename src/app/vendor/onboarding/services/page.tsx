@@ -2,9 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, ArrowRight, CheckCircle, Settings, Package } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle, Settings } from 'lucide-react'
 
 interface ServiceData {
+  // New fields per request
+  selectedCategories: string[]
+  itemsByCategory: Record<string, string[]>
+  customService?: string
+  serviceDescription: string
+
+  // Optional legacy/pricing fields (kept to not break backend)
   categoryId: string
   subcategory: string
   secondaryServices: string[]
@@ -30,18 +37,50 @@ interface ServiceData {
 
 interface Category { id: string; name: string }
 
-const secondaryServices = [
-  'Wedding Planning',
-  'Corporate Events',
-  'Birthday Parties',
-  'Festivals',
-  'Conferences',
-  'Product Launches',
-  'Anniversary Celebrations',
-  'Graduation Ceremonies',
-  'Baby Showers',
-  'Engagement Parties'
+const categoryOptions = [
+  'Catering & Food Services',
+  'Photography & Videography',
+  'Decoration & Styling',
+  'Entertainment & Music',
+  'Venue & Space Rental',
+  'Transportation Services',
+  'Floral Arrangements',
+  'Audio/Visual Equipment',
+  'Furniture & Props',
+  'Lighting Solutions',
+  'Security Services',
+  'Wedding Planning & Coordination',
+  'Makeup & Beauty Services',
+  'DJ & Sound Systems',
+  'Photo Booth Services',
+  'Custom Services'
 ]
+
+const itemSuggestions: Record<string, string[]> = {
+  'Catering & Food Services': [
+    'Multi-cuisine catering',
+    'Live cooking stations',
+    'Beverages & bar service',
+    'Desserts & cake services',
+    'Specialized dietary options (vegan, gluten-free)'
+  ],
+  'Photography & Videography': [
+    'Wedding shoots', 'Cinematic videos', 'Drone coverage', 'Same-day edits'
+  ],
+  'Decoration & Styling': [ 'Stage decor', 'Table styling', 'Theme setups' ],
+  'Entertainment & Music': [ 'Live bands', 'Solo singers', 'Dance troupes' ],
+  'Venue & Space Rental': [ 'Banquet halls', 'Outdoor lawns', 'Studios' ],
+  'Transportation Services': [ 'VIP cars', 'Shuttle buses', 'Logistics' ],
+  'Floral Arrangements': [ 'Bouquets', 'Centerpieces', 'Garlands' ],
+  'Audio/Visual Equipment': [ 'PA systems', 'LED walls', 'Projectors' ],
+  'Furniture & Props': [ 'Lounge seating', 'Backdrops', 'Props rental' ],
+  'Lighting Solutions': [ 'Ambient lighting', 'Spotlights', 'Fairy lights' ],
+  'Security Services': [ 'Bouncers', 'Crowd control', 'Surveillance' ],
+  'Wedding Planning & Coordination': [ 'Full planning', 'Day-of coordination' ],
+  'Makeup & Beauty Services': [ 'Bridal makeup', 'Hair styling', 'Grooming' ],
+  'DJ & Sound Systems': [ 'Club DJ', 'MC services', 'Sound engineering' ],
+  'Photo Booth Services': [ '360 booth', 'Print-outs', 'Custom props' ]
+}
 
 export default function ServicesPage() {
   const router = useRouter()
@@ -54,6 +93,10 @@ export default function ServicesPage() {
   const [success, setSuccess] = useState('')
 
   const [formData, setFormData] = useState<ServiceData>({
+    selectedCategories: [],
+    itemsByCategory: {},
+    customService: '',
+    serviceDescription: '',
     categoryId: '',
     subcategory: '',
     secondaryServices: [],
@@ -186,13 +229,24 @@ export default function ServicesPage() {
     }))
   }
 
-  const handleSecondaryServiceToggle = (service: string) => {
-    setFormData(prev => ({
-      ...prev,
-      secondaryServices: prev.secondaryServices.includes(service)
-        ? prev.secondaryServices.filter(s => s !== service)
-        : [...prev.secondaryServices, service]
-    }))
+  const toggleCategory = (name: string) => {
+    setFormData(prev => {
+      const selected = prev.selectedCategories.includes(name)
+        ? prev.selectedCategories.filter(c => c !== name)
+        : [...prev.selectedCategories, name]
+      // Initialize items bucket when selected
+      const itemsByCategory = { ...prev.itemsByCategory }
+      if (!itemsByCategory[name]) itemsByCategory[name] = []
+      return { ...prev, selectedCategories: selected, itemsByCategory }
+    })
+  }
+
+  const toggleItem = (category: string, item: string) => {
+    setFormData(prev => {
+      const bucket = prev.itemsByCategory[category] || []
+      const next = bucket.includes(item) ? bucket.filter(i => i !== item) : [...bucket, item]
+      return { ...prev, itemsByCategory: { ...prev.itemsByCategory, [category]: next } }
+    })
   }
 
   return (
@@ -244,74 +298,73 @@ export default function ServicesPage() {
 
         {/* Services Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Service Category */}
+          {/* Service Categories (multi-select) */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Category</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Primary Category *
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Categories</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {categoryOptions.map(cat => (
+                <label key={cat} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={formData.selectedCategories.includes(cat)}
+                    onChange={() => toggleCategory(cat)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>{cat}</span>
                 </label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) => handleInputChange('categoryId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select category</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>{category.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subcategory
-                </label>
+              ))}
+            </div>
+            {formData.selectedCategories.includes('Custom Services') && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Describe your custom services</label>
                 <input
                   type="text"
-                  value={formData.subcategory}
-                  onChange={(e) => handleInputChange('subcategory', e.target.value)}
+                  value={formData.customService || ''}
+                  onChange={(e)=>handleInputChange('customService', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Wedding Photography, Corporate Catering"
+                  placeholder="e.g., Theme-based dessert art, eco-friendly decor"
                 />
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Type *
-              </label>
-              <input
-                type="text"
-                value={formData.serviceType}
-                onChange={(e) => handleInputChange('serviceType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g., Full Service, Consultation Only, Equipment Rental"
-                required
-              />
+          {/* Dynamic Items/Services based on selected categories */}
+          {formData.selectedCategories.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Specific Items / Services</h2>
+              {formData.selectedCategories.map(cat => (
+                <div key={cat} className="mb-6">
+                  <p className="font-medium text-gray-900 mb-2">{cat}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {(itemSuggestions[cat] || []).map(item => (
+                      <label key={item} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={(formData.itemsByCategory[cat] || []).includes(item)}
+                          onChange={() => toggleItem(cat, item)}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>{item}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
 
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Secondary Services
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {secondaryServices.map(service => (
-                  <label key={service} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.secondaryServices.includes(service)}
-                      onChange={() => handleSecondaryServiceToggle(service)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{service}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+          {/* Rich Description */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Service Description</h2>
+            <p className="text-sm text-gray-500 mb-3">Describe your services in detail (minimum 50 words). Tell potential customers what makes your services special.</p>
+            <textarea
+              value={formData.serviceDescription}
+              onChange={(e)=>handleInputChange('serviceDescription', e.target.value)}
+              rows={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tell potential customers what makes your services special, your experience, team strength, turnaround time, and any guarantees or add-ons you provide..."
+              required
+            />
           </div>
 
           {/* Pricing */}
@@ -565,10 +618,10 @@ export default function ServicesPage() {
 
             <button
               type="submit"
-              disabled={loading || !formData.categoryId || !formData.serviceType}
+              disabled={loading || formData.selectedCategories.length === 0 || formData.serviceDescription.trim().length < 50}
               className="flex items-center space-x-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
             >
-              <span>{loading ? 'Saving...' : 'Submit for Approval'}</span>
+              <span>{loading ? 'Saving...' : 'Submit for Review'}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>

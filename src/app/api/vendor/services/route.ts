@@ -5,26 +5,32 @@ import { sendEmail } from '@/lib/email/sender'
 
 const VendorServicesSchema = z.object({
   vendorId: z.string().uuid('Invalid vendor ID'),
-  categoryId: z.string().uuid('Invalid category ID'),
+  // New flexible payload for multi-select categories & dynamic items
+  selectedCategories: z.array(z.string()).min(1, 'Select at least one category'),
+  itemsByCategory: z.record(z.string(), z.array(z.string())).optional().default({}),
+  serviceDescription: z.string().min(50, 'Description must be at least 50 characters'),
+
+  // Optional legacy fields retained for compatibility (all optional)
+  categoryId: z.string().uuid().optional(),
   subcategory: z.string().optional(),
   secondaryServices: z.array(z.string()).optional(),
-  serviceType: z.string().min(1, 'Service type is required'),
-  weddingPriceMin: z.number().min(0, 'Wedding price must be positive'),
-  weddingPriceMax: z.number().min(0, 'Wedding price must be positive'),
-  corporatePriceMin: z.number().min(0, 'Corporate price must be positive'),
-  corporatePriceMax: z.number().min(0, 'Corporate price must be positive'),
-  birthdayPriceMin: z.number().min(0, 'Birthday price must be positive'),
-  birthdayPriceMax: z.number().min(0, 'Birthday price must be positive'),
-  festivalPriceMin: z.number().min(0, 'Festival price must be positive'),
-  festivalPriceMax: z.number().min(0, 'Festival price must be positive'),
-  basicPackagePrice: z.number().min(0, 'Basic package price must be positive'),
+  serviceType: z.string().optional(),
+  weddingPriceMin: z.number().optional(),
+  weddingPriceMax: z.number().optional(),
+  corporatePriceMin: z.number().optional(),
+  corporatePriceMax: z.number().optional(),
+  birthdayPriceMin: z.number().optional(),
+  birthdayPriceMax: z.number().optional(),
+  festivalPriceMin: z.number().optional(),
+  festivalPriceMax: z.number().optional(),
+  basicPackagePrice: z.number().optional(),
   basicPackageDetails: z.string().optional(),
-  standardPackagePrice: z.number().min(0, 'Standard package price must be positive'),
+  standardPackagePrice: z.number().optional(),
   standardPackageDetails: z.string().optional(),
-  premiumPackagePrice: z.number().min(0, 'Premium package price must be positive'),
+  premiumPackagePrice: z.number().optional(),
   premiumPackageDetails: z.string().optional(),
   additionalServices: z.string().optional(),
-  advancePaymentPercentage: z.number().min(0).max(100, 'Advance payment percentage must be between 0 and 100'),
+  advancePaymentPercentage: z.number().optional(),
   cancellationPolicy: z.string().optional()
 })
 
@@ -70,33 +76,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Save vendor services
+    // Save vendor services (single row capturing full specializations & description)
     console.log('Saving vendor services...')
     const { data: serviceData, error: serviceError } = await supabaseAdmin
       .from('vendor_services')
       .insert({
         vendor_id: validatedData.vendorId,
-        category_id: validatedData.categoryId,
+        // keep a primary category if provided; otherwise null
+        category_id: validatedData.categoryId || null,
         subcategory: validatedData.subcategory || null,
         secondary_services: validatedData.secondaryServices || [],
-        service_type: validatedData.serviceType,
-        wedding_price_min: validatedData.weddingPriceMin,
-        wedding_price_max: validatedData.weddingPriceMax,
-        corporate_price_min: validatedData.corporatePriceMin,
-        corporate_price_max: validatedData.corporatePriceMax,
-        birthday_price_min: validatedData.birthdayPriceMin,
-        birthday_price_max: validatedData.birthdayPriceMax,
-        festival_price_min: validatedData.festivalPriceMin,
-        festival_price_max: validatedData.festivalPriceMax,
-        basic_package_price: validatedData.basicPackagePrice,
+        service_type: validatedData.serviceType || null,
+        // optional pricing; default to null if not provided
+        wedding_price_min: validatedData.weddingPriceMin ?? null,
+        wedding_price_max: validatedData.weddingPriceMax ?? null,
+        corporate_price_min: validatedData.corporatePriceMin ?? null,
+        corporate_price_max: validatedData.corporatePriceMax ?? null,
+        birthday_price_min: validatedData.birthdayPriceMin ?? null,
+        birthday_price_max: validatedData.birthdayPriceMax ?? null,
+        festival_price_min: validatedData.festivalPriceMin ?? null,
+        festival_price_max: validatedData.festivalPriceMax ?? null,
+        basic_package_price: validatedData.basicPackagePrice ?? null,
         basic_package_details: validatedData.basicPackageDetails || null,
-        standard_package_price: validatedData.standardPackagePrice,
+        standard_package_price: validatedData.standardPackagePrice ?? null,
         standard_package_details: validatedData.standardPackageDetails || null,
-        premium_package_price: validatedData.premiumPackagePrice,
+        premium_package_price: validatedData.premiumPackagePrice ?? null,
         premium_package_details: validatedData.premiumPackageDetails || null,
         additional_services: validatedData.additionalServices || null,
-        advance_payment_percentage: validatedData.advancePaymentPercentage,
-        cancellation_policy: validatedData.cancellationPolicy || null
+        advance_payment_percentage: validatedData.advancePaymentPercentage ?? 50,
+        cancellation_policy: validatedData.cancellationPolicy || null,
+        // New rich fields
+        service_specializations: {
+          selectedCategories: validatedData.selectedCategories,
+          itemsByCategory: validatedData.itemsByCategory,
+        },
+        service_description: validatedData.serviceDescription,
+        pricing_structure: 'package_based'
       })
       .select('id')
       .single()
