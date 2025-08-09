@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { z } from 'zod'
 import { sendEmail } from '@/lib/email/sender'
+import bcrypt from 'bcryptjs'
 
 const ApproveVendorSchema = z.object({
   vendorId: z.string().uuid('Invalid vendor ID'),
@@ -10,16 +11,15 @@ const ApproveVendorSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('--- Vendor Approval Start ---')
+    console.log('--- Admin Vendor Approval Start ---')
     
     const body = await request.json()
     console.log('Request body:', body)
     
     const validatedData = ApproveVendorSchema.parse(body)
-    console.log('Data validated successfully')
+    console.log('Data validated:', validatedData)
 
-    // Check if vendor exists and get user details
-    console.log('Checking vendor status...')
+    // Get vendor and user data
     const { data: vendorData, error: vendorError } = await supabaseAdmin
       .from('vendors')
       .select(`
@@ -40,28 +40,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Vendor found:', vendorData.id)
+    console.log('Vendor found:', vendorData.id, 'Status:', vendorData.verification_status)
 
-    // Check if already approved
+    // Check if vendor is already approved
     if (vendorData.verification_status === 'approved') {
       console.log('Vendor already approved')
-      return NextResponse.json({
-        success: true,
-        message: 'Vendor already approved',
-        vendorId: vendorData.id
-      })
+      return NextResponse.json(
+        { error: 'Vendor is already approved' },
+        { status: 400 }
+      )
     }
 
-    // Get user details for email
-    console.log('Getting user details...')
+    // Get user data
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
-      .select(`
-        id,
-        email,
-        full_name,
-        phone
-      `)
+      .select('id, email, full_name, password_hash')
       .eq('id', vendorData.user_id)
       .single()
 
@@ -73,104 +66,113 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('User found:', userData.email)
+    // Generate a new password for the vendor
+    const newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+    const passwordHash = await bcrypt.hash(newPassword, 12)
+
+    // Update user with new password and activate account
+    const { error: userUpdateError } = await supabaseAdmin
+      .from('users')
+      .update({
+        password_hash: passwordHash,
+        is_active: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userData.id)
+
+    if (userUpdateError) {
+      console.error('Failed to update user:', userUpdateError)
+      return NextResponse.json(
+        { error: 'Failed to update user' },
+        { status: 500 }
+      )
+    }
 
     // Update vendor status to approved
-    console.log('Updating vendor status to approved...')
     const { error: vendorUpdateError } = await supabaseAdmin
       .from('vendors')
       .update({
         verification_status: 'approved',
         approved_at: new Date().toISOString(),
-        approved_by: validatedData.adminId
+        approved_by: validatedData.adminId,
+        registration_step: 5, // Registration complete
+        updated_at: new Date().toISOString()
       })
-      .eq('id', validatedData.vendorId)
+      .eq('id', vendorData.id)
 
     if (vendorUpdateError) {
       console.error('Failed to update vendor:', vendorUpdateError)
       return NextResponse.json(
-        { error: 'Failed to approve vendor' },
+        { error: 'Failed to update vendor status' },
         { status: 500 }
       )
     }
 
-    console.log('Vendor status updated to approved')
-
-    // Update user status to active
-    console.log('Updating user status to active...')
-    const { error: userUpdateError } = await supabaseAdmin
-      .from('users')
-      .update({
-        is_active: true
-      })
-      .eq('id', vendorData.user_id)
-
-    if (userUpdateError) {
-      console.error('Failed to update user:', userUpdateError)
-      return NextResponse.json(
-        { error: 'Failed to activate user' },
-        { status: 500 }
-      )
+    // Create admin review record
+    try {
+      await supabaseAdmin
+        .from('admin_reviews')
+        .insert({
+          vendor_id: vendorData.id,
+          admin_id: validatedData.adminId,
+          review_status: 'approved',
+          review_notes: 'Vendor approved by admin',
+          documents_reviewed: true,
+          business_info_reviewed: true,
+          services_reviewed: true
+        })
+    } catch (reviewError) {
+      console.error('Failed to create admin review:', reviewError)
     }
 
-    console.log('User status updated to active')
-
-    // Send approval email
-    console.log('Sending approval email...')
+    // Send approval email to vendor
     try {
       const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/vendor/login`
       
       await sendEmail({
         to: userData.email,
-        subject: 'Your Vendor Account is Approved - Evea',
+        subject: 'Your EVEA Vendor Account is Approved!',
         template: 'vendor-approval',
         data: {
-          name: userData.full_name,
+          name: userData.full_name || 'Vendor',
           businessName: vendorData.business_name,
           email: userData.email,
-          password: 'Use the password you set during registration',
-          loginUrl,
-          supportEmail: 'support@evea.com'
+          password: newPassword,
+          loginUrl: loginUrl
         }
       })
-      
-      console.log('Approval email sent successfully')
     } catch (emailError) {
       console.error('Failed to send approval email:', emailError)
-      // Don't fail the approval process, just log the error
     }
 
     // Create notification for vendor
-    console.log('Creating notification for vendor...')
-    const { error: notificationError } = await supabaseAdmin
-      .from('notifications')
-      .insert({
-        user_id: vendorData.user_id,
-        type: 'vendor_approval',
-        title: 'Account Approved',
-        message: `Your vendor account for ${vendorData.business_name} has been approved! You can now log in and start receiving bookings.`,
-        data: {
-          vendorId: vendorData.id,
-          businessName: vendorData.business_name
-        }
-      })
-
-    if (notificationError) {
-      console.error('Failed to create notification:', notificationError)
-      // Don't fail the approval process, just log the error
+    try {
+      await supabaseAdmin
+        .from('notifications')
+        .insert({
+          user_id: userData.id,
+          type: 'vendor_approved',
+          title: 'Account Approved',
+          message: `Your vendor account for ${vendorData.business_name} has been approved! Check your email for login credentials.`,
+          data: {
+            vendorId: vendorData.id,
+            businessName: vendorData.business_name
+          }
+        })
+    } catch (notificationError) {
+      console.error('Failed to create vendor notification:', notificationError)
     }
 
-    console.log('--- Vendor Approval Success ---')
+    console.log('--- Admin Vendor Approval Success ---')
     return NextResponse.json({
       success: true,
-      message: 'Vendor approved successfully',
+      message: 'Vendor approved successfully. Login credentials have been sent to the vendor.',
       vendorId: vendorData.id,
-      businessName: vendorData.business_name,
-      userEmail: userData.email
+      businessName: vendorData.business_name
     })
 
   } catch (error) {
-    console.error('Vendor approval error:', error)
+    console.error('Admin vendor approval error:', error)
     if (error instanceof z.ZodError) {
       console.error('Zod validation errors:', error.issues)
       return NextResponse.json(

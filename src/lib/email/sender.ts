@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import { vendorVerificationTemplate } from './templates/vendor-verification'
+import { vendorRegistrationCompleteTemplate } from './templates/vendor-registration-complete'
 
 interface EmailData {
   to: string
@@ -52,7 +53,14 @@ function generateEmailTemplate(template: string, data: Record<string, any>): str
         businessName: data.businessName || '',
         verificationUrl: data.verificationUrl || '',
         supportEmail: data.supportEmail || 'support@evea.com'
-      })
+      }).html
+
+    case 'vendor-registration-complete':
+      return vendorRegistrationCompleteTemplate({
+        fullName: data.fullName || '',
+        businessName: data.businessName || '',
+        supportEmail: data.supportEmail || 'support@evea.com'
+      }).html
 
     case 'email-verification':
       return `

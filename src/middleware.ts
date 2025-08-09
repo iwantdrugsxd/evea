@@ -1,82 +1,97 @@
-// src/middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import jwt from 'jsonwebtoken'
+import { jwtVerify } from 'jose'
 
-// Define protected routes
+// Routes that require authentication
 const protectedRoutes = [
+  '/dashboard',
   '/profile',
+  '/orders',
   '/favorites',
   '/messages',
-  '/orders'
+  '/vendor/dashboard',
+  '/admin/dashboard'
 ]
 
-// Define public routes that don't need authentication
-const publicRoutes = [
-  '/',
-  '/login',
-  '/register',
-  '/vendor',
-  '/features',
-  '/about',
-  '/contact'
+// Vendor onboarding routes that need vendor ID validation
+const vendorOnboardingRoutes = [
+  '/vendor/onboarding/business-details',
+  '/vendor/onboarding/services',
+  '/vendor/onboarding/verification-pending'
 ]
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+// Public routes that should redirect if authenticated
+const authRoutes = ['/login', '/register']
 
-  // Check if the route is protected
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
+export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const token = request.cookies.get('token')?.value
 
-  // Check if the route is public
-  const isPublicRoute = publicRoutes.some(route => 
-    pathname.startsWith(route)
-  )
-
-  // Get auth token from cookies
-  const authToken = request.cookies.get('auth-token')?.value
-  const vendorToken = request.cookies.get('vendorToken')?.value
-  const token = authToken || vendorToken
-
-  // If it's a protected route and no token, redirect to login
-  if (isProtectedRoute && !token) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  // Handle vendor email verification (allow without authentication)
+  if (pathname === '/vendor/verify-email' || pathname === '/api/vendor/verify-email') {
+    return NextResponse.next()
   }
 
-  // If user has token and tries to access login/register, redirect to marketplace
-  if (token && (pathname === '/login' || pathname === '/register')) {
-    return NextResponse.redirect(new URL('/marketplace', request.url))
+  // Handle vendor onboarding routes
+  if (vendorOnboardingRoutes.some(route => pathname.startsWith(route))) {
+    const vendorId = request.nextUrl.searchParams.get('vendorId')
+    
+    if (!vendorId) {
+      return NextResponse.redirect(new URL('/vendor/onboarding?error=missing_vendor_id', request.url))
+    }
+
+    // Optional: Validate vendor ID exists and user has permission
+    // This would require a database call, implement if needed for security
+    
+    return NextResponse.next()
   }
 
-  // Verify token for protected routes
-  if (isProtectedRoute && token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-      
-      // Check if user is accessing vendor routes with customer token
-      if (pathname.startsWith('/vendor') && decoded.role !== 'vendor') {
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
-      
-      // Check if user is accessing customer routes with vendor token
-      if (!pathname.startsWith('/vendor') && decoded.role === 'vendor') {
-        return NextResponse.redirect(new URL('/vendor/dashboard', request.url))
-      }
-      
-      // Check if user is accessing customer routes with customer token
-      if (!pathname.startsWith('/vendor') && !pathname.startsWith('/admin') && decoded.role === 'customer') {
-        // Allow access to marketplace and other customer routes
-        return NextResponse.next()
-      }
-    } catch (error) {
-      // Invalid token, redirect to login
+  // Handle protected routes
+  if (protectedRoutes.some(route => pathname.startsWith(route))) {
+    if (!token) {
+      // Store the attempted URL to redirect after login
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
+    }
+
+    try {
+      // Verify the JWT token
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+      const { payload } = await jwtVerify(token, secret)
+      
+      // Check role-based access
+      if (pathname.startsWith('/vendor/') && payload.role !== 'vendor') {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+      
+      if (pathname.startsWith('/admin/') && payload.role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+
+      return NextResponse.next()
+    } catch (error) {
+      console.error('Token verification failed:', error)
+      // Clear invalid token
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      response.cookies.delete('token')
+      return response
+    }
+  }
+
+  // Handle auth routes (redirect if already authenticated)
+  if (authRoutes.includes(pathname)) {
+    if (token) {
+      try {
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+        await jwtVerify(token, secret)
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      } catch (error) {
+        // Invalid token, allow access to auth routes
+        const response = NextResponse.next()
+        response.cookies.delete('token')
+        return response
+      }
     }
   }
 
@@ -85,13 +100,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|public/).*)',
   ],
 }

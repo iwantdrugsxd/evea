@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import jwt from 'jsonwebtoken'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('--- Vendor Dashboard Start ---')
+    console.log('--- Vendor Dashboard Data Fetch Start ---')
     
     // Get vendor token from cookies
     const vendorToken = request.cookies.get('vendorToken')?.value
@@ -21,60 +21,18 @@ export async function GET(request: NextRequest) {
     let decodedToken
     try {
       decodedToken = jwt.verify(vendorToken, process.env.JWT_SECRET!) as any
-      console.log('Token verified for user:', decodedToken.userId)
-    } catch (jwtError) {
-      console.error('JWT verification failed:', jwtError)
+    } catch (error) {
+      console.error('Token verification failed:', error)
       return NextResponse.json(
-        { error: 'Invalid authentication token' },
+        { error: 'Invalid token' },
         { status: 401 }
       )
     }
 
-    // Check if user is a vendor
-    if (decodedToken.role !== 'vendor') {
-      console.error('User is not a vendor. Role:', decodedToken.role)
-      return NextResponse.json(
-        { error: 'Access denied. Vendor account required.' },
-        { status: 403 }
-      )
-    }
+    const { userId, vendorId } = decodedToken
+    console.log('Token verified for user:', userId, 'vendor:', vendorId)
 
-    // Get user details
-    console.log('Fetching user details...')
-    const { data: userData, error: userError } = await supabaseAdmin
-      .from('users')
-      .select(`
-        id,
-        email,
-        full_name,
-        phone,
-        role,
-        is_active
-      `)
-      .eq('id', decodedToken.userId)
-      .single()
-
-    if (userError || !userData) {
-      console.error('User not found:', decodedToken.userId)
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    console.log('User found:', userData.email)
-
-    // Check if user is active
-    if (!userData.is_active) {
-      console.error('User account is not active')
-      return NextResponse.json(
-        { error: 'Account is deactivated' },
-        { status: 403 }
-      )
-    }
-
-    // Get vendor details
-    console.log('Fetching vendor details...')
+    // Get vendor data
     const { data: vendorData, error: vendorError } = await supabaseAdmin
       .from('vendors')
       .select(`
@@ -84,31 +42,50 @@ export async function GET(request: NextRequest) {
         city,
         state,
         postal_code,
+        description,
         verification_status,
-        registration_step
+        approved_at,
+        created_at
       `)
-      .eq('user_id', userData.id)
+      .eq('id', vendorId)
       .single()
 
     if (vendorError || !vendorData) {
-      console.error('Vendor not found for user:', userData.id)
+      console.error('Vendor not found:', vendorId)
       return NextResponse.json(
-        { error: 'Vendor profile not found' },
+        { error: 'Vendor not found' },
         { status: 404 }
       )
     }
 
-    console.log('Vendor found:', vendorData.business_name)
+    // Get user data
+    const { data: userData, error: userError } = await supabaseAdmin
+      .from('users')
+      .select(`
+        id,
+        full_name,
+        email,
+        phone,
+        created_at
+      `)
+      .eq('id', userId)
+      .single()
 
-    // Get vendor services
-    console.log('Fetching vendor services...')
-    const { data: servicesData, error: servicesError } = await supabaseAdmin
+    if (userError || !userData) {
+      console.error('User not found:', userId)
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // Get service data
+    const { data: serviceData, error: serviceError } = await supabaseAdmin
       .from('vendor_services')
       .select(`
         id,
         category_id,
         service_type,
-        description,
         wedding_price_min,
         wedding_price_max,
         corporate_price_min,
@@ -118,63 +95,29 @@ export async function GET(request: NextRequest) {
         festival_price_min,
         festival_price_max,
         basic_package_price,
-        basic_package_details,
         standard_package_price,
-        standard_package_details,
         premium_package_price,
-        premium_package_details,
-        additional_services,
         advance_payment_percentage,
-        cancellation_policy,
-        categories (
-          id,
-          name
-        )
+        cancellation_policy
       `)
-      .eq('vendor_id', vendorData.id)
+      .eq('vendor_id', vendorId)
+      .single()
 
-    if (servicesError) {
-      console.error('Failed to fetch services:', servicesError)
-      // Don't fail the request, just return empty services
+    // Get category name if service exists
+    let categoryName = null
+    if (serviceData && !serviceError) {
+      const { data: categoryData } = await supabaseAdmin
+        .from('categories')
+        .select('name')
+        .eq('id', serviceData.category_id)
+        .single()
+      
+      categoryName = categoryData?.name || 'Unknown Category'
     }
 
-    console.log('Services fetched:', servicesData?.length || 0)
-
-    // Format services data
-    const formattedServices = servicesData?.map(service => ({
-      id: service.id,
-      categoryId: service.category_id,
-      categoryName: service.categories?.name || 'Unknown Category',
-      serviceType: service.service_type,
-      description: service.description,
-      weddingPriceMin: service.wedding_price_min,
-      weddingPriceMax: service.wedding_price_max,
-      corporatePriceMin: service.corporate_price_min,
-      corporatePriceMax: service.corporate_price_max,
-      birthdayPriceMin: service.birthday_price_min,
-      birthdayPriceMax: service.birthday_price_max,
-      festivalPriceMin: service.festival_price_min,
-      festivalPriceMax: service.festival_price_max,
-      basicPackagePrice: service.basic_package_price,
-      basicPackageDetails: service.basic_package_details,
-      standardPackagePrice: service.standard_package_price,
-      standardPackageDetails: service.standard_package_details,
-      premiumPackagePrice: service.premium_package_price,
-      premiumPackageDetails: service.premium_package_details,
-      additionalServices: service.additional_services || [],
-      advancePaymentPercentage: service.advance_payment_percentage,
-      cancellationPolicy: service.cancellation_policy
-    })) || []
-
-    console.log('--- Vendor Dashboard Success ---')
+    console.log('--- Vendor Dashboard Data Fetch Success ---')
     return NextResponse.json({
-      user: {
-        id: userData.id,
-        email: userData.email,
-        fullName: userData.full_name,
-        phone: userData.phone,
-        role: userData.role
-      },
+      success: true,
       vendor: {
         id: vendorData.id,
         businessName: vendorData.business_name,
@@ -182,16 +125,43 @@ export async function GET(request: NextRequest) {
         city: vendorData.city,
         state: vendorData.state,
         postalCode: vendorData.postal_code,
+        description: vendorData.description,
         verificationStatus: vendorData.verification_status,
-        registrationStep: vendorData.registration_step
+        approvedAt: vendorData.approved_at,
+        createdAt: vendorData.created_at
       },
-      services: formattedServices
+      user: {
+        id: userData.id,
+        fullName: userData.full_name,
+        email: userData.email,
+        phone: userData.phone,
+        createdAt: userData.created_at
+      },
+      service: serviceData && !serviceError ? {
+        id: serviceData.id,
+        categoryId: serviceData.category_id,
+        categoryName: categoryName,
+        serviceType: serviceData.service_type,
+        weddingPriceMin: serviceData.wedding_price_min,
+        weddingPriceMax: serviceData.wedding_price_max,
+        corporatePriceMin: serviceData.corporate_price_min,
+        corporatePriceMax: serviceData.corporate_price_max,
+        birthdayPriceMin: serviceData.birthday_price_min,
+        birthdayPriceMax: serviceData.birthday_price_max,
+        festivalPriceMin: serviceData.festival_price_min,
+        festivalPriceMax: serviceData.festival_price_max,
+        basicPackagePrice: serviceData.basic_package_price,
+        standardPackagePrice: serviceData.standard_package_price,
+        premiumPackagePrice: serviceData.premium_package_price,
+        advancePaymentPercentage: serviceData.advance_payment_percentage,
+        cancellationPolicy: serviceData.cancellation_policy
+      } : null
     })
 
   } catch (error) {
-    console.error('Vendor dashboard error:', error)
+    console.error('Vendor dashboard data fetch error:', error)
     return NextResponse.json(
-      { error: 'Failed to load vendor dashboard' },
+      { error: 'Failed to fetch dashboard data' },
       { status: 500 }
     )
   }

@@ -1,176 +1,245 @@
+// src/app/vendor/verify-email/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { 
-  CheckCircle, 
-  XCircle, 
-  Mail, 
-  ArrowRight,
-  Loader2
-} from 'lucide-react'
-import Header from '@/components/layout/header'
-import Footer from '@/components/layout/Footer'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import Button from '@/components/ui/button'
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 
-export default function VendorEmailVerificationPage() {
-  const [verificationStatus, setVerificationStatus] = useState<'loading' | 'success' | 'error'>('loading')
-  const [message, setMessage] = useState('')
-  const [vendorId, setVendorId] = useState<string | null>(null)
+interface VerificationState {
+  status: 'loading' | 'success' | 'error' | 'already_verified'
+  message: string
+  registrationStep?: number
+  vendorId?: string
+}
+
+export default function VerifyEmailPage() {
+  const [verificationState, setVerificationState] = useState<VerificationState>({
+    status: 'loading',
+    message: 'Verifying your email...'
+  })
+  
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
 
   useEffect(() => {
-    if (!token) {
-      setVerificationStatus('error')
-      setMessage('Invalid verification link. Please check your email and try again.')
-      return
+    // Call the verification API with the token from URL
+    const verifyWithToken = async () => {
+      if (!token) {
+        setVerificationState({
+          status: 'error',
+          message: 'Verification token is missing'
+        })
+        return
+      }
+
+      try {
+        // Use POST method to get JSON response instead of redirect
+        const response = await fetch('/api/vendor/verify-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token })
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          const isAlreadyVerified = data.registrationStep >= 2 && data.message.includes('already')
+          
+          setVerificationState({
+            status: isAlreadyVerified ? 'already_verified' : 'success',
+            message: data.message,
+            registrationStep: data.registrationStep,
+            vendorId: data.vendorId
+          })
+
+          // Auto-redirect after 3 seconds to next step
+          setTimeout(() => {
+            redirectToNextStep(data.registrationStep, data.vendorId)
+          }, 3000)
+        } else {
+          setVerificationState({
+            status: 'error',
+            message: data.error || 'Email verification failed'
+          })
+        }
+      } catch (error) {
+        console.error('Verification error:', error)
+        setVerificationState({
+          status: 'error',
+          message: 'Network error occurred during verification'
+        })
+      }
     }
 
-    verifyEmail(token)
+    verifyWithToken()
   }, [token])
 
-  const verifyEmail = async (verificationToken: string) => {
-    try {
-      const response = await fetch('/api/vendor/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: verificationToken }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-        setVerificationStatus('success')
-        setMessage('Email verified successfully! You can now proceed to upload your documents.')
-        setVendorId(data.vendorId)
-      } else {
-        setVerificationStatus('error')
-        setMessage(data.error || 'Email verification failed. Please try again.')
-      }
-    } catch (error) {
-      console.error('Verification error:', error)
-      setVerificationStatus('error')
-      setMessage('An error occurred during verification. Please try again.')
+  const redirectToNextStep = (registrationStep: number, vendorId: string) => {
+    switch (registrationStep) {
+      case 2:
+        // After email verification, go to business details/document upload
+        router.push(`/vendor/onboarding/business-details?vendorId=${vendorId}&step=2`)
+        break
+      case 3:
+        // After business details, go to service setup
+        router.push(`/vendor/onboarding/services?vendorId=${vendorId}&step=3`)
+        break
+      case 4:
+        // After service setup, go to verification pending
+        router.push(`/vendor/onboarding/verification-pending?vendorId=${vendorId}&step=4`)
+        break
+      default:
+        // Registration complete, go to vendor dashboard
+        router.push('/vendor/dashboard')
+        break
     }
   }
 
-  const handleContinue = () => {
-    if (vendorId) {
-      router.push(`/vendor/register/documents?vendorId=${vendorId}`)
+  const handleManualRedirect = () => {
+    if (verificationState.registrationStep && verificationState.vendorId) {
+      redirectToNextStep(verificationState.registrationStep, verificationState.vendorId)
     } else {
-      router.push('/vendor/register')
+      router.push('/vendor/onboarding')
     }
   }
 
-  const handleResendEmail = () => {
-    router.push('/vendor/register')
+  const renderContent = () => {
+    switch (verificationState.status) {
+      case 'loading':
+        return (
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-12 w-12 text-blue-600 animate-spin mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Verifying Email
+            </h2>
+            <p className="text-gray-600 text-center">
+              Please wait while we verify your email address...
+            </p>
+          </div>
+        )
+
+      case 'success':
+        return (
+          <div className="flex flex-col items-center">
+            <CheckCircle className="h-12 w-12 text-green-600 mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Email Verified Successfully!
+            </h2>
+            <p className="text-gray-600 text-center mb-4">
+              {verificationState.message}
+            </p>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              Redirecting you to the next step in 3 seconds...
+            </p>
+            <button
+              onClick={handleManualRedirect}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Continue to Next Step
+            </button>
+          </div>
+        )
+
+      case 'already_verified':
+        return (
+          <div className="flex flex-col items-center">
+            <CheckCircle className="h-12 w-12 text-green-600 mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Email Already Verified
+            </h2>
+            <p className="text-gray-600 text-center mb-4">
+              Your email has been verified previously.
+            </p>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              Redirecting you to continue your registration in 3 seconds...
+            </p>
+            <button
+              onClick={handleManualRedirect}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Continue Registration
+            </button>
+          </div>
+        )
+
+      case 'error':
+        return (
+          <div className="flex flex-col items-center">
+            <XCircle className="h-12 w-12 text-red-600 mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Verification Failed
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              {verificationState.message}
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => router.push('/vendor/onboarding')}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+              >
+                Back to Registration
+              </button>
+              <button
+                onClick={() => router.push('/contact')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+              >
+                Contact Support
+              </button>
+            </div>
+          </div>
+        )
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <Header />
-      
-      <main className="section-padding">
-        <div className="container-custom">
-          <div className="max-w-md mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-8"
-            >
-              <h1 className="text-3xl font-bold text-gray-900 mb-4 font-heading">
-                Email Verification
-              </h1>
-              <p className="text-gray-600">
-                Verifying your email address...
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <Card className="card-elegant">
-                <CardHeader>
-                  <CardTitle className="text-center">Verification Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {verificationStatus === 'loading' && (
-                    <div className="text-center py-8">
-                      <Loader2 className="h-12 w-12 text-red-600 animate-spin mx-auto mb-4" />
-                      <p className="text-gray-600">Verifying your email address...</p>
-                    </div>
-                  )}
-
-                  {verificationStatus === 'success' && (
-                    <div className="text-center py-8">
-                      <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        Email Verified Successfully!
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        {message}
-                      </p>
-                      <div className="space-y-3">
-                        <Button
-                          onClick={handleContinue}
-                          variant="primary"
-                          size="lg"
-                          className="w-full"
-                        >
-                          Continue to Document Upload
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {verificationStatus === 'error' && (
-                    <div className="text-center py-8">
-                      <XCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        Verification Failed
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        {message}
-                      </p>
-                      <div className="space-y-3">
-                        <Button
-                          onClick={handleResendEmail}
-                          variant="primary"
-                          size="lg"
-                          className="w-full"
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          Register Again
-                        </Button>
-                        <Button
-                          onClick={() => router.push('/vendor')}
-                          variant="ghost"
-                          size="lg"
-                          className="w-full"
-                        >
-                          Back to Vendor Page
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <div className="text-center">
+            {renderContent()}
           </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
+      
+      {/* Progress indicator */}
+      {verificationState.registrationStep && (
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white p-4 shadow sm:rounded-lg">
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Registration Progress</h3>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+                <span className="ml-2 text-sm text-gray-600">Email Verified</span>
+              </div>
+              
+              <div className="flex-1 h-0.5 bg-gray-200">
+                <div 
+                  className="h-full bg-blue-600 transition-all duration-500"
+                  style={{ width: `${Math.min(((verificationState.registrationStep - 1) / 4) * 100, 100)}%` }}
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <div className={`flex-shrink-0 w-6 h-6 rounded-full ${
+                  verificationState.registrationStep >= 3 ? 'bg-green-500' : 'bg-gray-300'
+                } flex items-center justify-center`}>
+                  {verificationState.registrationStep >= 3 ? (
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  ) : (
+                    <span className="text-xs text-gray-600">2</span>
+                  )}
+                </div>
+                <span className="ml-2 text-sm text-gray-600">Complete Registration</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

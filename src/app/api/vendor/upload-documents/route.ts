@@ -9,25 +9,20 @@ const UploadDocumentsSchema = z.object({
   documentTypes: z.array(z.string()).min(1, 'Document types are required')
 })
 
-// Initialize Google Drive API
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  },
-  scopes: ['https://www.googleapis.com/auth/drive'],
-})
-
-const drive = google.drive({ version: 'v3', auth })
+// Defer Google Drive API initialization until request time so we can validate env
 
 export async function POST(request: NextRequest) {
   try {
     console.log('--- Document Upload Start ---')
-    
     const formData = await request.formData()
     const vendorId = formData.get('vendorId') as string
     const documents = formData.getAll('documents') as File[]
     const documentTypes = formData.getAll('documentTypes') as string[]
+    // OAuth token can be sent in form field or Authorization header
+    const providedAccessToken = (formData.get('googleAccessToken') as string) || ''
+    const authHeader = request.headers.get('authorization') || ''
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+    const googleAccessToken = providedAccessToken || bearerToken
     
     console.log('Vendor ID:', vendorId)
     console.log('Documents count:', documents.length)
@@ -40,6 +35,22 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    if (!googleAccessToken) {
+      return NextResponse.json(
+        { error: 'Missing Google access token. Connect Google Drive and try again.' },
+        { status: 400 }
+      )
+    }
+
+    // Build OAuth2 client using provided access token (user consent flow)
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    )
+    oauth2Client.setCredentials({ access_token: googleAccessToken })
+    const drive = google.drive({ version: 'v3', auth: oauth2Client })
 
     // Check if vendor exists and get current registration step
     console.log('Checking vendor status...')

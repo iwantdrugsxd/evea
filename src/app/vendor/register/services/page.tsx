@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
-  Settings, 
-  DollarSign, 
   Calendar,
-  MapPin,
+  Users,
+  DollarSign,
+  Package,
+  CheckCircle,
+  XCircle,
   ArrowRight,
   ArrowLeft,
-  CheckCircle,
-  Loader2
+  Loader2,
+  Star
 } from 'lucide-react'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
@@ -19,16 +21,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
 
-interface ServiceFormData {
+interface ServiceData {
   categoryId: string
+  subcategory: string
+  secondaryServices: string[]
   serviceType: string
-  description: string
-  address: string
-  city: string
-  state: string
-  postalCode: string
-  latitude: number
-  longitude: number
   weddingPriceMin: number
   weddingPriceMax: number
   corporatePriceMin: number
@@ -43,30 +40,25 @@ interface ServiceFormData {
   standardPackageDetails: string
   premiumPackagePrice: number
   premiumPackageDetails: string
-  additionalServices: string[]
+  additionalServices: string
   advancePaymentPercentage: number
   cancellationPolicy: string
 }
 
 export default function VendorServicesSetupPage() {
   const [vendorId, setVendorId] = useState<string | null>(null)
-  const [categories, setCategories] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
+  const [categories, setCategories] = useState<any[]>([])
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [formData, setFormData] = useState<ServiceFormData>({
+  const [formData, setFormData] = useState<ServiceData>({
     categoryId: '',
-    serviceType: 'per_event',
-    description: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    latitude: 0,
-    longitude: 0,
+    subcategory: '',
+    secondaryServices: [],
+    serviceType: '',
     weddingPriceMin: 0,
     weddingPriceMax: 0,
     corporatePriceMin: 0,
@@ -81,7 +73,7 @@ export default function VendorServicesSetupPage() {
     standardPackageDetails: '',
     premiumPackagePrice: 0,
     premiumPackageDetails: '',
-    additionalServices: [],
+    additionalServices: '',
     advancePaymentPercentage: 50,
     cancellationPolicy: ''
   })
@@ -106,16 +98,19 @@ export default function VendorServicesSetupPage() {
     }
   }
 
-  const handleInputChange = (field: keyof ServiceFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleAdditionalServiceChange = (service: string, checked: boolean) => {
+  const handleInputChange = (field: keyof ServiceData, value: any) => {
     setFormData(prev => ({
       ...prev,
-      additionalServices: checked 
-        ? [...prev.additionalServices, service]
-        : prev.additionalServices.filter(s => s !== service)
+      [field]: value
+    }))
+  }
+
+  const handleSecondaryServiceToggle = (service: string) => {
+    setFormData(prev => ({
+      ...prev,
+      secondaryServices: prev.secondaryServices.includes(service)
+        ? prev.secondaryServices.filter(s => s !== service)
+        : [...prev.secondaryServices, service]
     }))
   }
 
@@ -128,17 +123,17 @@ export default function VendorServicesSetupPage() {
       return
     }
 
-    if (!formData.categoryId || !formData.description || !formData.address) {
+    if (!formData.categoryId || !formData.serviceType) {
       setSubmitStatus('error')
       setMessage('Please fill in all required fields.')
       return
     }
 
-    setIsLoading(true)
+    setIsSubmitting(true)
     setSubmitStatus('idle')
 
     try {
-      const response = await fetch('/api/vendor/services-location', {
+      const response = await fetch('/api/vendor/services', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +148,7 @@ export default function VendorServicesSetupPage() {
 
       if (response.ok && data.success) {
         setSubmitStatus('success')
-        setMessage('Services setup completed successfully! Your registration is now complete.')
+        setMessage('Services setup completed successfully! You will receive an email with login credentials once your account is approved.')
       } else {
         setSubmitStatus('error')
         setMessage(data.error || 'Failed to save services. Please try again.')
@@ -161,34 +156,16 @@ export default function VendorServicesSetupPage() {
     } catch (error) {
       console.error('Services setup error:', error)
       setSubmitStatus('error')
-      setMessage('An error occurred. Please try again.')
+      setMessage('An error occurred during setup. Please try again.')
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
-  const handleFinish = () => {
-    router.push('/vendor/registration-complete')
-  }
-
-  const serviceTypes = [
-    { value: 'per_hour', label: 'Per Hour' },
-    { value: 'per_day', label: 'Per Day' },
-    { value: 'per_event', label: 'Per Event' },
-    { value: 'custom_quote', label: 'Custom Quote' }
-  ]
-
-  const additionalServicesOptions = [
-    'Setup & Decoration',
-    'Equipment Rental',
-    'Staff Services',
-    'Transportation',
-    'Catering',
-    'Photography',
-    'Entertainment',
-    'Security',
-    'Cleaning Services',
-    'Custom Design'
+  const secondaryServiceOptions = [
+    'Photography', 'Videography', 'Catering', 'Decoration', 'Music', 'Transportation',
+    'Makeup & Styling', 'Wedding Planning', 'Event Management', 'DJ Services',
+    'Live Band', 'Dance Performances', 'Fireworks', 'Lighting', 'Sound System'
   ]
 
   return (
@@ -208,7 +185,7 @@ export default function VendorServicesSetupPage() {
                 Set Up Your Services
               </h1>
               <p className="text-gray-600">
-                Configure your services, pricing, and business details
+                Configure your service offerings and pricing to start receiving bookings
               </p>
             </motion.div>
 
@@ -219,272 +196,74 @@ export default function VendorServicesSetupPage() {
             >
               <Card className="card-elegant">
                 <CardHeader>
-                  <CardTitle className="text-center">Service Configuration</CardTitle>
+                  <CardTitle className="text-center">Service Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Service Category */}
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Primary Service Category */}
                     <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <Settings className="h-5 w-5 mr-2" />
-                        Service Category
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Service Category *
-                          </label>
-                          <select
-                            value={formData.categoryId}
-                            onChange={(e) => handleInputChange('categoryId', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                            required
-                          >
-                            <option value="">Select a category</option>
-                            {categories.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Service Type *
-                          </label>
-                          <select
-                            value={formData.serviceType}
-                            onChange={(e) => handleInputChange('serviceType', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                            required
-                          >
-                            {serviceTypes.map((type) => (
-                              <option key={type.value} value={type.value}>
-                                {type.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Primary Service Category *
+                      </label>
+                      <select
+                        value={formData.categoryId}
+                        onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        required
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    {/* Service Description */}
+                    {/* Service Type */}
                     <div>
-                      <h3 className="text-lg font-semibold mb-4">Service Description</h3>
-                      <textarea
-                        value={formData.description}
-                        onChange={(e) => handleInputChange('description', e.target.value)}
-                        placeholder="Describe your services in detail..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                        rows={4}
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Service Type *
+                      </label>
+                      <select
+                        value={formData.serviceType}
+                        onChange={(e) => handleInputChange('serviceType', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         required
+                      >
+                        <option value="">Select service type</option>
+                        <option value="full_service">Full Service Package</option>
+                        <option value="partial_service">Partial Service</option>
+                        <option value="consultation">Consultation Only</option>
+                        <option value="equipment_rental">Equipment Rental</option>
+                      </select>
+                    </div>
+
+                    {/* Subcategory */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Subcategory
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.subcategory}
+                        onChange={(e) => handleInputChange('subcategory', e.target.value)}
+                        placeholder="e.g., Wedding Photography, Corporate Events"
                       />
                     </div>
 
-                    {/* Location */}
+                    {/* Secondary Services */}
                     <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <MapPin className="h-5 w-5 mr-2" />
-                        Service Location
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          type="text"
-                          label="Address"
-                          value={formData.address}
-                          onChange={(value) => handleInputChange('address', value)}
-                          placeholder="Enter your service address"
-                          required
-                        />
-                        <Input
-                          type="text"
-                          label="City"
-                          value={formData.city}
-                          onChange={(value) => handleInputChange('city', value)}
-                          placeholder="City"
-                          required
-                        />
-                        <Input
-                          type="text"
-                          label="State"
-                          value={formData.state}
-                          onChange={(value) => handleInputChange('state', value)}
-                          placeholder="State"
-                          required
-                        />
-                        <Input
-                          type="text"
-                          label="Postal Code"
-                          value={formData.postalCode}
-                          onChange={(value) => handleInputChange('postalCode', value)}
-                          placeholder="Postal Code"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Pricing */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <DollarSign className="h-5 w-5 mr-2" />
-                        Pricing Structure
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Wedding Events (₹)
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Input
-                              type="number"
-                              label="Min Price"
-                              value={formData.weddingPriceMin}
-                              onChange={(value) => handleInputChange('weddingPriceMin', parseFloat(value) || 0)}
-                              placeholder="Min"
-                            />
-                            <Input
-                              type="number"
-                              label="Max Price"
-                              value={formData.weddingPriceMax}
-                              onChange={(value) => handleInputChange('weddingPriceMax', parseFloat(value) || 0)}
-                              placeholder="Max"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Corporate Events (₹)
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Input
-                              type="number"
-                              label="Min Price"
-                              value={formData.corporatePriceMin}
-                              onChange={(value) => handleInputChange('corporatePriceMin', parseFloat(value) || 0)}
-                              placeholder="Min"
-                            />
-                            <Input
-                              type="number"
-                              label="Max Price"
-                              value={formData.corporatePriceMax}
-                              onChange={(value) => handleInputChange('corporatePriceMax', parseFloat(value) || 0)}
-                              placeholder="Max"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Birthday Events (₹)
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Input
-                              type="number"
-                              label="Min Price"
-                              value={formData.birthdayPriceMin}
-                              onChange={(value) => handleInputChange('birthdayPriceMin', parseFloat(value) || 0)}
-                              placeholder="Min"
-                            />
-                            <Input
-                              type="number"
-                              label="Max Price"
-                              value={formData.birthdayPriceMax}
-                              onChange={(value) => handleInputChange('birthdayPriceMax', parseFloat(value) || 0)}
-                              placeholder="Max"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Festival Events (₹)
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Input
-                              type="number"
-                              label="Min Price"
-                              value={formData.festivalPriceMin}
-                              onChange={(value) => handleInputChange('festivalPriceMin', parseFloat(value) || 0)}
-                              placeholder="Min"
-                            />
-                            <Input
-                              type="number"
-                              label="Max Price"
-                              value={formData.festivalPriceMax}
-                              onChange={(value) => handleInputChange('festivalPriceMax', parseFloat(value) || 0)}
-                              placeholder="Max"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Package Pricing */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Package Pricing</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <h4 className="font-semibold mb-2">Basic Package</h4>
-                          <Input
-                            type="number"
-                            label="Price (₹)"
-                            value={formData.basicPackagePrice}
-                            onChange={(value) => handleInputChange('basicPackagePrice', parseFloat(value) || 0)}
-                            placeholder="Price"
-                          />
-                          <textarea
-                            value={formData.basicPackageDetails}
-                            onChange={(e) => handleInputChange('basicPackageDetails', e.target.value)}
-                            placeholder="Package details..."
-                            className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                            rows={3}
-                          />
-                        </div>
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <h4 className="font-semibold mb-2">Standard Package</h4>
-                          <Input
-                            type="number"
-                            label="Price (₹)"
-                            value={formData.standardPackagePrice}
-                            onChange={(value) => handleInputChange('standardPackagePrice', parseFloat(value) || 0)}
-                            placeholder="Price"
-                          />
-                          <textarea
-                            value={formData.standardPackageDetails}
-                            onChange={(e) => handleInputChange('standardPackageDetails', e.target.value)}
-                            placeholder="Package details..."
-                            className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                            rows={3}
-                          />
-                        </div>
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <h4 className="font-semibold mb-2">Premium Package</h4>
-                          <Input
-                            type="number"
-                            label="Price (₹)"
-                            value={formData.premiumPackagePrice}
-                            onChange={(value) => handleInputChange('premiumPackagePrice', parseFloat(value) || 0)}
-                            placeholder="Price"
-                          />
-                          <textarea
-                            value={formData.premiumPackageDetails}
-                            onChange={(e) => handleInputChange('premiumPackageDetails', e.target.value)}
-                            placeholder="Package details..."
-                            className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Additional Services */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Additional Services</h3>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Services Offered
+                      </label>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {additionalServicesOptions.map((service) => (
+                        {secondaryServiceOptions.map((service) => (
                           <label key={service} className="flex items-center space-x-2">
                             <input
                               type="checkbox"
-                              checked={formData.additionalServices.includes(service)}
-                              onChange={(e) => handleAdditionalServiceChange(service, e.target.checked)}
+                              checked={formData.secondaryServices.includes(service)}
+                              onChange={() => handleSecondaryServiceToggle(service)}
                               className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                             />
                             <span className="text-sm text-gray-700">{service}</span>
@@ -493,34 +272,198 @@ export default function VendorServicesSetupPage() {
                       </div>
                     </div>
 
-                    {/* Business Policies */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Business Policies</h3>
+                    {/* Pricing Section */}
+                    <div className="border-t pt-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing Information</h3>
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Wedding Pricing */}
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">Wedding Events</label>
+                          <div className="flex space-x-2">
+                            <Input
+                              type="number"
+                              placeholder="Min Price"
+                              value={formData.weddingPriceMin}
+                              onChange={(e) => handleInputChange('weddingPriceMin', Number(e.target.value))}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Max Price"
+                              value={formData.weddingPriceMax}
+                              onChange={(e) => handleInputChange('weddingPriceMax', Number(e.target.value))}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Corporate Pricing */}
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">Corporate Events</label>
+                          <div className="flex space-x-2">
+                            <Input
+                              type="number"
+                              placeholder="Min Price"
+                              value={formData.corporatePriceMin}
+                              onChange={(e) => handleInputChange('corporatePriceMin', Number(e.target.value))}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Max Price"
+                              value={formData.corporatePriceMax}
+                              onChange={(e) => handleInputChange('corporatePriceMax', Number(e.target.value))}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Birthday Pricing */}
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">Birthday Parties</label>
+                          <div className="flex space-x-2">
+                            <Input
+                              type="number"
+                              placeholder="Min Price"
+                              value={formData.birthdayPriceMin}
+                              onChange={(e) => handleInputChange('birthdayPriceMin', Number(e.target.value))}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Max Price"
+                              value={formData.birthdayPriceMax}
+                              onChange={(e) => handleInputChange('birthdayPriceMax', Number(e.target.value))}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Festival Pricing */}
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">Festivals & Celebrations</label>
+                          <div className="flex space-x-2">
+                            <Input
+                              type="number"
+                              placeholder="Min Price"
+                              value={formData.festivalPriceMin}
+                              onChange={(e) => handleInputChange('festivalPriceMin', Number(e.target.value))}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Max Price"
+                              value={formData.festivalPriceMax}
+                              onChange={(e) => handleInputChange('festivalPriceMax', Number(e.target.value))}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Package Pricing */}
+                    <div className="border-t pt-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Package Pricing</h3>
+                      
+                      <div className="space-y-4">
+                        {/* Basic Package */}
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-3">Basic Package</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                              type="number"
+                              placeholder="Price"
+                              value={formData.basicPackagePrice}
+                              onChange={(e) => handleInputChange('basicPackagePrice', Number(e.target.value))}
+                            />
+                            <textarea
+                              placeholder="Package details"
+                              value={formData.basicPackageDetails}
+                              onChange={(e) => handleInputChange('basicPackageDetails', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Standard Package */}
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-3">Standard Package</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                              type="number"
+                              placeholder="Price"
+                              value={formData.standardPackagePrice}
+                              onChange={(e) => handleInputChange('standardPackagePrice', Number(e.target.value))}
+                            />
+                            <textarea
+                              placeholder="Package details"
+                              value={formData.standardPackageDetails}
+                              onChange={(e) => handleInputChange('standardPackageDetails', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Premium Package */}
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-3">Premium Package</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                              type="number"
+                              placeholder="Price"
+                              value={formData.premiumPackagePrice}
+                              onChange={(e) => handleInputChange('premiumPackagePrice', Number(e.target.value))}
+                            />
+                            <textarea
+                              placeholder="Package details"
+                              value={formData.premiumPackageDetails}
+                              onChange={(e) => handleInputChange('premiumPackageDetails', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Information */}
+                    <div className="border-t pt-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Services
+                          </label>
+                          <textarea
+                            placeholder="Describe any additional services you offer"
+                            value={formData.additionalServices}
+                            onChange={(e) => handleInputChange('additionalServices', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            rows={3}
+                          />
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Advance Payment Percentage
                           </label>
                           <Input
                             type="number"
-                            label="Percentage (%)"
+                            min="0"
+                            max="100"
                             value={formData.advancePaymentPercentage}
-                            onChange={(value) => handleInputChange('advancePaymentPercentage', parseFloat(value) || 0)}
+                            onChange={(e) => handleInputChange('advancePaymentPercentage', Number(e.target.value))}
                             placeholder="50"
-                            help="Percentage of total amount required as advance payment"
                           />
                         </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Cancellation Policy
                           </label>
                           <textarea
+                            placeholder="Describe your cancellation policy"
                             value={formData.cancellationPolicy}
                             onChange={(e) => handleInputChange('cancellationPolicy', e.target.value)}
-                            placeholder="Describe your cancellation policy..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                             rows={3}
-                            required
                           />
                         </div>
                       </div>
@@ -537,7 +480,10 @@ export default function VendorServicesSetupPage() {
 
                     {submitStatus === 'error' && (
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <span className="text-red-800">{message}</span>
+                        <div className="flex items-center">
+                          <XCircle className="h-5 w-5 text-red-600 mr-2" />
+                          <span className="text-red-800">{message}</span>
+                        </div>
                       </div>
                     )}
 
@@ -545,38 +491,27 @@ export default function VendorServicesSetupPage() {
                       <Button
                         type="button"
                         variant="ghost"
-                        onClick={() => router.push('/vendor/register/documents')}
+                        onClick={() => router.push(`/vendor/register/documents?vendorId=${vendorId}`)}
                       >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back
                       </Button>
 
-                      {submitStatus === 'success' ? (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={handleFinish}
-                        >
-                          Complete Registration
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      ) : (
-                        <Button
-                          type="submit"
-                          variant="primary"
-                          disabled={isLoading}
-                          loading={isLoading}
-                        >
-                          {isLoading ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Saving...
-                            </>
-                          ) : (
-                            'Save Services'
-                          )}
-                        </Button>
-                      )}
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={isSubmitting}
+                        loading={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          'Submit for Approval'
+                        )}
+                      </Button>
                     </div>
                   </form>
                 </CardContent>

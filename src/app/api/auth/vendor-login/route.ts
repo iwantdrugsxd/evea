@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
+import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { z } from 'zod'
 
 const VendorLoginSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -17,35 +17,41 @@ export async function POST(request: NextRequest) {
     console.log('Request body:', body)
     
     const validatedData = VendorLoginSchema.parse(body)
-    console.log('Data validated successfully')
+    console.log('Data validated:', validatedData)
 
     // Find user by email
-    console.log('Finding user by email...')
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select(`
         id,
         email,
         full_name,
-        phone,
         password_hash,
         role,
         is_active,
         email_verified
       `)
       .eq('email', validatedData.email)
-      .eq('role', 'vendor')
       .single()
 
     if (userError || !userData) {
-      console.error('User not found or not a vendor:', validatedData.email)
+      console.error('User not found:', validatedData.email)
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       )
     }
 
-    console.log('User found:', userData.id)
+    console.log('User found:', userData.id, 'Role:', userData.role)
+
+    // Check if user is a vendor
+    if (userData.role !== 'vendor') {
+      console.error('User is not a vendor:', userData.role)
+      return NextResponse.json(
+        { error: 'This login is only for vendors' },
+        { status: 401 }
+      )
+    }
 
     // Check if user is active
     if (!userData.is_active) {
@@ -66,21 +72,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    console.log('Verifying password...')
     const isPasswordValid = await bcrypt.compare(validatedData.password, userData.password_hash)
     
     if (!isPasswordValid) {
-      console.error('Invalid password')
+      console.error('Invalid password for user:', userData.id)
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       )
     }
 
-    console.log('Password verified successfully')
-
-    // Get vendor details
-    console.log('Getting vendor details...')
+    // Get vendor data
     const { data: vendorData, error: vendorError } = await supabaseAdmin
       .from('vendors')
       .select(`
@@ -93,41 +95,37 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (vendorError || !vendorData) {
-      console.error('Vendor details not found')
+      console.error('Vendor data not found for user:', userData.id)
       return NextResponse.json(
         { error: 'Vendor profile not found' },
         { status: 404 }
       )
     }
 
-    console.log('Vendor details found:', vendorData.id)
+    console.log('Vendor found:', vendorData.id, 'Status:', vendorData.verification_status)
 
     // Check if vendor is approved
     if (vendorData.verification_status !== 'approved') {
-      console.error('Vendor not approved. Status:', vendorData.verification_status)
+      console.error('Vendor not approved:', vendorData.verification_status)
       return NextResponse.json(
-        { error: 'Your vendor account is pending approval. You will be notified once approved.' },
+        { error: 'Your vendor account is pending approval. You will receive an email once approved.' },
         { status: 401 }
       )
     }
 
     // Generate JWT token
-    console.log('Generating JWT token...')
     const token = jwt.sign(
       {
         userId: userData.id,
-        vendorId: vendorData.id,
         email: userData.email,
         role: userData.role,
-        businessName: vendorData.business_name
+        vendorId: vendorData.id
       },
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
     )
 
-    console.log('JWT token generated')
-
-    // Set vendor token cookie
+    // Create response with token cookie
     const response = NextResponse.json({
       success: true,
       message: 'Login successful',
@@ -135,24 +133,21 @@ export async function POST(request: NextRequest) {
         id: userData.id,
         email: userData.email,
         fullName: userData.full_name,
-        phone: userData.phone,
         role: userData.role
       },
       vendor: {
         id: vendorData.id,
         businessName: vendorData.business_name,
-        verificationStatus: vendorData.verification_status,
-        registrationStep: vendorData.registration_step
+        verificationStatus: vendorData.verification_status
       }
     })
 
-    // Set secure cookie
+    // Set authentication cookie
     response.cookies.set('vendorToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/'
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     })
 
     console.log('--- Vendor Login Success ---')

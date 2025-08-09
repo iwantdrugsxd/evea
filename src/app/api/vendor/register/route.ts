@@ -1,101 +1,89 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
-import crypto from 'crypto'
-import bcrypt from 'bcryptjs'
+import { supabaseAdmin } from '@/lib/supabase'
 import { z } from 'zod'
+import bcrypt from 'bcryptjs'
+import { v4 as uuidv4 } from 'uuid'
 import { sendEmail } from '@/lib/email/sender'
 
-const RegisterSchema = z.object({
+const VendorRegistrationSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email format'),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid phone number format'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   businessName: z.string().min(2, 'Business name must be at least 2 characters'),
   address: z.string().min(5, 'Address must be at least 5 characters'),
   city: z.string().min(2, 'City must be at least 2 characters'),
   state: z.string().min(2, 'State must be at least 2 characters'),
-  postalCode: z.string().min(5, 'Postal code must be at least 5 characters')
+  postalCode: z.string().min(5, 'Postal code must be at least 5 characters'),
+  agreeToTerms: z.boolean().refine(val => val === true, 'You must agree to the terms and conditions')
 })
 
 export async function POST(request: NextRequest) {
   try {
     console.log('--- Vendor Registration Start ---')
     
-    let body
-    try {
-      body = await request.json()
-      console.log('Request body:', body)
-    } catch (jsonError) {
-      console.error('JSON parsing error:', jsonError)
-      console.error('Raw request body:', await request.text())
-      return NextResponse.json(
-        { error: 'Invalid JSON format in request body' },
-        { status: 400 }
-      )
-    }
+    const body = await request.json()
+    console.log('Registration request for:', body.email)
     
-    const validatedData = RegisterSchema.parse(body)
+    const validatedData = VendorRegistrationSchema.parse(body)
     console.log('Data validated successfully')
 
-    // Check if email already exists
-    console.log('Checking if email already exists...')
+    // Check if user already exists
+    console.log('Checking if user exists...')
     const { data: existingUser, error: userCheckError } = await supabaseAdmin
       .from('users')
-      .select('id')
+      .select('id, email')
       .eq('email', validatedData.email)
       .single()
 
     if (existingUser) {
-      console.error('Email already registered:', validatedData.email)
+      console.log('User already exists:', existingUser.email)
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: 'An account with this email already exists' },
         { status: 400 }
       )
     }
 
-    console.log('Email is available')
-
-    // Check if phone already exists
-    console.log('Checking if phone already exists...')
-    const { data: existingPhone, error: phoneCheckError } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('phone', validatedData.phone)
+    // Check if vendor business already exists
+    console.log('Checking if business name exists...')
+    const { data: existingVendor, error: vendorCheckError } = await supabaseAdmin
+      .from('vendors')
+      .select('id, business_name')
+      .eq('business_name', validatedData.businessName)
       .single()
 
-    if (existingPhone) {
-      console.error('Phone already registered:', validatedData.phone)
+    if (existingVendor) {
+      console.log('Business name already exists:', existingVendor.business_name)
       return NextResponse.json(
-        { error: 'Phone number already registered' },
+        { error: 'A business with this name already exists' },
         { status: 400 }
       )
     }
-
-    console.log('Phone is available')
 
     // Hash password
     console.log('Hashing password...')
-    const passwordHash = await bcrypt.hash(validatedData.password, 10)
-    console.log('Password hashed successfully')
+    const saltRounds = 12
+    const passwordHash = await bcrypt.hash(validatedData.password, saltRounds)
 
     // Generate verification token
-    const verificationToken = crypto.randomUUID()
-    console.log('Verification token generated:', verificationToken)
+    const verificationToken = uuidv4()
+    console.log('Generated verification token')
 
-    // Create user first
-    console.log('Creating user...')
+    // Create user record
+    console.log('Creating user record...')
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
-        full_name: validatedData.fullName,
         email: validatedData.email,
-        phone: validatedData.phone,
         password_hash: passwordHash,
+        full_name: validatedData.fullName,
+        phone: validatedData.phone,
         role: 'vendor',
-        is_active: false, // Will be activated after email verification
+        is_active: true,
         email_verified: false,
         verification_token: verificationToken,
-        token_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+        token_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+        created_at: new Date().toISOString()
       })
       .select('id')
       .single()
@@ -103,7 +91,7 @@ export async function POST(request: NextRequest) {
     if (userError) {
       console.error('User creation error:', userError)
       return NextResponse.json(
-        { error: 'Registration failed' },
+        { error: 'Registration failed - user creation error' },
         { status: 500 }
       )
     }
@@ -123,15 +111,21 @@ export async function POST(request: NextRequest) {
         postal_code: validatedData.postalCode,
         verification_status: 'pending',
         registration_step: 1, // Start at step 1 (email verification)
-        verification_token: verificationToken
+        created_at: new Date().toISOString()
       })
       .select('id')
       .single()
 
     if (vendorError) {
       console.error('Vendor creation error:', vendorError)
+      // Cleanup user record if vendor creation fails
+      await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('id', userData.id)
+      
       return NextResponse.json(
-        { error: 'Registration failed' },
+        { error: 'Registration failed - vendor creation error' },
         { status: 500 }
       )
     }
@@ -141,7 +135,11 @@ export async function POST(request: NextRequest) {
     // Send verification email
     console.log('Sending verification email...')
     try {
-      const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/vendor/verify-email?token=${verificationToken}`
+      // Build verification URL using current request origin to avoid wrong port issues
+      const origin = (() => {
+        try { return new URL(request.url).origin } catch { return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }
+      })()
+      const verificationUrl = `${origin}/api/vendor/verify-email?token=${verificationToken}`
       
       await sendEmail({
         to: validatedData.email,
@@ -151,23 +149,58 @@ export async function POST(request: NextRequest) {
           fullName: validatedData.fullName,
           businessName: validatedData.businessName,
           verificationUrl,
-          supportEmail: 'support@evea.com'
+          supportEmail: process.env.SUPPORT_EMAIL || 'support@evea.com'
         }
       })
       
       console.log('Verification email sent successfully')
-    } catch (emailError) {
+    } catch (emailError: any) {
       console.error('Failed to send verification email:', emailError)
-      // Don't fail the registration, just log the error
+      
+      // Create notification in database about email failure
+      try {
+        await supabaseAdmin
+          .from('notifications')
+          .insert({
+            user_id: userData.id,
+            type: 'system_announcement',
+            title: 'Email Verification Issue',
+            message: 'There was an issue sending your verification email. Please contact support.',
+            data: {
+              vendorId: vendorData.id,
+              verificationToken,
+              emailError: emailError?.message || 'Unknown error'
+            }
+          })
+      } catch (notificationError) {
+        console.error('Failed to create notification:', notificationError)
+      }
+      
+      // Don't fail the registration, but inform the user
+      return NextResponse.json({
+        success: true,
+        vendorId: vendorData.id,
+        userId: userData.id,
+        registrationStep: 1,
+        message: 'Registration successful, but there was an issue sending the verification email. Please contact support.',
+        emailIssue: true
+      })
     }
 
+    // Log successful registration for analytics
     console.log('--- Vendor Registration Success ---')
+    console.log('User ID:', userData.id)
+    console.log('Vendor ID:', vendorData.id)
+    console.log('Business Name:', validatedData.businessName)
+    console.log('Email:', validatedData.email)
+
     return NextResponse.json({
       success: true,
       vendorId: vendorData.id,
       userId: userData.id,
       registrationStep: 1,
-      message: 'Registration successful. Please check your email to verify your account.'
+      message: 'Registration successful! Please check your email to verify your account and continue the registration process.',
+      verificationEmailSent: true
     })
 
   } catch (error) {
@@ -180,7 +213,7 @@ export async function POST(request: NextRequest) {
       )
     }
     return NextResponse.json(
-      { error: 'Registration failed' },
+      { error: 'Registration failed - internal server error' },
       { status: 500 }
     )
   }

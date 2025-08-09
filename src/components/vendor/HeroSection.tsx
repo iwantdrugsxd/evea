@@ -172,7 +172,7 @@ export default function VendorHeroSection() {
                   size="lg" 
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-2xl shadow-purple-500/25 border-0 text-lg px-8 py-4 group transition-all duration-300"
                 >
-                  Start Your Journey
+                  Start Selling Today
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
