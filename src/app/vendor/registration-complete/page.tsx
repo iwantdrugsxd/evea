@@ -111,9 +111,9 @@ export default function VendorRegistrationCompletePage() {
                       </Button>
                     </Link>
                     
-                    <Link href="/" className="block">
+                    <Link href="/vendor/login" className="block">
                       <Button variant="ghost" size="lg" className="w-full">
-                        Back to Homepage
+                        Go to Vendor Login
                       </Button>
                     </Link>
                   </div>

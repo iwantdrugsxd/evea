@@ -1,167 +1,178 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyVendorToken } from '@/lib/vendor/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import jwt from 'jsonwebtoken'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('--- Vendor Dashboard Data Fetch Start ---')
-    
-    // Get vendor token from cookies
-    const vendorToken = request.cookies.get('vendorToken')?.value
-    
-    if (!vendorToken) {
-      console.error('No vendor token found')
+    const vendorData = await verifyVendorToken(request)
+    if (!vendorData) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Verify JWT token
-    let decodedToken
-    try {
-      decodedToken = jwt.verify(vendorToken, process.env.JWT_SECRET!) as any
-    } catch (error) {
-      console.error('Token verification failed:', error)
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      )
-    }
+    const supabase = supabaseAdmin
 
-    const { userId, vendorId } = decodedToken
-    console.log('Token verified for user:', userId, 'vendor:', vendorId)
+    // Fetch vendor profile, user, and primary service info
+    const [
+      { data: vendorProfile },
+      { data: userProfile },
+      { data: serviceInfo },
+    ] = await Promise.all([
+      supabase
+        .from('vendors')
+        .select(`
+          id,
+          business_name,
+          address,
+          city,
+          state,
+          postal_code,
+          description,
+          verification_status,
+          approved_at,
+          created_at
+        `)
+        .eq('id', vendorData.vendorId)
+        .single(),
+      supabase
+        .from('users')
+        .select(`
+          id,
+          full_name,
+          email,
+          phone,
+          created_at
+        `)
+        .eq('id', vendorData.userId)
+        .single(),
+      supabase
+        .from('vendor_services')
+        .select(`
+          id,
+          vendor_id,
+          category_id,
+          service_type,
+          wedding_price_min,
+          wedding_price_max,
+          corporate_price_min,
+          corporate_price_max,
+          birthday_price_min,
+          birthday_price_max,
+          festival_price_min,
+          festival_price_max,
+          basic_package_price,
+          standard_package_price,
+          premium_package_price,
+          advance_payment_percentage,
+          cancellation_policy
+        `)
+        .eq('vendor_id', vendorData.vendorId)
+        .limit(1)
+        .single(),
+    ])
 
-    // Get vendor data
-    const { data: vendorData, error: vendorError } = await supabaseAdmin
-      .from('vendors')
-      .select(`
-        id,
-        business_name,
-        address,
-        city,
-        state,
-        postal_code,
-        description,
-        verification_status,
-        approved_at,
-        created_at
-      `)
-      .eq('id', vendorId)
-      .single()
-
-    if (vendorError || !vendorData) {
-      console.error('Vendor not found:', vendorId)
-      return NextResponse.json(
-        { error: 'Vendor not found' },
-        { status: 404 }
-      )
-    }
-
-    // Get user data
-    const { data: userData, error: userError } = await supabaseAdmin
-      .from('users')
-      .select(`
-        id,
-        full_name,
-        email,
-        phone,
-        created_at
-      `)
-      .eq('id', userId)
-      .single()
-
-    if (userError || !userData) {
-      console.error('User not found:', userId)
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    // Get service data
-    const { data: serviceData, error: serviceError } = await supabaseAdmin
-      .from('vendor_services')
-      .select(`
-        id,
-        category_id,
-        service_type,
-        wedding_price_min,
-        wedding_price_max,
-        corporate_price_min,
-        corporate_price_max,
-        birthday_price_min,
-        birthday_price_max,
-        festival_price_min,
-        festival_price_max,
-        basic_package_price,
-        standard_package_price,
-        premium_package_price,
-        advance_payment_percentage,
-        cancellation_policy
-      `)
-      .eq('vendor_id', vendorId)
-      .single()
-
-    // Get category name if service exists
-    let categoryName = null
-    if (serviceData && !serviceError) {
-      const { data: categoryData } = await supabaseAdmin
-        .from('categories')
-        .select('name')
-        .eq('id', serviceData.category_id)
-        .single()
+    // Get dashboard statistics
+    const [
+      { data: orders },
+      { data: cards },
+      { data: reviews },
+      { data: payments }
+    ] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('*')
+        .eq('vendor_id', vendorData.vendorId),
       
-      categoryName = categoryData?.name || 'Unknown Category'
-    }
+      supabase
+        .from('vendor_cards')
+        .select('*')
+        .eq('vendor_id', vendorData.vendorId),
+      
+      supabase
+        .from('reviews')
+        .select('*')
+        .eq('vendor_id', vendorData.vendorId),
+      
+      supabase
+        .from('payments')
+        .select('*')
+        .eq('vendor_id', vendorData.vendorId)
+        .eq('status', 'completed')
+    ])
 
-    console.log('--- Vendor Dashboard Data Fetch Success ---')
+    // Calculate statistics
+    const totalOrders = orders?.length || 0
+    const pendingOrders = (orders || []).filter((o: any) => o.status === 'pending').length || 0
+    const completedOrders = (orders || []).filter((o: any) => o.status === 'completed').length || 0
+    const totalRevenue = (payments || []).reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0
+    const averageRating = (reviews && reviews.length) 
+      ? (reviews as any[]).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length 
+      : 0
+
     return NextResponse.json({
       success: true,
-      vendor: {
-        id: vendorData.id,
-        businessName: vendorData.business_name,
-        address: vendorData.address,
-        city: vendorData.city,
-        state: vendorData.state,
-        postalCode: vendorData.postal_code,
-        description: vendorData.description,
-        verificationStatus: vendorData.verification_status,
-        approvedAt: vendorData.approved_at,
-        createdAt: vendorData.created_at
+      vendor: vendorProfile
+        ? {
+            id: vendorProfile.id,
+            businessName: vendorProfile.business_name,
+            address: vendorProfile.address,
+            city: vendorProfile.city,
+            state: vendorProfile.state,
+            postalCode: vendorProfile.postal_code,
+            description: vendorProfile.description,
+            verificationStatus: vendorProfile.verification_status,
+            approvedAt: vendorProfile.approved_at,
+            createdAt: vendorProfile.created_at,
+          }
+        : null,
+      user: userProfile
+        ? {
+            id: userProfile.id,
+            fullName: userProfile.full_name,
+            email: userProfile.email,
+            phone: userProfile.phone,
+            createdAt: userProfile.created_at,
+          }
+        : null,
+      service: serviceInfo
+        ? {
+            id: serviceInfo.id,
+            categoryId: serviceInfo.category_id,
+            categoryName: '',
+            serviceType: serviceInfo.service_type || '',
+            weddingPriceMin: serviceInfo.wedding_price_min || 0,
+            weddingPriceMax: serviceInfo.wedding_price_max || 0,
+            corporatePriceMin: serviceInfo.corporate_price_min || 0,
+            corporatePriceMax: serviceInfo.corporate_price_max || 0,
+            birthdayPriceMin: serviceInfo.birthday_price_min || 0,
+            birthdayPriceMax: serviceInfo.birthday_price_max || 0,
+            festivalPriceMin: serviceInfo.festival_price_min || 0,
+            festivalPriceMax: serviceInfo.festival_price_max || 0,
+            basicPackagePrice: serviceInfo.basic_package_price || 0,
+            standardPackagePrice: serviceInfo.standard_package_price || 0,
+            premiumPackagePrice: serviceInfo.premium_package_price || 0,
+            advancePaymentPercentage: serviceInfo.advance_payment_percentage || 0,
+            cancellationPolicy: serviceInfo.cancellation_policy || '',
+          }
+        : null,
+      stats: {
+        totalOrders,
+        pendingOrders,
+        completedOrders,
+        totalRevenue,
+        averageRating: Math.round(averageRating * 10) / 10,
+        totalReviews: reviews?.length || 0,
+         activeCards: (cards || []).filter((c: any) => c.is_active).length || 0
       },
-      user: {
-        id: userData.id,
-        fullName: userData.full_name,
-        email: userData.email,
-        phone: userData.phone,
-        createdAt: userData.created_at
-      },
-      service: serviceData && !serviceError ? {
-        id: serviceData.id,
-        categoryId: serviceData.category_id,
-        categoryName: categoryName,
-        serviceType: serviceData.service_type,
-        weddingPriceMin: serviceData.wedding_price_min,
-        weddingPriceMax: serviceData.wedding_price_max,
-        corporatePriceMin: serviceData.corporate_price_min,
-        corporatePriceMax: serviceData.corporate_price_max,
-        birthdayPriceMin: serviceData.birthday_price_min,
-        birthdayPriceMax: serviceData.birthday_price_max,
-        festivalPriceMin: serviceData.festival_price_min,
-        festivalPriceMax: serviceData.festival_price_max,
-        basicPackagePrice: serviceData.basic_package_price,
-        standardPackagePrice: serviceData.standard_package_price,
-        premiumPackagePrice: serviceData.premium_package_price,
-        advancePaymentPercentage: serviceData.advance_payment_percentage,
-        cancellationPolicy: serviceData.cancellation_policy
-      } : null
+      recentOrders: orders?.slice(0, 5) || [],
+      recentReviews: reviews?.slice(0, 3) || []
     })
-
   } catch (error) {
-    console.error('Vendor dashboard data fetch error:', error)
+    console.error('Dashboard API error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch dashboard data' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

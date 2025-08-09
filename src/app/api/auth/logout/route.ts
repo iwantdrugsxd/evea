@@ -18,11 +18,20 @@ export async function POST(request: NextRequest) {
       maxAge: 0 // Expire immediately
     })
 
-    response.cookies.set('vendorToken', '', {
+    // Current cookie name used in vendor auth
+    response.cookies.set('vendor-token', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 0 // Expire immediately
+    })
+
+    // Backward compatibility: also clear legacy cookie name if present
+    response.cookies.set('vendorToken', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 0
     })
 
     console.log('--- Logout Success ---')

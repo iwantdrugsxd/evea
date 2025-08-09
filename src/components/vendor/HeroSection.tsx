@@ -176,6 +176,16 @@ export default function VendorHeroSection() {
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
+              <Link href="/vendor/login">
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-lg px-8 py-4"
+                >
+                  Vendor Login
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </Link>
               
               <motion.button
                 whileHover={{ scale: 1.05 }}

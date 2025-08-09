@@ -11,7 +11,7 @@ export default function VendorRegistrationSuccess() {
     const timer = setInterval(() => {
       setRedirectCountdown(prev => {
         if (prev <= 1) {
-          window.location.href = '/'
+          window.location.href = '/vendor/login'
           return 0
         }
         return prev - 1
@@ -156,9 +156,9 @@ export default function VendorRegistrationSuccess() {
               </div>
               <div className="flex space-x-4">
                 <button onClick={() => (window.location.href = '/vendor/onboarding')} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-200 text-sm font-medium">Back to Registration</button>
-                <button onClick={() => (window.location.href = '/')} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2 text-sm font-medium">
+                <button onClick={() => (window.location.href = '/vendor/login')} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2 text-sm font-medium">
                   <Home className="w-4 h-4" />
-                  <span>Go to Homepage</span>
+                  <span>Go to Vendor Login</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

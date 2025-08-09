@@ -25,7 +25,8 @@ const authRoutes = ['/login', '/register']
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-  const token = request.cookies.get('token')?.value
+  // Accept both general token and vendor-specific cookie
+  const token = request.cookies.get('token')?.value || request.cookies.get('vendor-token')?.value || request.cookies.get('vendorToken')?.value
 
   // Handle vendor email verification (allow without authentication)
   if (pathname === '/vendor/verify-email' || pathname === '/api/vendor/verify-email') {
@@ -50,7 +51,7 @@ export async function middleware(request: NextRequest) {
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!token) {
       // Store the attempted URL to redirect after login
-      const loginUrl = new URL('/login', request.url)
+      const loginUrl = new URL(pathname.startsWith('/vendor/') ? '/vendor/login' : '/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
@@ -73,8 +74,10 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
       console.error('Token verification failed:', error)
       // Clear invalid token
-      const response = NextResponse.redirect(new URL('/login', request.url))
+       const response = NextResponse.redirect(new URL(pathname.startsWith('/vendor/') ? '/vendor/login' : '/login', request.url))
       response.cookies.delete('token')
+       response.cookies.delete('vendor-token')
+       response.cookies.delete('vendorToken')
       return response
     }
   }
@@ -90,6 +93,8 @@ export async function middleware(request: NextRequest) {
         // Invalid token, allow access to auth routes
         const response = NextResponse.next()
         response.cookies.delete('token')
+        response.cookies.delete('vendor-token')
+        response.cookies.delete('vendorToken')
         return response
       }
     }

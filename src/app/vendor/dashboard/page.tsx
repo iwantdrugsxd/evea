@@ -16,10 +16,11 @@ import {
   Star,
   Settings,
   LogOut,
-  XCircle
+  XCircle,
+  ShoppingBag,
+  Eye,
+  BarChart3
 } from 'lucide-react'
-import Header from '@/components/layout/header'
-import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 
@@ -70,6 +71,11 @@ export default function VendorDashboardPage() {
   const [serviceData, setServiceData] = useState<ServiceData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [stats, setStats] = useState<any | null>(null)
+  const [recentOrders, setRecentOrders] = useState<any[]>([])
+  const [recentReviews, setRecentReviews] = useState<any[]>([])
+  const [monthlyTrends, setMonthlyTrends] = useState<any[]>([])
+  const maxRevenue = Math.max(1, ...monthlyTrends.map((m: any) => m?.revenue || 0))
 
   useEffect(() => {
     fetchVendorData()
@@ -80,15 +86,35 @@ export default function VendorDashboardPage() {
       setIsLoading(true)
       setError(null)
 
-      const response = await fetch('/api/vendor/dashboard')
-      const data = await response.json()
+      const [dashRes, analyticsRes] = await Promise.all([
+        fetch('/api/vendor/dashboard'),
+        fetch('/api/vendor/analytics?period=6months')
+      ])
 
-      if (response.ok && data.success) {
-        setVendorData(data.vendor)
-        setUserData(data.user)
-        setServiceData(data.service)
+      const dashData = await dashRes.json()
+      const analyticsData = await analyticsRes.json()
+
+      if (dashRes.ok && dashData.success) {
+        if (dashData.vendor) setVendorData(dashData.vendor)
+        if (dashData.user) setUserData(dashData.user)
+        if (dashData.service) setServiceData(dashData.service)
+        if (dashData.stats) setStats(dashData.stats)
+        setRecentOrders(dashData.recentOrders || [])
+        setRecentReviews(dashData.recentReviews || [])
       } else {
-        setError(data.error || 'Failed to load vendor data')
+        setError(dashData.error || 'Failed to load vendor data')
+      }
+
+      if (analyticsRes.ok) {
+        setMonthlyTrends(analyticsData.monthlyTrends || [])
+        // Prefer analytics totals for richer cards if available
+        setStats((prev: any) => ({
+          ...(prev || {}),
+          totalRevenue: analyticsData.totalRevenue ?? prev?.totalRevenue ?? 0,
+          totalOrders: analyticsData.totalOrders ?? prev?.totalOrders ?? 0,
+          averageRating: analyticsData.averageRating ?? prev?.averageRating ?? 0,
+          totalViews: analyticsData.totalViews ?? 0
+        }))
       }
     } catch (error) {
       console.error('Error fetching vendor data:', error)
@@ -114,63 +140,43 @@ export default function VendorDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-        <Header />
-        <main className="section-padding">
-          <div className="container-custom">
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading your dashboard...</p>
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-        <Header />
-        <main className="section-padding">
-          <div className="container-custom">
-            <div className="max-w-md mx-auto text-center">
-              <Card className="card-elegant">
-                <CardContent className="p-6">
-                  <div className="text-red-600 mb-4">
-                    <XCircle className="h-12 w-12 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Error Loading Dashboard
-                  </h3>
-                  <p className="text-gray-600 mb-4">{error}</p>
-                  <Button
-                    onClick={fetchVendorData}
-                    variant="primary"
-                    size="sm"
-                  >
-                    Try Again
-                  </Button>
-                </CardContent>
-              </Card>
+      <div className="max-w-md mx-auto text-center">
+        <Card className="card-elegant">
+          <CardContent className="p-6">
+            <div className="text-red-600 mb-4">
+              <XCircle className="h-12 w-12 mx-auto" />
             </div>
-          </div>
-        </main>
-        <Footer />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Error Loading Dashboard
+            </h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={fetchVendorData} variant="primary" size="sm">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <Header />
-      
-      <main className="section-padding">
-        <div className="container-custom">
-          <div className="max-w-6xl mx-auto">
+      <main className="py-6">
+        <div className="w-full px-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
+            <div className="lg:col-span-12">
+              <div className="max-w-none">
             {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -181,7 +187,7 @@ export default function VendorDashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-2 font-heading">
-                    Welcome back, {userData?.fullName}!
+                    Welcome back, {userData?.fullName || 'Vendor'}!
                   </h1>
                   <p className="text-gray-600">
                     Manage your business profile and services
@@ -208,7 +214,63 @@ export default function VendorDashboardPage() {
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <Card className="card-elegant">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Earnings</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">₹{(stats?.totalRevenue || 0).toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-green-100">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="card-elegant">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Orders</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.totalOrders || 0}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-blue-100">
+                      <ShoppingBag className="h-5 w-5 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="card-elegant">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Average Rating</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.averageRating || 0}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-yellow-100">
+                      <Star className="h-5 w-5 text-yellow-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="card-elegant">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Profile Views</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{(stats?.totalViews || 0).toLocaleString()}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-purple-100">
+                      <Eye className="h-5 w-5 text-purple-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
               {/* Business Profile */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -293,6 +355,36 @@ export default function VendorDashboardPage() {
                         </div>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Orders */}
+                <Card className="card-elegant mt-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <ShoppingBag className="h-5 w-5 mr-2 text-red-600" />
+                      Recent Orders
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {recentOrders.length === 0 ? (
+                      <p className="text-gray-600">No recent orders.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {recentOrders.map((o: any, idx: number) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900">Order #{o.id || o.orderNumber || '—'}</p>
+                              <p className="text-sm text-gray-600">{new Date(o.created_at || Date.now()).toLocaleString()}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-600 capitalize">{o.status || 'pending'}</p>
+                              <p className="text-sm font-medium">₹{(o.total || o.amount || 0).toLocaleString('en-IN')}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -384,6 +476,29 @@ export default function VendorDashboardPage() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Revenue Trend */}
+                <Card className="card-elegant mt-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <BarChart3 className="h-5 w-5 mr-2 text-red-600" />
+                      Revenue Trend (6 months)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-48 flex items-end justify-between space-x-2">
+                      {monthlyTrends.map((m: any, i: number) => (
+                        <div key={i} className="flex-1 flex flex-col items-center">
+                          <div
+                            className="w-full bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-md"
+                            style={{ height: `${Math.max(20, Math.min(200, ((m?.revenue || 0) / maxRevenue) * 200))}px` }}
+                          />
+                          <p className="text-xs text-gray-600 mt-2">{m.month}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             </div>
 
@@ -392,7 +507,7 @@ export default function VendorDashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-8"
+              className="mt-6"
             >
               <Card className="card-elegant">
                 <CardHeader>
@@ -428,11 +543,11 @@ export default function VendorDashboardPage() {
                 </CardContent>
               </Card>
             </motion.div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

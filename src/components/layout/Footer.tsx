@@ -35,7 +35,7 @@ const Footer = () => {
     <footer className="bg-gray-900 text-white">
       {/* Newsletter Section */}
       <div className="bg-gray-800 border-b border-gray-700">
-        <div className="container-custom py-12">
+        <div className="w-full px-0 py-12">
           <div className="text-center max-w-2xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -73,7 +73,7 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="container-custom section-padding">
+      <div className="w-full px-0 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-2">
@@ -247,7 +247,7 @@ const Footer = () => {
 
       {/* Bottom Footer */}
       <div className="border-t border-gray-800 bg-gray-950">
-        <div className="container-custom py-6">
+        <div className="w-full px-0 py-6">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-gray-400">
               <p className="flex items-center font-medium">
