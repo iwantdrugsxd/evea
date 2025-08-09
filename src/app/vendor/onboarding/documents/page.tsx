@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Script from 'next/script'
 import { ArrowLeft, ArrowRight, CheckCircle, Upload, FileText, CreditCard, Landmark } from 'lucide-react'
 
 type UploadItem = {
@@ -26,6 +27,8 @@ export default function DocumentsPage() {
   const [files, setFiles] = useState<Record<string, File | null>>({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [googleReady, setGoogleReady] = useState(false)
+  const [accessToken, setAccessToken] = useState('')
 
   useEffect(() => {
     if (!vendorId) {
@@ -33,12 +36,45 @@ export default function DocumentsPage() {
     }
   }, [vendorId])
 
+  // Mark Google Identity Services ready when script loads
+  const onGisLoad = () => setGoogleReady(true)
+
+  const requestDriveToken = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      try {
+        // @ts-ignore
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
+          scope: 'https://www.googleapis.com/auth/drive.file',
+          prompt: 'consent',
+          callback: (resp: any) => {
+            if (resp && resp.access_token) {
+              resolve(resp.access_token)
+            } else {
+              reject(new Error('Failed to obtain Google access token'))
+            }
+          }
+        })
+        tokenClient.requestAccessToken({ prompt: 'consent' })
+      } catch (e) {
+        reject(e as Error)
+      }
+    })
+  }
+
   const onFileChange = (key: string, file: File | null) => {
     setFiles(prev => ({ ...prev, [key]: file }))
   }
 
   const uploadAll = async () => {
     if (!vendorId) return { ok: true }
+    let token = accessToken
+    if (!token) {
+      if (!googleReady) return { ok: false, error: 'Google not initialized yet. Please wait and try again.' }
+      token = await requestDriveToken().catch(() => '')
+      if (!token) return { ok: false, error: 'Google authorization was cancelled or failed.' }
+      setAccessToken(token)
+    }
     const formData = new FormData()
     formData.append('vendorId', vendorId)
     Object.entries(files).forEach(([key, file]) => {
@@ -47,7 +83,12 @@ export default function DocumentsPage() {
         formData.append('documentTypes', key)
       }
     })
-    const res = await fetch('/api/vendor/upload-documents', { method: 'POST', body: formData })
+    formData.append('googleAccessToken', token)
+    const res = await fetch('/api/vendor/upload-documents', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
     if (!res.ok) return { ok: false, error: 'Upload failed' }
     return { ok: true }
   }
@@ -72,6 +113,7 @@ export default function DocumentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onLoad={onGisLoad} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between">
@@ -89,6 +131,26 @@ export default function DocumentsPage() {
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+            <div className="flex items-center justify-between p-3 rounded-md bg-blue-50 border border-blue-100">
+              <div className="text-sm text-blue-800">
+                Connect Google Drive to store your documents securely (scope: drive.file)
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  setError('')
+                  try {
+                    const token = await requestDriveToken()
+                    setAccessToken(token)
+                  } catch (e: any) {
+                    setError(e?.message || 'Google authorization failed')
+                  }
+                }}
+                className="px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+              >
+                {accessToken ? 'Connected' : 'Connect Google Drive'}
+              </button>
+            </div>
             {uploadItems.map(item => (
               <div key={item.key} className="">
                 <label className="block text-sm font-medium text-gray-700 mb-2">{item.label}</label>
