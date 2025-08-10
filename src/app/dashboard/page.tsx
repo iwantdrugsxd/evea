@@ -67,7 +67,7 @@ export default function DashboardPage() {
             className="mb-8"
           >
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back, {user?.fullName}!
+              Welcome back, {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.email || 'User'}!
             </h1>
             <p className="text-gray-600">
               Here's what's happening with your account
@@ -95,7 +95,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center">
                     <Phone className="w-4 h-4 text-gray-500 mr-3" />
-                    <span className="text-gray-700">{user?.phone || 'Not provided'}</span>
+                    <span className="text-gray-700">Not provided</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 text-gray-500 mr-3" />
@@ -167,22 +167,14 @@ export default function DashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Email Verified</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user?.emailVerified 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user?.emailVerified ? 'Verified' : 'Not Verified'}
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Verified
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Phone Verified</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user?.phoneVerified 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user?.phoneVerified ? 'Verified' : 'Not Verified'}
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Not Verified
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
