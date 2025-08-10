@@ -18,7 +18,7 @@ import {
   Calendar,
   Zap
 } from 'lucide-react'
-import Header from '@/components/layout/header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import SectionHeader from '@/components/common/SectionHeader'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -105,7 +105,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-white">
       <Header />
       
-      <main>
+      <main className="pt-20 lg:pt-24">
         {/* Hero Section */}
         <section className="section-padding bg-gradient-to-br from-primary-50 to-white hero-pattern">
           <div className="container-custom">

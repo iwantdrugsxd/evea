@@ -15,7 +15,7 @@ import {
   Users,
   Shield
 } from 'lucide-react'
-import Header from '@/components/layout/header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
@@ -97,7 +97,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main>
+      <main className="pt-20 lg:pt-24">
         {/* Hero Section */}
         <section className="section-padding-sm bg-gradient-to-br from-primary-50 to-white">
           <div className="container-custom">

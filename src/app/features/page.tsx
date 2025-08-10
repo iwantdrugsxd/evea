@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Header from '@/components/layout/header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import FeaturesHeroSection from '@/components/features/HeroSection'
 import FeatureShowcaseSection from '@/components/features/FeatureShowcaseSection'
@@ -31,7 +31,7 @@ export default function FeaturesPage() {
       
       <Header />
       
-      <main className="relative z-10">
+      <main className="relative z-10 pt-20 lg:pt-24">
         <FeaturesHeroSection />
         <FeatureShowcaseSection />
         <InteractiveDemoSection />

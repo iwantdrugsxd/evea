@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Header from '@/components/layout/header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import VendorHeroSection from '@/components/vendor/HeroSection'
 import WhyJoinSection from '@/components/vendor/WhyJoinSection'
@@ -28,7 +28,7 @@ export default function VendorLandingPage() {
       
       <Header />
       
-      <main className="relative z-10">
+      <main className="relative z-10 pt-20 lg:pt-24">
         <VendorHeroSection />
         <WhyJoinSection />
         <HowItWorksSection />

@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     
     // Get token from cookie
     const token = request.cookies.get('auth-token')?.value || 
+                  // request.cookies.get('vendor-token')?.value ||
                   request.cookies.get('vendorToken')?.value
 
     if (!token) {

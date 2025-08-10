@@ -10,7 +10,7 @@ import {
   ArrowRight,
   Loader2
 } from 'lucide-react'
-import Header from '@/components/layout/header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
@@ -131,7 +131,7 @@ export default function VerifyEmailPage() {
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-20 lg:pt-24 pb-8">
         <div className="max-w-md mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

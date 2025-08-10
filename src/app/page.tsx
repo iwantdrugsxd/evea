@@ -1,7 +1,7 @@
 'use client'
 
 import { useIntersectionObserver } from '@/hooks/use-intersection'
-import Header from '@/components/layout/header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/landing/HeroSection'
 import FeaturesSection from '@/components/landing/FeaturesSection' 
@@ -18,7 +18,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
       <Header />
       
-      <main className="space-y-enterprise">
+      <main className="space-y-enterprise overflow-hidden">
         <HeroSection />
         <FeaturesSection />
         <ServicesSection />
