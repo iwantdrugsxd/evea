@@ -74,17 +74,23 @@ export async function POST(request: NextRequest) {
       category_id: formData.get('category') as string,
       base_price: parseFloat(formData.get('basePrice') as string),
       price_type: formData.get('priceType') as string,
-      service_area: JSON.parse(formData.get('serviceArea') as string),
+      event_type_pricing: formData.get('eventTypePricing') ? JSON.parse(formData.get('eventTypePricing') as string) : null,
+      service_area: formData.get('serviceArea') ? JSON.parse(formData.get('serviceArea') as string) : [],
       max_capacity: parseInt(formData.get('maxCapacity') as string),
       min_booking_time: parseInt(formData.get('minBookingTime') as string),
       max_booking_time: parseInt(formData.get('maxBookingTime') as string),
       advance_booking_days: parseInt(formData.get('advanceBookingDays') as string),
-      inclusions: JSON.parse(formData.get('inclusions') as string),
-      exclusions: JSON.parse(formData.get('exclusions') as string),
-      equipment_provided: JSON.parse(formData.get('equipmentProvided') as string),
+      inclusions: formData.get('inclusions') ? JSON.parse(formData.get('inclusions') as string) : [],
+      exclusions: formData.get('exclusions') ? JSON.parse(formData.get('exclusions') as string) : [],
+      equipment_provided: formData.get('equipmentProvided') ? JSON.parse(formData.get('equipmentProvided') as string) : [],
       cancellation_policy: formData.get('cancellationPolicy') as string,
+      refund_policy: formData.get('refundPolicy') as string,
+      working_days: formData.get('workingDays') ? JSON.parse(formData.get('workingDays') as string) : [],
+      working_hours: formData.get('workingHours') ? JSON.parse(formData.get('workingHours') as string) : null,
+      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [],
+      seo_description: formData.get('seoDescription') as string,
       is_active: true
-    }
+    } as any
 
     // Handle image uploads
     const images = formData.getAll('images') as File[]

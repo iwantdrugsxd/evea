@@ -1,7 +1,7 @@
 // src/app/(vendor)/cards/create/page.tsx
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -26,11 +26,16 @@ import {
   Image as ImageIcon,
   Tag,
   FileText,
-  Settings
+  Settings,
+  Loader2
 } from 'lucide-react'
-const toast = {
-  success: (msg: string) => typeof window !== 'undefined' && alert(msg),
-  error: (msg: string) => typeof window !== 'undefined' && alert(msg)
+import toast from 'react-hot-toast'
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  description?: string
 }
 
 interface ServiceCard {
@@ -39,17 +44,6 @@ interface ServiceCard {
   description: string
   category: string
   subcategory: string
-  
-  // Pricing
-  basePrice: number
-  priceType: 'fixed' | 'per_hour' | 'per_day' | 'per_person' | 'custom'
-  eventTypePricing: {
-    wedding: { min: number; max: number }
-    birthday: { min: number; max: number }
-    corporate: { min: number; max: number }
-    festival: { min: number; max: number }
-    other: { min: number; max: number }
-  }
   
   // Service Details
   serviceArea: string[]
@@ -67,10 +61,6 @@ interface ServiceCard {
   images: File[]
   videos: File[]
   
-  // Policies
-  cancellationPolicy: string
-  refundPolicy: string
-  
   // Availability
   workingDays: string[]
   workingHours: { start: string; end: string }
@@ -78,6 +68,10 @@ interface ServiceCard {
   // SEO
   tags: string[]
   seoDescription: string
+  
+  // Pricing (moved to end)
+  basePrice: number
+  priceType: 'fixed' | 'per_hour' | 'per_day' | 'per_person' | 'custom'
 }
 
 const initialCardData: ServiceCard = {
@@ -85,15 +79,6 @@ const initialCardData: ServiceCard = {
   description: '',
   category: '',
   subcategory: '',
-  basePrice: 0,
-  priceType: 'fixed',
-  eventTypePricing: {
-    wedding: { min: 0, max: 0 },
-    birthday: { min: 0, max: 0 },
-    corporate: { min: 0, max: 0 },
-    festival: { min: 0, max: 0 },
-    other: { min: 0, max: 0 }
-  },
   serviceArea: [],
   maxCapacity: 0,
   minBookingTime: 1,
@@ -104,24 +89,13 @@ const initialCardData: ServiceCard = {
   equipmentProvided: [],
   images: [],
   videos: [],
-  cancellationPolicy: '',
-  refundPolicy: '',
   workingDays: [],
   workingHours: { start: '09:00', end: '18:00' },
   tags: [],
-  seoDescription: ''
+  seoDescription: '',
+  basePrice: 0,
+  priceType: 'fixed'
 }
-
-const categories = [
-  { value: 'photography', label: 'Photography & Videography' },
-  { value: 'catering', label: 'Catering Services' },
-  { value: 'decoration', label: 'Decoration & Design' },
-  { value: 'music', label: 'Music & Entertainment' },
-  { value: 'venue', label: 'Venue & Locations' },
-  { value: 'transportation', label: 'Transportation' },
-  { value: 'planning', label: 'Event Planning' },
-  { value: 'beauty', label: 'Beauty & Wellness' }
-]
 
 const priceTypes = [
   { value: 'fixed', label: 'Fixed Price' },
@@ -131,21 +105,12 @@ const priceTypes = [
   { value: 'custom', label: 'Custom Pricing' }
 ]
 
-const eventTypes = [
-  { key: 'wedding', label: 'Wedding', color: 'bg-pink-100 text-pink-800' },
-  { key: 'birthday', label: 'Birthday Party', color: 'bg-blue-100 text-blue-800' },
-  { key: 'corporate', label: 'Corporate Event', color: 'bg-gray-100 text-gray-800' },
-  { key: 'festival', label: 'Festival', color: 'bg-yellow-100 text-yellow-800' },
-  { key: 'other', label: 'Other Events', color: 'bg-green-100 text-green-800' }
-]
-
+// Reduced to 4 steps
 const steps = [
   { id: 1, title: 'Basic Info', icon: FileText },
-  { id: 2, title: 'Pricing', icon: DollarSign },
-  { id: 3, title: 'Service Details', icon: Settings },
-  { id: 4, title: 'Media & Images', icon: ImageIcon },
-  { id: 5, title: 'Policies', icon: Tag },
-  { id: 6, title: 'Preview', icon: Eye }
+  { id: 2, title: 'Service Details', icon: Settings },
+  { id: 3, title: 'Media & Images', icon: ImageIcon },
+  { id: 4, title: 'Pricing & Preview', icon: DollarSign }
 ]
 
 export default function CreateCardPage() {
@@ -153,8 +118,32 @@ export default function CreateCardPage() {
   const [cardData, setCardData] = useState<ServiceCard>(initialCardData)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (response.ok) {
+        const data = await response.json()
+        setCategories(data.categories || [])
+      } else {
+        console.error('Failed to fetch categories')
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    } finally {
+      setIsLoadingCategories(false)
+    }
+  }
 
   const updateCardData = (field: keyof ServiceCard, value: any) => {
     setCardData(prev => ({ ...prev, [field]: value }))
@@ -179,9 +168,34 @@ export default function CreateCardPage() {
 
   const handleImageUpload = (files: FileList | null) => {
     if (files) {
-      const newImages = Array.from(files).filter(file => file.type.startsWith('image/'))
+      const newImages = Array.from(files).filter(file => {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast.error('Please select only image files')
+          return false
+        }
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error('Image size should be less than 10MB')
+          return false
+        }
+        return true
+      })
+
+      // Create preview URLs for new images
+      const newPreviewUrls = newImages.map(file => URL.createObjectURL(file))
+      setImagePreviewUrls(prev => [...prev, ...newPreviewUrls])
+      
       updateCardData('images', [...cardData.images, ...newImages])
     }
+  }
+
+  const removeImage = (index: number) => {
+    const newImages = cardData.images.filter((_, i) => i !== index)
+    const newPreviewUrls = imagePreviewUrls.filter((_, i) => i !== index)
+    
+    updateCardData('images', newImages)
+    setImagePreviewUrls(newPreviewUrls)
   }
 
   const validateStep = (step: number): boolean => {
@@ -189,16 +203,22 @@ export default function CreateCardPage() {
     
     switch (step) {
       case 1:
-        if (!cardData.title) newErrors.title = 'Title is required'
-        if (!cardData.description) newErrors.description = 'Description is required'
+        if (!cardData.title.trim()) newErrors.title = 'Title is required'
+        if (!cardData.description.trim()) newErrors.description = 'Description is required'
         if (!cardData.category) newErrors.category = 'Category is required'
+        if (cardData.title.length > 100) newErrors.title = 'Title must be less than 100 characters'
+        if (cardData.description.length < 50) newErrors.description = 'Description must be at least 50 characters'
         break
       case 2:
-        if (!cardData.basePrice) newErrors.basePrice = 'Base price is required'
+        if (cardData.serviceArea.length === 0) newErrors.serviceArea = 'At least one service area is required'
+        if (!cardData.maxCapacity || cardData.maxCapacity <= 0) newErrors.maxCapacity = 'Maximum capacity must be greater than 0'
+        if (cardData.minBookingTime > cardData.maxBookingTime) newErrors.minBookingTime = 'Min booking time cannot be greater than max booking time'
         break
       case 3:
-        if (cardData.serviceArea.length === 0) newErrors.serviceArea = 'At least one service area is required'
-        if (!cardData.maxCapacity) newErrors.maxCapacity = 'Maximum capacity is required'
+        if (cardData.images.length === 0) newErrors.images = 'At least one image is required'
+        break
+      case 4:
+        if (!cardData.basePrice || cardData.basePrice <= 0) newErrors.basePrice = 'Base price must be greater than 0'
         break
     }
     
@@ -239,13 +259,41 @@ export default function CreateCardPage() {
       })
       
       if (response.ok) {
+        const result = await response.json()
         toast.success('Service card created successfully!')
         router.push('/vendor/cards')
       } else {
-        toast.error('Failed to create service card')
+        const errorData = await response.json()
+        toast.error(errorData.message || 'Failed to create service card')
       }
     } catch (error) {
-      toast.error('Something went wrong')
+      console.error('Submit error:', error)
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const saveDraft = async () => {
+    setIsLoading(true)
+    try {
+      const draftData = { ...cardData, status: 'draft' }
+      const formData = new FormData()
+      Object.entries(draftData).forEach(([key, value]) => {
+        if (key === 'images' || key === 'videos') {
+          (value as File[]).forEach(file => formData.append(key, file))
+        } else if (typeof value === 'object') {
+          formData.append(key, JSON.stringify(value))
+        } else {
+          formData.append(key, String(value))
+        }
+      })
+      
+      // For draft, we'll just save to localStorage for now
+      localStorage.setItem('vendorCardDraft', JSON.stringify(draftData))
+      toast.success('Draft saved successfully!')
+    } catch (error) {
+      toast.error('Failed to save draft')
     } finally {
       setIsLoading(false)
     }
@@ -266,25 +314,53 @@ export default function CreateCardPage() {
                 onChange={(e) => updateCardData('title', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="e.g., Professional Wedding Photography"
+                maxLength={100}
               />
-              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+              <div className="flex justify-between items-center mt-1">
+                {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+                <span className="text-xs text-gray-500 ml-auto">
+                  {cardData.title.length}/100
+                </span>
+              </div>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                value={cardData.category}
-                onChange={(e) => updateCardData('category', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value="">Select a category</option>
-                {categories.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
-              {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                {isLoadingCategories ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-gray-500">Loading categories...</span>
+                  </div>
+                ) : (
+                  <select
+                    value={cardData.category}
+                    onChange={(e) => updateCardData('category', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                )}
+                {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Subcategory
+                </label>
+                <input
+                  type="text"
+                  value={cardData.subcategory}
+                  onChange={(e) => updateCardData('subcategory', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="e.g., Photography, Decoration, Catering"
+                />
+              </div>
             </div>
             
             <div>
@@ -297,8 +373,14 @@ export default function CreateCardPage() {
                 rows={6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Describe your service in detail. Include what makes you unique, your experience, and what customers can expect..."
+                minLength={50}
               />
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+              <div className="flex justify-between items-center mt-1">
+                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+                <span className="text-xs text-gray-500 ml-auto">
+                  {cardData.description.length}/500
+                </span>
+              </div>
             </div>
             
             <div>
@@ -311,7 +393,13 @@ export default function CreateCardPage() {
                 rows={3}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="A brief description for search engines (150-160 characters)"
+                maxLength={160}
               />
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-xs text-gray-500 ml-auto">
+                  {cardData.seoDescription.length}/160
+                </span>
+              </div>
             </div>
           </div>
         )
@@ -319,92 +407,9 @@ export default function CreateCardPage() {
       case 2:
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Base Price (₹) *
-                </label>
-                <input
-                  type="number"
-                  value={cardData.basePrice}
-                  onChange={(e) => updateCardData('basePrice', Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="10000"
-                />
-                {errors.basePrice && <p className="text-red-500 text-sm mt-1">{errors.basePrice}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pricing Type
-                </label>
-                <select
-                  value={cardData.priceType}
-                  onChange={(e) => updateCardData('priceType', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  {priceTypes.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Type Pricing</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {eventTypes.map(eventType => (
-                  <div key={eventType.key} className="border border-gray-200 rounded-lg p-4">
-                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-3 ${eventType.color}`}>
-                      {eventType.label}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Min Price</label>
-                        <input
-                          type="number"
-                          value={cardData.eventTypePricing[eventType.key as keyof typeof cardData.eventTypePricing].min}
-                          onChange={(e) => updateCardData('eventTypePricing', {
-                            ...cardData.eventTypePricing,
-                            [eventType.key]: {
-                              ...cardData.eventTypePricing[eventType.key as keyof typeof cardData.eventTypePricing],
-                              min: Number(e.target.value)
-                            }
-                          })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                          placeholder="5000"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Max Price</label>
-                        <input
-                          type="number"
-                          value={cardData.eventTypePricing[eventType.key as keyof typeof cardData.eventTypePricing].max}
-                          onChange={(e) => updateCardData('eventTypePricing', {
-                            ...cardData.eventTypePricing,
-                            [eventType.key]: {
-                              ...cardData.eventTypePricing[eventType.key as keyof typeof cardData.eventTypePricing],
-                              max: Number(e.target.value)
-                            }
-                          })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                          placeholder="50000"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-        
-      case 3:
-        return (
-          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Areas *
+                Service Areas * (Type or select from suggestions)
               </label>
               <div className="flex space-x-2 mb-2">
                 <input
@@ -451,7 +456,7 @@ export default function CreateCardPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Maximum Capacity *
+                  Maximum Capacity * (Type or use arrows)
                 </label>
                 <input
                   type="number"
@@ -459,6 +464,7 @@ export default function CreateCardPage() {
                   onChange={(e) => updateCardData('maxCapacity', Number(e.target.value))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="100"
+                  min="1"
                 />
                 {errors.maxCapacity && <p className="text-red-500 text-sm mt-1">{errors.maxCapacity}</p>}
               </div>
@@ -473,7 +479,9 @@ export default function CreateCardPage() {
                   onChange={(e) => updateCardData('minBookingTime', Number(e.target.value))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="1"
+                  min="1"
                 />
+                {errors.minBookingTime && <p className="text-red-500 text-sm mt-1">{errors.minBookingTime}</p>}
               </div>
               
               <div>
@@ -486,13 +494,14 @@ export default function CreateCardPage() {
                   onChange={(e) => updateCardData('advanceBookingDays', Number(e.target.value))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="7"
+                  min="1"
                 />
               </div>
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                What's Included
+                What's Included (Type or select from suggestions)
               </label>
               <div className="flex space-x-2 mb-2">
                 <input
@@ -540,7 +549,7 @@ export default function CreateCardPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                What's Not Included
+                What's Not Included (Type or select from suggestions)
               </label>
               <div className="flex space-x-2 mb-2">
                 <input
@@ -571,7 +580,7 @@ export default function CreateCardPage() {
                 {cardData.exclusions.map((exclusion, index) => (
                   <div key={index} className="flex items-center justify-between bg-red-50 px-4 py-2 rounded-lg">
                     <span className="text-red-800 flex items-center">
-                      <X className="h-4 w-4 mr-2" />
+                      <X className="h-4 w-4" />
                       {exclusion}
                     </span>
                     <button
@@ -585,23 +594,79 @@ export default function CreateCardPage() {
                 ))}
               </div>
             </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Working Days (Select or type custom)
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                  <label key={day} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={cardData.workingDays.includes(day)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          updateCardData('workingDays', [...cardData.workingDays, day])
+                        } else {
+                          updateCardData('workingDays', cardData.workingDays.filter(d => d !== day))
+                        }
+                      }}
+                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    />
+                    <span className="text-sm">{day}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Working Hours Start
+                  </label>
+                  <input
+                    type="time"
+                    value={cardData.workingHours.start}
+                    onChange={(e) => updateCardData('workingHours', {
+                      ...cardData.workingHours,
+                      start: e.target.value
+                    })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Working Hours End
+                  </label>
+                  <input
+                    type="time"
+                    value={cardData.workingHours.end}
+                    onChange={(e) => updateCardData('workingHours', {
+                      ...cardData.workingHours,
+                      end: e.target.value
+                    })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         )
         
-      case 4:
+      case 3:
         return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Images
+                Service Images * (Upload or drag & drop)
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 cursor-pointer transition-colors m-[100px]"
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 cursor-pointer transition-colors"
               >
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-2">Click to upload images or drag and drop</p>
                 <p className="text-sm text-gray-500">PNG, JPG, GIF up to 10MB each</p>
+                <p className="text-sm text-purple-600 mt-2">At least one image is required</p>
               </div>
               <input
                 ref={fileInputRef}
@@ -613,20 +678,17 @@ export default function CreateCardPage() {
               />
               
               {cardData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4 m-[100px]">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                   {cardData.images.map((image, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={URL.createObjectURL(image)}
+                        src={imagePreviewUrls[index] || URL.createObjectURL(image)}
                         alt={`Upload ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg"
                       />
                       <button
                         type="button"
-                        onClick={() => {
-                          const newImages = cardData.images.filter((_, i) => i !== index)
-                          updateCardData('images', newImages)
-                        }}
+                        onClick={() => removeImage(index)}
                         className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-4 w-4" />
@@ -635,11 +697,12 @@ export default function CreateCardPage() {
                   ))}
                 </div>
               )}
+              {errors.images && <p className="text-red-500 text-sm mt-1">{errors.images}</p>}
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags (for better search visibility)
+                Tags (Type or select from suggestions)
               </label>
               <div className="flex space-x-2 mb-2">
                 <input
@@ -684,102 +747,53 @@ export default function CreateCardPage() {
           </div>
         )
         
-      case 5:
+      case 4:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cancellation Policy
-              </label>
-              <textarea
-                value={cardData.cancellationPolicy}
-                onChange={(e) => updateCardData('cancellationPolicy', e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Describe your cancellation terms and conditions..."
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Refund Policy
-              </label>
-              <textarea
-                value={cardData.refundPolicy}
-                onChange={(e) => updateCardData('refundPolicy', e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Describe your refund terms and conditions..."
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Working Days
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                  <label key={day} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={cardData.workingDays.includes(day)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateCardData('workingDays', [...cardData.workingDays, day])
-                        } else {
-                          updateCardData('workingDays', cardData.workingDays.filter(d => d !== day))
-                        }
-                      }}
-                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <span className="text-sm">{day}</span>
+            {/* Pricing Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-purple-900 mb-4">Set Your Pricing</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-purple-700 mb-2">
+                    Starting Price (₹) *
                   </label>
-                ))}
+                  <input
+                    type="number"
+                    value={cardData.basePrice}
+                    onChange={(e) => updateCardData('basePrice', Number(e.target.value))}
+                    className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="10000"
+                    min="0"
+                    step="100"
+                  />
+                  {errors.basePrice && <p className="text-red-500 text-sm mt-1">{errors.basePrice}</p>}
+                  <p className="text-xs text-purple-600 mt-1">This will be displayed as "Starting from ₹X"</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-purple-700 mb-2">
+                    Pricing Type
+                  </label>
+                  <select
+                    value={cardData.priceType}
+                    onChange={(e) => updateCardData('priceType', e.target.value as any)}
+                    className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    {priceTypes.map(type => (
+                      <option key={type.value} value={type.value}>{type.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Working Hours Start
-                </label>
-                <input
-                  type="time"
-                  value={cardData.workingHours.start}
-                  onChange={(e) => updateCardData('workingHours', {
-                    ...cardData.workingHours,
-                    start: e.target.value
-                  })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Working Hours End
-                </label>
-                <input
-                  type="time"
-                  value={cardData.workingHours.end}
-                  onChange={(e) => updateCardData('workingHours', {
-                    ...cardData.workingHours,
-                    end: e.target.value
-                  })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-        )
-        
-      case 6:
-        return (
-          <div className="space-y-6">
             {/* Professional Card Preview */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-w-md mx-auto">
               <div className="relative">
                 {cardData.images.length > 0 ? (
                   <img
-                    src={URL.createObjectURL(cardData.images[0])}
+                    src={imagePreviewUrls[0] || URL.createObjectURL(cardData.images[0])}
                     alt={cardData.title}
                     className="w-full h-48 object-cover"
                   />
@@ -790,7 +804,7 @@ export default function CreateCardPage() {
                 )}
                 <div className="absolute top-4 right-4">
                   <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-900">
-                    {categories.find(c => c.value === cardData.category)?.label}
+                    {categories.find(c => c.id === cardData.category)?.name || 'Category'}
                   </span>
                 </div>
               </div>
@@ -809,7 +823,7 @@ export default function CreateCardPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-purple-600">
-                      ₹{cardData.basePrice.toLocaleString('en-IN')}
+                      Starting from ₹{cardData.basePrice.toLocaleString('en-IN')}
                     </p>
                     <p className="text-xs text-gray-500">{cardData.priceType.replace('_', ' ')}</p>
                   </div>
@@ -947,8 +961,16 @@ export default function CreateCardPage() {
         </button>
         
         <div className="flex space-x-4">
-          <button className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 flex items-center">
-            <Save className="h-4 w-4 mr-2" />
+          <button 
+            onClick={saveDraft}
+            disabled={isLoading}
+            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 flex items-center"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
             Save Draft
           </button>
           
