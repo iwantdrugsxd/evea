@@ -1,0 +1,690 @@
+{
+  "info": {
+    "name": "Evea Event Planning System Tests",
+    "description": "Comprehensive testing collection for the Evea event planning system including form interactions, API endpoints, and recommendation engine testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3003"
+    },
+    {
+      "key": "VENDOR_ID",
+      "value": ""
+    },
+    {
+      "key": "EVENT_ID",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Vendor Recommendations API",
+      "item": [
+        {
+          "name": "1.1 Wedding Event - High Budget",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?eventType=Wedding&eventDate=2024-12-25&guestCount=200&budget=500000&location=Mumbai&rating=4.5&priceRange=50000-200000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "eventType",
+                  "value": "Wedding"
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2024-12-25"
+                },
+                {
+                  "key": "guestCount",
+                  "value": "200"
+                },
+                {
+                  "key": "budget",
+                  "value": "500000"
+                },
+                {
+                  "key": "location",
+                  "value": "Mumbai"
+                },
+                {
+                  "key": "rating",
+                  "value": "4.5"
+                },
+                {
+                  "key": "priceRange",
+                  "value": "50000-200000"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has vendors array\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('vendors');",
+                  "    pm.expect(response.vendors).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 2000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test(\"Vendors have required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.vendors.length > 0) {",
+                  "        const vendor = response.vendors[0];",
+                  "        pm.expect(vendor).to.have.property('id');",
+                  "        pm.expect(vendor).to.have.property('title');",
+                  "        pm.expect(vendor).to.have.property('base_price');",
+                  "        pm.expect(vendor).to.have.property('average_rating');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.2 Corporate Event - Medium Budget",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?eventType=Corporate Event&eventDate=2024-11-15&guestCount=50&budget=200000&services=venue-location,catering-food&rating=4.0&priceRange=20000-100000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "eventType",
+                  "value": "Corporate Event"
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2024-11-15"
+                },
+                {
+                  "key": "guestCount",
+                  "value": "50"
+                },
+                {
+                  "key": "budget",
+                  "value": "200000"
+                },
+                {
+                  "key": "services",
+                  "value": "venue-location,catering-food"
+                },
+                {
+                  "key": "rating",
+                  "value": "4.0"
+                },
+                {
+                  "key": "priceRange",
+                  "value": "20000-100000"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.3 Birthday Party - Low Budget",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?eventType=Birthday Party&eventDate=2024-10-20&guestCount=30&budget=50000&location=Delhi&rating=3.5&priceRange=5000-30000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "eventType",
+                  "value": "Birthday Party"
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2024-10-20"
+                },
+                {
+                  "key": "guestCount",
+                  "value": "30"
+                },
+                {
+                  "key": "budget",
+                  "value": "50000"
+                },
+                {
+                  "key": "location",
+                  "value": "Delhi"
+                },
+                {
+                  "key": "rating",
+                  "value": "3.5"
+                },
+                {
+                  "key": "priceRange",
+                  "value": "5000-30000"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.4 All Vendors - No Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Vendor Profile API",
+      "item": [
+        {
+          "name": "2.1 Get Vendor Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors/{{VENDOR_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors", "{{VENDOR_ID}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Vendor profile has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id');",
+                  "    pm.expect(response).to.have.property('business_name');",
+                  "    pm.expect(response).to.have.property('average_rating');",
+                  "    pm.expect(response).to.have.property('total_reviews');",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 2000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 Get Non-existent Vendor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors/non-existent-id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors", "non-existent-id"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message is present\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Recommendation Engine Tests",
+      "item": [
+        {
+          "name": "3.1 Budget-Based Filtering",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?budget=100000&priceRange=10000-80000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "budget",
+                  "value": "100000"
+                },
+                {
+                  "key": "priceRange",
+                  "value": "10000-80000"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Rating-Based Filtering",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?rating=4.5",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "rating",
+                  "value": "4.5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Location-Based Filtering",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?location=Mumbai",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "Mumbai"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 Capacity-Based Filtering",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?guestCount=500",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "guestCount",
+                  "value": "500"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Edge Cases Testing",
+      "item": [
+        {
+          "name": "4.1 No Matching Vendors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?eventType=Wedding&budget=10000&location=Remote Village",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "eventType",
+                  "value": "Wedding"
+                },
+                {
+                  "key": "budget",
+                  "value": "10000"
+                },
+                {
+                  "key": "location",
+                  "value": "Remote Village"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Invalid Parameters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?budget=invalid&rating=invalid",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "budget",
+                  "value": "invalid"
+                },
+                {
+                  "key": "rating",
+                  "value": "invalid"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Very High Budget",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?budget=10000000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "budget",
+                  "value": "10000000"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Performance Testing",
+      "item": [
+        {
+          "name": "5.1 Large Data Set Request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/vendors?eventType=Wedding&guestCount=1000&budget=1000000&rating=4.0&priceRange=10000-500000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "eventType",
+                  "value": "Wedding"
+                },
+                {
+                  "key": "guestCount",
+                  "value": "1000"
+                },
+                {
+                  "key": "budget",
+                  "value": "1000000"
+                },
+                {
+                  "key": "rating",
+                  "value": "4.0"
+                },
+                {
+                  "key": "priceRange",
+                  "value": "10000-500000"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is valid JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Form Data Testing",
+      "item": [
+        {
+          "name": "6.1 Event Planning Form Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventType\": \"Wedding\",\n  \"eventDate\": \"2024-12-25\",\n  \"eventTime\": \"18:00\",\n  \"eventLocation\": \"Mumbai, Maharashtra\",\n  \"guestCount\": 200,\n  \"budget\": 500000,\n  \"specialRequirements\": \"Vegetarian catering, accessibility needs\",\n  \"selectedServices\": [\n    {\n      \"categoryId\": \"venue-location\",\n      \"subcategoryId\": \"wedding-venues\",\n      \"required\": true\n    },\n    {\n      \"categoryId\": \"catering-food\",\n      \"subcategoryId\": \"wedding-catering\",\n      \"required\": true\n    },\n    {\n      \"categoryId\": \"photography-videography\",\n      \"subcategoryId\": \"wedding-photography\",\n      \"required\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/event-planning/validate",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "event-planning", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.2 Invalid Form Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventType\": \"\",\n  \"eventDate\": \"2023-01-01\",\n  \"guestCount\": 0,\n  \"budget\": -1000\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/event-planning/validate",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "event-planning", "validate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set dynamic values if not already set",
+          "if (!pm.environment.get('VENDOR_ID')) {",
+          "    pm.environment.set('VENDOR_ID', pm.variables.replaceIn('{{$guid}}'));",
+          "}",
+          "if (!pm.environment.get('EVENT_ID')) {",
+          "    pm.environment.set('EVENT_ID', pm.variables.replaceIn('{{$guid}}'));",
+          "}"
+        ]
+      }
+    }
+  ]
+}

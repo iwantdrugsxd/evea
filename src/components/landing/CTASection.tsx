@@ -101,6 +101,47 @@ const CTASection = () => {
             {cta.description}
           </motion.p>
 
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+          >
+            <Link href="/plan-event">
+              <Button
+                size="lg"
+                className="btn-primary btn-lg group relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center space-x-3">
+                  <Sparkles className="h-5 w-5" />
+                  <span>Start Planning Today</span>
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </Button>
+            </Link>
+            
+            <Button
+              variant="outline"
+              size="lg"
+              className="btn-outline btn-lg text-white border-white hover:bg-white hover:text-gray-900"
+            >
+              <Phone className="h-5 w-5 mr-2" />
+              Talk to Expert
+            </Button>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto"
+          >
+            {cta.description}
+          </motion.p>
+
           {/* Benefits Grid */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}

@@ -94,6 +94,7 @@ const Header = () => {
                       className="flex items-center space-x-1 text-gray-700 hover:text-red-600 transition-colors py-2"
                       onMouseEnter={() => setActiveDropdown(item.name)}
                       onMouseLeave={() => setActiveDropdown(null)}
+                      suppressHydrationWarning
                     >
                       <span className="font-medium">{item.name}</span>
                       <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180" />
@@ -149,9 +150,9 @@ const Header = () => {
             </Link>
 
             {/* Search Icon */}
-            <button className="p-2 text-gray-600 hover:text-red-600 transition-colors">
-              <Search className="h-5 w-5" />
-            </button>
+                            <button className="p-2 text-gray-600 hover:text-red-600 transition-colors" suppressHydrationWarning>
+                  <Search className="h-5 w-5" />
+                </button>
 
             {/* Authentication Section */}
             {!loading && (
@@ -174,7 +175,7 @@ const Header = () => {
                 ) : (
                   <div className="flex items-center space-x-4">
                     {/* Notifications */}
-                    <button className="relative p-2 text-gray-600 hover:text-red-600 transition-colors">
+                    <button className="relative p-2 text-gray-600 hover:text-red-600 transition-colors" suppressHydrationWarning>
                       <Bell className="h-5 w-5" />
                       <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                         3
@@ -332,6 +333,7 @@ const Header = () => {
           <button
             className="lg:hidden p-2 text-gray-600 hover:text-red-600 transition-colors"
             onClick={toggleMenu}
+            suppressHydrationWarning
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>

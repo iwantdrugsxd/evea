@@ -63,6 +63,7 @@ const Footer = () => {
                 type="email"
                 placeholder="Enter your email address"
                 className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                suppressHydrationWarning
               />
               <Button variant="primary" className="whitespace-nowrap">
                 Subscribe Now
@@ -238,6 +239,7 @@ const Footer = () => {
               onClick={scrollToTop}
               className="w-12 h-12 bg-primary-600 hover:bg-primary-700 rounded-lg flex items-center justify-center transition-all duration-200 group hover:scale-105"
               aria-label="Scroll to top"
+              suppressHydrationWarning
             >
               <ArrowUp className="h-5 w-5 text-white group-hover:-translate-y-0.5 transition-transform duration-200" />
             </button>
