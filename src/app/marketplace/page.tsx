@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useHydration } from '@/hooks/use-hydration'
+import { getCategoryImage } from '@/lib/utils/vendor-images'
+import FilterSidebar from '@/components/marketplace/FilterSidebar'
 import { 
   Search, 
   Filter, 
@@ -21,7 +23,18 @@ import {
   Clock,
   DollarSign,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ArrowLeft,
+  Grid3X3,
+  List,
+  SortAsc,
+  SortDesc,
+  Check,
+  Minus,
+  Plus,
+  FilterX,
+  Settings,
+  Zap
 } from 'lucide-react'
 
 interface VendorCard {
@@ -54,6 +67,7 @@ interface Category {
   slug: string
   icon: string
   vendor_count: number
+  subcategories?: string[]
 }
 
 interface FilterState {
@@ -64,7 +78,12 @@ interface FilterState {
   capacity: number
   featured: boolean
   verified: boolean
+  availability: string[]
+  services: string[]
 }
+
+type ViewMode = 'grid' | 'list'
+type SortBy = 'relevance' | 'rating' | 'price_low' | 'price_high' | 'name' | 'distance'
 
 export default function MarketplacePage() {
   const isHydrated = useHydration()
@@ -74,7 +93,11 @@ export default function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
-  const [displayCount, setDisplayCount] = useState(25)
+  const [displayCount, setDisplayCount] = useState(12)
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [sortBy, setSortBy] = useState<SortBy>('relevance')
+  const [showCategorySelection, setShowCategorySelection] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filters, setFilters] = useState<FilterState>({
     eventType: [],
     rating: 0,
@@ -82,7 +105,9 @@ export default function MarketplacePage() {
     location: '',
     capacity: 0,
     featured: false,
-    verified: false
+    verified: false,
+    availability: [],
+    services: []
   })
 
   const eventTypes = [
@@ -94,6 +119,20 @@ export default function MarketplacePage() {
     { id: 'anniversary', name: 'Anniversary', icon: '💝' },
     { id: 'graduation', name: 'Graduation', icon: '🎓' },
     { id: 'baby-shower', name: 'Baby Shower', icon: '👶' }
+  ]
+
+  const availabilityOptions = [
+    { id: 'weekdays', name: 'Weekdays' },
+    { id: 'weekends', name: 'Weekends' },
+    { id: 'evenings', name: 'Evenings' },
+    { id: 'mornings', name: 'Mornings' }
+  ]
+
+  const serviceOptions = [
+    { id: 'full-service', name: 'Full Service' },
+    { id: 'setup-only', name: 'Setup Only' },
+    { id: 'delivery', name: 'Delivery' },
+    { id: 'cleanup', name: 'Cleanup' }
   ]
 
   const fetchCategories = useCallback(async () => {
@@ -126,7 +165,6 @@ export default function MarketplacePage() {
       const response = await fetch(`/api/vendors?${params}`)
       if (response.ok) {
         const data = await response.json()
-        // Flatten the category-wise data for marketplace display
         const allVendors = Object.values(data.vendorsByCategory || {}).flatMap((category: any) => 
           category.vendors.map((vendor: any) => ({
             ...vendor,
@@ -147,13 +185,46 @@ export default function MarketplacePage() {
     fetchVendors()
   }, [fetchCategories, fetchVendors])
 
+  const handleCategorySelect = (categorySlug: string) => {
+    setSelectedCategory(categorySlug)
+    setShowCategorySelection(false)
+    setDisplayCount(12)
+  }
+
+  const handleBackToCategories = () => {
+    setSelectedCategory(null)
+    setShowCategorySelection(true)
+    setSearchTerm('')
+    setFilters({
+      eventType: [],
+      rating: 0,
+      priceRange: { min: 0, max: 100000 },
+      location: '',
+      capacity: 0,
+      featured: false,
+      verified: false,
+      availability: [],
+      services: []
+    })
+  }
+
   const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 25)
+    setDisplayCount(prev => prev + 12)
   }
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }))
-    setDisplayCount(25) // Reset display count when filters change
+    setDisplayCount(12)
+  }
+
+  const toggleArrayFilter = (key: keyof FilterState, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: Array.isArray(prev[key]) && (prev[key] as string[]).includes(value)
+        ? (prev[key] as string[]).filter(item => item !== value)
+        : [...(prev[key] as string[]), value]
+    }))
+    setDisplayCount(12)
   }
 
   const clearFilters = () => {
@@ -164,11 +235,11 @@ export default function MarketplacePage() {
       location: '',
       capacity: 0,
       featured: false,
-      verified: false
+      verified: false,
+      availability: [],
+      services: []
     })
-    setSelectedCategory(null)
-    setSearchTerm('')
-    setDisplayCount(25)
+    setDisplayCount(12)
   }
 
   const renderStars = (rating: number) => {
@@ -189,10 +260,31 @@ export default function MarketplacePage() {
     }).format(price)
   }
 
-  const displayedVendors = vendors.slice(0, displayCount)
+  const sortVendors = (vendors: VendorCard[]) => {
+    switch (sortBy) {
+      case 'rating':
+        return [...vendors].sort((a, b) => b.average_rating - a.average_rating)
+      case 'price_low':
+        return [...vendors].sort((a, b) => a.base_price - b.base_price)
+      case 'price_high':
+        return [...vendors].sort((a, b) => b.base_price - a.base_price)
+      case 'name':
+        return [...vendors].sort((a, b) => a.title.localeCompare(b.title))
+      default:
+        return vendors
+    }
+  }
+
+  const displayedVendors = sortVendors(vendors).slice(0, displayCount)
   const hasMore = displayedVendors.length < vendors.length
 
-  // Don't render until hydrated to prevent hydration mismatches
+  const activeFiltersCount = Object.values(filters).filter(value => {
+    if (Array.isArray(value)) return value.length > 0
+    if (typeof value === 'object') return value.min > 0 || value.max < 100000
+    if (typeof value === 'boolean') return value
+    return value > 0 && value !== ''
+  }).length
+
   if (!isHydrated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -200,8 +292,6 @@ export default function MarketplacePage() {
       </div>
     )
   }
-
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -229,13 +319,19 @@ export default function MarketplacePage() {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* Mobile Filter Button */}
               <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 suppressHydrationWarning
               >
-                <SlidersHorizontal className="h-4 w-4" />
+                <Filter className="h-4 w-4" />
                 <span>Filters</span>
+                {activeFiltersCount > 0 && (
+                  <span className="bg-primary-600 text-white text-xs px-2 py-1 rounded-full">
+                    {activeFiltersCount}
+                  </span>
+                )}
               </button>
               
               <Link href="/plan-event">
@@ -250,344 +346,314 @@ export default function MarketplacePage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar - Categories */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-elegant p-6 sticky top-24">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Categories</h2>
-              
-              <div className="space-y-2">
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                    !selectedCategory 
-                      ? 'bg-primary-50 text-primary-700 border border-primary-200' 
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`}
-                  suppressHydrationWarning
+        {showCategorySelection ? (
+          // Category Selection View
+          <div className="space-y-8">
+            {/* Header */}
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">What are you looking for?</h1>
+              <p className="text-xl text-gray-600">Choose a category to find the perfect vendors for your event</p>
+            </div>
+
+            {/* Categories Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {categories.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  onClick={() => handleCategorySelect(category.slug)}
+                  className="bg-white rounded-2xl shadow-elegant p-6 cursor-pointer hover:shadow-elegant-hover transition-all duration-300 group border border-gray-100"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">All Categories</span>
-                    <span className="text-sm text-gray-500">{vendors.length}</span>
-                  </div>
-                </button>
-                
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.slug)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedCategory === category.slug 
-                        ? 'bg-primary-50 text-primary-700 border border-primary-200' 
-                        : 'hover:bg-gray-50 text-gray-700'
-                    }`}
-                    suppressHydrationWarning
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg">{category.icon}</span>
-                        <span className="font-medium">{category.name}</span>
-                      </div>
-                      <span className="text-sm text-gray-500">{category.vendor_count}</span>
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300">
+                      {category.icon}
                     </div>
-                  </button>
-                ))}
-              </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-lg mb-1">{category.name}</h3>
+                      <p className="text-sm text-gray-500">{category.vendor_count} vendors</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Filters Panel */}
-            {showFilters && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-2xl shadow-elegant p-6 mb-6"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Advanced Filters</h3>
-                  <button
-                    onClick={clearFilters}
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    Clear All
-                  </button>
+        ) : (
+          // Vendor Listing View with Sidebar
+          <div className="flex gap-8">
+            {/* Sidebar */}
+            <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
+              <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)} />
+              <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+                    <button
+                      onClick={() => setSidebarOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <FilterSidebar
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onToggleArrayFilter={toggleArrayFilter}
+                    onClearFilters={clearFilters}
+                    eventTypes={eventTypes}
+                    availabilityOptions={availabilityOptions}
+                    serviceOptions={serviceOptions}
+                  />
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Event Type */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
-                    <div className="space-y-2">
-                      {eventTypes.map((eventType) => (
-                        <label key={eventType.id} className="flex items-center space-x-2">
-                                                     <input
-                             type="checkbox"
-                             checked={filters.eventType.includes(eventType.id)}
-                             onChange={(e) => {
-                               if (e.target.checked) {
-                                 handleFilterChange('eventType', [...filters.eventType, eventType.id])
-                               } else {
-                                 handleFilterChange('eventType', filters.eventType.filter(id => id !== eventType.id))
-                               }
-                             }}
-                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                             suppressHydrationWarning
-                           />
-                          <span className="text-sm text-gray-700">{eventType.icon} {eventType.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Rating */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Rating</label>
-                                         <select
-                       value={filters.rating}
-                       onChange={(e) => handleFilterChange('rating', Number(e.target.value))}
-                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                       suppressHydrationWarning
-                     >
-                      <option value={0}>Any Rating</option>
-                      <option value={3}>3+ Stars</option>
-                      <option value={4}>4+ Stars</option>
-                      <option value={4.5}>4.5+ Stars</option>
-                      <option value={4.8}>4.8+ Stars</option>
-                    </select>
-                  </div>
-
-                  {/* Price Range */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-                    <div className="flex items-center space-x-2">
-                                             <input
-                         type="number"
-                         value={filters.priceRange.min}
-                         onChange={(e) => handleFilterChange('priceRange', { ...filters.priceRange, min: Number(e.target.value) })}
-                         placeholder="Min"
-                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                         suppressHydrationWarning
-                       />
-                       <span className="text-gray-500">-</span>
-                       <input
-                         type="number"
-                         value={filters.priceRange.max}
-                         onChange={(e) => handleFilterChange('priceRange', { ...filters.priceRange, max: Number(e.target.value) })}
-                         placeholder="Max"
-                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                         suppressHydrationWarning
-                       />
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                                         <input
-                       type="text"
-                       value={filters.location}
-                       onChange={(e) => handleFilterChange('location', e.target.value)}
-                       placeholder="Enter city or state..."
-                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                       suppressHydrationWarning
-                     />
-                  </div>
-
-                  {/* Capacity */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Capacity</label>
-                                         <input
-                       type="number"
-                       value={filters.capacity}
-                       onChange={(e) => handleFilterChange('capacity', Number(e.target.value))}
-                       placeholder="Number of guests"
-                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                       suppressHydrationWarning
-                     />
-                  </div>
-
-                  {/* Additional Filters */}
-                  <div className="space-y-3">
-                                         <label className="flex items-center space-x-2">
-                       <input
-                         type="checkbox"
-                         checked={filters.featured}
-                         onChange={(e) => handleFilterChange('featured', e.target.checked)}
-                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                         suppressHydrationWarning
-                       />
-                       <span className="text-sm text-gray-700">Featured Vendors Only</span>
-                     </label>
-                     
-                     <label className="flex items-center space-x-2">
-                       <input
-                         type="checkbox"
-                         checked={filters.verified}
-                         onChange={(e) => handleFilterChange('verified', e.target.checked)}
-                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                         suppressHydrationWarning
-                       />
-                       <span className="text-sm text-gray-700">Verified Vendors Only</span>
-                     </label>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name : 'All Vendors'}
-                </h1>
-                <p className="text-gray-600">
-                  {vendors.length} vendors found
-                  {selectedCategory && ` in ${categories.find(c => c.slug === selectedCategory)?.name}`}
-                </p>
-              </div>
-              
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <span>Showing {displayedVendors.length} of {vendors.length}</span>
               </div>
             </div>
 
-            {/* Loading State */}
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Finding the best vendors for you...</p>
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:block w-80 flex-shrink-0">
+              <div className="sticky top-24">
+                <FilterSidebar
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onToggleArrayFilter={toggleArrayFilter}
+                  onClearFilters={clearFilters}
+                  eventTypes={eventTypes}
+                  availabilityOptions={availabilityOptions}
+                  serviceOptions={serviceOptions}
+                />
               </div>
-            ) : (
-              <>
-                {/* Vendor Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayedVendors.map((vendor, index) => (
-                    <motion.div
-                      key={vendor.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
-                      className="bg-white rounded-2xl shadow-elegant overflow-hidden hover:shadow-elegant-hover transition-all duration-300 group"
-                    >
-                      {/* Card Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-primary-100 to-primary-200">
-                        <div className="absolute inset-0 flex items-center justify-center text-6xl">
-                          {vendor.category?.icon || '🏢'}
-                        </div>
-                        
-                        {/* Badges */}
-                        <div className="absolute top-3 left-3 flex space-x-2">
-                          {vendor.featured && (
-                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
-                              Featured
-                            </span>
-                          )}
-                          {vendor.vendor.verification_status === 'verified' && (
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                              Verified
-                            </span>
-                          )}
-                        </div>
-                        
-                                                 {/* Action Buttons */}
-                         <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                           <button className="p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-colors" suppressHydrationWarning>
-                             <Heart className="h-4 w-4 text-gray-600" />
-                           </button>
-                           <Link href={`/vendor/${vendor.vendor.id}`}>
-                             <button className="p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-colors" suppressHydrationWarning>
-                               <Eye className="h-4 w-4 text-gray-600" />
-                             </button>
-                           </Link>
-                         </div>
-                      </div>
+            </div>
 
-                      {/* Card Content */}
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
-                            {vendor.title}
-                          </h3>
-                        </div>
-                        
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                          {vendor.description}
-                        </p>
-                        
-                        <div className="flex items-center space-x-1 mb-3">
-                          {renderStars(vendor.average_rating)}
-                          <span className="text-sm text-gray-600 ml-1">
-                            {vendor.average_rating} ({vendor.total_reviews})
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{vendor.vendor.city}, {vendor.vendor.state}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Users className="h-4 w-4" />
-                            <span>Up to {vendor.max_capacity}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="text-2xl font-bold text-gray-900">
-                            {formatPrice(vendor.base_price)}
+            {/* Main Content */}
+            <div className="flex-1 space-y-6">
+              {/* Breadcrumb and Back Button */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={handleBackToCategories}
+                    className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Back to Categories</span>
+                  </button>
+                  <div className="flex items-center space-x-2 text-gray-500">
+                    <span>•</span>
+                    <span className="font-medium text-gray-900">
+                      {categories.find(c => c.slug === selectedCategory)?.name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Results Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {categories.find(c => c.slug === selectedCategory)?.name}
+                  </h1>
+                  <p className="text-gray-600">
+                    {vendors.length} vendors found
+                  </p>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  {/* Active Filters Display */}
+                  {activeFiltersCount > 0 && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <FilterX className="h-4 w-4" />
+                      <span>{activeFiltersCount} active filters</span>
+                    </div>
+                  )}
+
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-md transition-colors ${
+                        viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Grid3X3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-md transition-colors ${
+                        viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <List className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Sort Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as SortBy)}
+                      className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    >
+                      <option value="relevance">Sort by Relevance</option>
+                      <option value="rating">Sort by Rating</option>
+                      <option value="price_low">Price: Low to High</option>
+                      <option value="price_high">Price: High to Low</option>
+                      <option value="name">Sort by Name</option>
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Loading State */}
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Finding the best vendors for you...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Vendor Cards */}
+                  <div className={`grid gap-6 ${
+                    viewMode === 'grid' 
+                      ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+                      : 'grid-cols-1'
+                  }`}>
+                    {displayedVendors.map((vendor, index) => (
+                      <motion.div
+                        key={vendor.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.05 }}
+                        className={`bg-white rounded-2xl shadow-elegant overflow-hidden hover:shadow-elegant-hover transition-all duration-300 group ${
+                          viewMode === 'list' ? 'flex' : ''
+                        }`}
+                      >
+                        {/* Card Image */}
+                        <div className={`relative overflow-hidden ${
+                          viewMode === 'list' ? 'w-48 h-32' : 'h-48'
+                        }`}>
+                          {(() => {
+                            const categoryImage = getCategoryImage(vendor.category?.slug || 'default')
+                            return (
+                              <img
+                                src={categoryImage.url}
+                                alt={categoryImage.alt}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            )
+                          })()}
+                          
+                          {/* Badges */}
+                          <div className="absolute top-3 left-3 flex space-x-2">
+                            {vendor.featured && (
+                              <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
+                                Featured
+                              </span>
+                            )}
+                            {vendor.vendor.verification_status === 'verified' && (
+                              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                                Verified
+                              </span>
+                            )}
                           </div>
                           
-                                                     <Link href={`/vendor/${vendor.vendor.id}`}>
-                             <button className="btn-primary btn-sm" suppressHydrationWarning>
-                               View Details
-                             </button>
-                           </Link>
+                          {/* Action Buttons */}
+                          <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button className="p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-colors" suppressHydrationWarning>
+                              <Heart className="h-4 w-4 text-gray-600" />
+                            </button>
+                            <Link href={`/vendor/${vendor.vendor.id}`}>
+                              <button className="p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-colors" suppressHydrationWarning>
+                                <Eye className="h-4 w-4 text-gray-600" />
+                              </button>
+                            </Link>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
 
-                                 {/* Load More Button */}
-                 {hasMore && (
-                   <div className="text-center mt-8">
-                     <button
-                       onClick={handleLoadMore}
-                       className="btn-outline px-8 py-3"
-                       suppressHydrationWarning
-                     >
-                       Show More Vendors
-                     </button>
-                   </div>
-                 )}
-
-                {/* No Results */}
-                {vendors.length === 0 && !loading && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Search className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No vendors found</h3>
-                    <p className="text-gray-600 mb-4">
-                      Try adjusting your search criteria or filters to find more vendors.
-                    </p>
-                                         <button
-                       onClick={clearFilters}
-                       className="btn-outline"
-                       suppressHydrationWarning
-                     >
-                       Clear Filters
-                     </button>
+                        {/* Card Content */}
+                        <div className={`p-6 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                              {vendor.title}
+                            </h3>
+                          </div>
+                          
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {vendor.description}
+                          </p>
+                          
+                          <div className="flex items-center space-x-1 mb-3">
+                            {renderStars(vendor.average_rating)}
+                            <span className="text-sm text-gray-600 ml-1">
+                              {vendor.average_rating} ({vendor.total_reviews})
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{vendor.vendor.city}, {vendor.vendor.state}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Users className="h-4 w-4" />
+                              <span>Up to {vendor.max_capacity}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="text-2xl font-bold text-gray-900">
+                              {formatPrice(vendor.base_price)}
+                            </div>
+                            
+                            <Link href={`/vendor/${vendor.vendor.id}`}>
+                              <button className="btn-primary btn-sm" suppressHydrationWarning>
+                                View Details
+                              </button>
+                            </Link>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-                )}
-              </>
-            )}
+
+                  {/* Load More Button */}
+                  {hasMore && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={handleLoadMore}
+                        className="btn-outline px-8 py-3"
+                        suppressHydrationWarning
+                      >
+                        Show More Vendors
+                      </button>
+                    </div>
+                  )}
+
+                  {/* No Results */}
+                  {vendors.length === 0 && !loading && (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Search className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No vendors found</h3>
+                      <p className="text-gray-600 mb-4">
+                        Try adjusting your search criteria or filters to find more vendors.
+                      </p>
+                      <button
+                        onClick={clearFilters}
+                        className="btn-outline"
+                        suppressHydrationWarning
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
 }
+

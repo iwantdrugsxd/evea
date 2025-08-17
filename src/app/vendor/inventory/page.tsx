@@ -255,14 +255,6 @@ export default function VendorInventoryPage() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Inventory Items</h3>
           <div className="flex items-center space-x-3">
-            <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              <Upload className="h-4 w-4 mr-2" />
-              Import
-            </button>
-            <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </button>
             <button className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
               <Plus className="h-4 w-4 mr-2" />
               Add Item
@@ -290,9 +282,7 @@ export default function VendorInventoryPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+                             {/* Actions column header removed */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -360,19 +350,9 @@ export default function VendorInventoryPage() {
                   )}
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center space-x-2">
-                    <button className="text-purple-600 hover:text-purple-900">
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button className="text-blue-600 hover:text-blue-900">
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
+                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                   {/* Actions removed - keeping only Add Item button */}
+                 </td>
               </tr>
             ))}
           </tbody>

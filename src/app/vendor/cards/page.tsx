@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { getCategoryImage } from '@/lib/utils/vendor-images'
 import {
   Plus,
   Edit,
@@ -263,7 +264,7 @@ export default function ServiceCardsPage() {
               className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
             >
               {/* Card Image */}
-              <div className="relative h-48 bg-gray-200">
+              <div className="relative h-48 bg-gray-200 overflow-hidden">
                 {card.images && card.images.length > 0 ? (
                   <img
                     src={card.images[0]}
@@ -271,9 +272,16 @@ export default function ServiceCardsPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    <span className="text-4xl">{getCategoryIcon(card.category)}</span>
-                  </div>
+                  (() => {
+                    const categoryImage = getCategoryImage(card.category)
+                    return (
+                      <img
+                        src={categoryImage.url}
+                        alt={categoryImage.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    )
+                  })()
                 )}
                 
                 {/* Status Badge */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { getCategoryImage } from '@/lib/utils/vendor-images'
 import { 
   Star, 
   MapPin, 
@@ -161,12 +162,16 @@ export default function VendorDetailPage() {
                     )}
                   </>
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-6xl mb-4">🏢</div>
-                      <p className="text-gray-600">No images available</p>
-                    </div>
-                  </div>
+                  (() => {
+                    const categoryImage = getCategoryImage('default')
+                    return (
+                      <img
+                        src={categoryImage.url}
+                        alt={categoryImage.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    )
+                  })()
                 )}
               </div>
               

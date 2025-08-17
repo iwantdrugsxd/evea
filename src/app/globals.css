@@ -759,6 +759,18 @@ body {
     animation: shimmer 2s infinite;
   }
 
+  .animate-disco-shimmer {
+    animation: disco-shimmer 3s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+  }
+
+  .animate-spin-reverse {
+    animation: spin-reverse 12s linear infinite;
+  }
+
   /* Shadow Utilities */
   .shadow-red-soft {
     box-shadow: var(--shadow-red);
@@ -823,6 +835,24 @@ body {
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes disco-shimmer {
+  0% { 
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    background-size: 200% 200%;
+    background-position: -200% -200%;
+  }
+  50% { 
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+    background-size: 200% 200%;
+    background-position: 200% 200%;
+  }
+  100% { 
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    background-size: 200% 200%;
+    background-position: -200% -200%;
+  }
 }
 
 @keyframes fadeIn {
@@ -1143,6 +1173,16 @@ body {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
 }
 
 /* Enterprise Form Styling */

@@ -4,8 +4,7 @@ import { useIntersectionObserver } from '@/hooks/use-intersection'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/landing/HeroSection'
-import FeaturesSection from '@/components/landing/FeaturesSection' 
-import ServicesSection from '@/components/landing/ServicesSection'
+import ServicesSection from '@/components/landing/FeaturesSection'
 import StatsSection from '@/components/landing/StatsSection'
 import TestimonialsSection from '@/components/landing/TestimonialsSection'
 import CTASection from '@/components/landing/CTASection'
@@ -19,12 +18,11 @@ export default function HomePage() {
       <Header />
       
       <main className="space-y-enterprise overflow-hidden">
-        <HeroSection />
-        <FeaturesSection />
+        {/* <HeroSection /> */}
+        <CTASection />
         <ServicesSection />
         <StatsSection />
         <TestimonialsSection />
-        <CTASection />
       </main>
 
       <Footer />

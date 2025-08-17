@@ -307,6 +307,15 @@ const Header = () => {
                               Profile
                             </Link>
 
+                            <Link
+                              href="/customer/settings"
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                              onClick={() => setShowUserMenu(false)}
+                            >
+                              <Settings className="h-4 w-4 mr-3" />
+                              Settings
+                            </Link>
+
                             <hr className="my-2 border-gray-200" />
                             
                             <button
@@ -538,6 +547,15 @@ const Header = () => {
                           >
                             <User className="h-5 w-5" />
                             <span>Profile</span>
+                          </Link>
+
+                          <Link
+                            href="/customer/settings"
+                            className="flex items-center space-x-3 py-3 text-gray-700 hover:text-red-600 transition-colors"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <Settings className="h-5 w-5" />
+                            <span>Settings</span>
                           </Link>
 
                           <hr className="my-2 border-gray-200" />

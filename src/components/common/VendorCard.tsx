@@ -22,6 +22,7 @@ import Button from '@/components/ui/button'
 import Badge from '@/components/ui/badge'
 import { VendorCard as VendorCardType } from '@/lib'
 import { formatPrice, cn } from '@/lib/utils'
+import { getCategoryImage } from '@/lib/utils/vendor-images'
 
 interface VendorCardProps {
   vendor: VendorCardType & {
@@ -72,9 +73,16 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, className, featured = f
               )}
             </>
           ) : (
-            <div className="absolute inset-0 bg-gradient-red flex items-center justify-center">
-              <Camera className="h-12 w-12 text-primary-600/60" />
-            </div>
+            (() => {
+              const categoryImage = getCategoryImage(vendor.category?.slug || 'default')
+              return (
+                <img
+                  src={categoryImage.url}
+                  alt={categoryImage.alt}
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                />
+              )
+            })()
           )}
 
           {/* Overlay Badges */}

@@ -132,15 +132,7 @@ const CTASection = () => {
               Talk to Expert
             </Button>
           </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto"
-          >
-            {cta.description}
-          </motion.p>
+          {/* Duplicate description removed */}
 
           {/* Benefits Grid */}
           <motion.div
@@ -171,100 +163,10 @@ const CTASection = () => {
             })}
           </motion.div>
 
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-          >
-            <Link href="/marketplace">
-              <Button 
-                variant="primary" 
-                size="lg" 
-                className="group text-lg px-8 py-4 shadow-red-medium hover:shadow-red-strong"
-              >
-                {cta.cta.primary}
-                <ArrowRight className="h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            
-            <Link href="/contact">
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-gray-900"
-              >
-                <Phone className="h-5 w-5 mr-3" />
-                {cta.cta.secondary}
-              </Button>
-            </Link>
-          </motion.div>
+          {/* Second set of CTA buttons removed - keeping only the first set */}
         </div>
 
-        {/* Urgency Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto"
-        >
-          <Card className="p-8 bg-gray-800/50 border-gray-700 backdrop-blur-sm">
-            <CardContent className="p-0">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-4 font-heading">
-                  🔥 Limited Time Offer - Act Fast!
-                </h3>
-                <p className="text-gray-300 text-lg">
-                  Join in the next 24 hours and get exclusive benefits worth ₹10,000
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {urgencyFeatures.map((feature, index) => (
-                  <motion.div
-                    key={feature.text}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="flex items-center space-x-3 p-4 bg-primary-600/10 rounded-lg border border-primary-600/20"
-                  >
-                    <feature.icon className="h-5 w-5 text-primary-400 flex-shrink-0" />
-                    <span className="text-gray-300 font-medium text-sm">{feature.text}</span>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Newsletter Signup */}
-              <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto">
-                <div className="flex gap-3">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email for early access"
-                    value={email}
-                    onChange={setEmail}
-                    required
-                    className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                  />
-                  <Button 
-                    type="submit" 
-                    variant="primary" 
-                    loading={isSubmitting}
-                    className="whitespace-nowrap"
-                  >
-                    Get Started
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  Join 5,000+ event planners who trust Evea
-                </p>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {/* Urgency Section removed */}
 
         {/* Final Trust Indicators */}
         <motion.div
