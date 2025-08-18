@@ -659,6 +659,7 @@ async function seedVendorData() {
           description: vendorInfo.description,
           category_id: categoryMap[vendorInfo.category],
           base_price: vendorInfo.base_price,
+
           price_type: 'fixed',
           service_area: [vendorInfo.city, vendorInfo.state, 'India'],
           max_capacity: vendorInfo.max_capacity,

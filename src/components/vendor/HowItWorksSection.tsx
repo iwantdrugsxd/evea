@@ -1,360 +1,194 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   UserPlus, 
-  MessageSquare, 
-  CreditCard, 
+  Settings, 
+  Calendar, 
   TrendingUp,
-  CheckCircle,
-  Play,
   ArrowRight,
-  Sparkles,
-  Clock,
-  Users,
-  DollarSign
+  CheckCircle,
+  Star,
+  Zap
 } from 'lucide-react'
-import * as Tabs from '@radix-ui/react-tabs'
+import { Card, CardContent } from '@/components/ui/card'
+import Button from '@/components/ui/button'
 
-const steps = [
-  {
-    id: 'step1',
-    icon: UserPlus,
-    title: 'Create Your Vendor Profile',
-    shortTitle: 'Sign Up',
-    description: 'Register and create your professional profile with service listings, portfolio images, and pricing packages.',
-    details: [
-      'Upload high-quality portfolio images',
-      'Set competitive pricing packages', 
-      'Add detailed service descriptions',
-      'Verify your business credentials'
-    ],
-    time: '5 minutes',
-    color: 'from-blue-500 to-cyan-500',
-    bgColor: 'from-blue-50 to-cyan-50',
-    stats: { icon: Users, value: '500+', label: 'New vendors monthly' }
-  },
-  {
-    id: 'step2',
-    icon: MessageSquare,
-    title: 'Get Quality Leads',
-    shortTitle: 'Connect',
-    description: 'Receive direct inquiries from verified clients in your area and event categories with our smart matching system.',
-    details: [
-      'AI-powered lead matching',
-      'Verified customer inquiries only',
-      'Real-time notification system',
-      'Lead quality scoring'
-    ],
-    time: 'Instant',
-    color: 'from-purple-500 to-pink-500',
-    bgColor: 'from-purple-50 to-pink-50',
-    stats: { icon: MessageSquare, value: '10K+', label: 'Monthly inquiries' }
-  },
-  {
-    id: 'step3',
-    icon: CreditCard,
-    title: 'Secure Bookings & Payments',
-    shortTitle: 'Book & Pay',
-    description: 'Confirm bookings through our secure platform, communicate with clients, and receive guaranteed payments.',
-    details: [
-      'Secure escrow payment system',
-      'Automated booking confirmations',
-      'Built-in chat system',
-      'Digital contract management'
-    ],
-    time: '2 minutes',
-    color: 'from-green-500 to-emerald-500',
-    bgColor: 'from-green-50 to-emerald-50',
-    stats: { icon: DollarSign, value: '₹50L+', label: 'Monthly transactions' }
-  },
-  {
-    id: 'step4',
-    icon: TrendingUp,
-    title: 'Grow with Analytics',
-    shortTitle: 'Scale',
-    description: 'Access detailed analytics, client reviews, and premium features to continuously grow your business.',
-    details: [
-      'Real-time business analytics',
-      'Customer feedback management',
-      'Premium listing upgrades',
-      'Marketing tools and insights'
-    ],
-    time: 'Ongoing',
-    color: 'from-orange-500 to-red-500',
-    bgColor: 'from-orange-50 to-red-50',
-    stats: { icon: TrendingUp, value: '300%', label: 'Average growth' }
-  }
-]
-
-const InteractiveTimeline = () => {
-  const [activeStep, setActiveStep] = useState(0)
-  const [hoveredStep, setHoveredStep] = useState<number | null>(null)
-  
-  return (
-    <div className="relative">
-      {/* Desktop Timeline */}
-      <div className="hidden lg:block relative">
-        {/* Progress Line */}
-        <div className="absolute top-20 left-0 w-full h-1 bg-gray-200 rounded-full">
-          <motion.div
-            className="h-full bg-gradient-to-r from-blue-500 via-purple-500 via-green-500 to-orange-500 rounded-full"
-            initial={{ width: '0%' }}
-            animate={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-          />
-        </div>
-
-        {/* Timeline Steps */}
-        <div className="grid grid-cols-4 gap-8">
-          {steps.map((step, index) => {
-            const Icon = step.icon
-            const isActive = index <= activeStep
-            const isHovered = hoveredStep === index
-            
-            return (
-              <motion.div
-                key={step.id}
-                className="relative cursor-pointer"
-                onHoverStart={() => setHoveredStep(index)}
-                onHoverEnd={() => setHoveredStep(null)}
-                onClick={() => setActiveStep(index)}
-                whileHover={{ scale: 1.02 }}
-              >
-                {/* Step Circle */}
-                <motion.div
-                  className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 border-4 ${
-                    isActive 
-                      ? 'border-white shadow-2xl' 
-                      : 'border-gray-200 shadow-lg'
-                  }`}
-                  animate={{
-                    background: isActive 
-                      ? `linear-gradient(135deg, ${step.color.split(' ')[1]}, ${step.color.split(' ')[3]})`
-                      : 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
-                    scale: isHovered ? 1.1 : 1
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Icon className={`h-8 w-8 ${isActive ? 'text-white' : 'text-gray-400'}`} />
-                  
-                  {/* Pulse Animation for Active Step */}
-                  {isActive && (
-                    <motion.div
-                      className="absolute inset-0 rounded-full border-4 border-white/50"
-                      animate={{ scale: [1, 1.5], opacity: [1, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                  )}
-                </motion.div>
-
-                {/* Step Number */}
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 shadow-lg">
-                  {index + 1}
-                </div>
-
-                {/* Step Content */}
-                <motion.div
-                  className="text-center"
-                  animate={{
-                    opacity: isActive ? 1 : 0.7,
-                    y: isHovered ? -5 : 0
-                  }}
-                >
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {step.shortTitle}
-                  </h3>
-                  <div className="flex items-center justify-center space-x-2 mb-3">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-500">{step.time}</span>
-                  </div>
-                  
-                  {/* Stats */}
-                  <motion.div
-                    className={`bg-gradient-to-r ${step.bgColor} p-3 rounded-xl border border-gray-100`}
-                    animate={{
-                      scale: isHovered ? 1.05 : 1,
-                      opacity: isActive ? 1 : 0.8
-                    }}
-                  >
-                    <div className="flex items-center justify-center space-x-2">
-                      <step.stats.icon className="h-4 w-4 text-gray-600" />
-                      <span className="font-bold text-gray-900">{step.stats.value}</span>
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1">{step.stats.label}</p>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Mobile Timeline */}
-      <div className="lg:hidden space-y-8">
-        {steps.map((step, index) => {
-          const Icon = step.icon
-          const isActive = index === activeStep
-          
-          return (
-            <motion.div
-              key={step.id}
-              className="relative"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-            >
-              <div className="flex items-start space-x-6">
-                {/* Timeline Line */}
-                {index < steps.length - 1 && (
-                  <div className="absolute left-8 top-16 w-0.5 h-16 bg-gradient-to-b from-gray-300 to-gray-200" />
-                )}
-                
-                {/* Step Circle */}
-                <motion.div
-                  className={`w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-r ${step.color} shadow-xl`}
-                  whileHover={{ scale: 1.1 }}
-                  onClick={() => setActiveStep(index)}
-                >
-                  <Icon className="h-8 w-8 text-white" />
-                </motion.div>
-                
-                {/* Content */}
-                <div className="flex-1 pb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    {step.description}
-                  </p>
-                  
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-500">{step.time}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <step.stats.icon className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-semibold">{step.stats.value} {step.stats.label}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )
-        })}
+const StepCard = ({ 
+  step, 
+  icon: Icon, 
+  title, 
+  description, 
+  features, 
+  delay = 0 
+}: { 
+  step: number, 
+  icon: any, 
+  title: string, 
+  description: string, 
+  features: string[], 
+  delay?: number 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay }}
+    className="group relative"
+  >
+    {/* Step Number Badge */}
+    <div className="absolute -top-4 -left-4 z-10">
+      <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+        <span className="text-white font-bold text-lg">{step}</span>
       </div>
     </div>
-  )
-}
 
-const StepDetails = ({ activeStep }: { activeStep: number }) => {
-  const step = steps[activeStep]
-  const Icon = step.icon
-  
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={activeStep}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-2xl"
-      >
-        <div className="flex items-start space-x-6">
-          <motion.div
-            className={`w-20 h-20 rounded-2xl bg-gradient-to-r ${step.color} flex items-center justify-center shadow-xl flex-shrink-0`}
-            whileHover={{ scale: 1.05, rotate: 5 }}
-          >
-            <Icon className="h-10 w-10 text-white" />
-          </motion.div>
-          
-          <div className="flex-1">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              {step.title}
+    <Card className="h-full bg-white border-gray-200 hover:border-primary-300 shadow-elegant hover:shadow-elegant-hover transition-all duration-500 group-hover:scale-[1.02] overflow-hidden">
+      <CardContent className="p-8 pt-12">
+        {/* Icon Header */}
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <Icon className="h-8 w-8 text-primary-600" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+              {title}
             </h3>
-            <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-              {step.description}
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {step.details.map((detail, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-center space-x-3"
-                >
-                  <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-gray-700 font-medium">{detail}</span>
-                </motion.div>
-              ))}
-            </div>
+            <p className="text-gray-600 mt-1">{description}</p>
           </div>
         </div>
-      </motion.div>
-    </AnimatePresence>
-  )
-}
+
+        {/* Features List */}
+        <div className="space-y-3">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: delay + 0.1 + index * 0.1 }}
+              className="flex items-center space-x-3"
+            >
+              <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="h-4 w-4 text-primary-600" />
+              </div>
+              <span className="text-gray-700 font-medium">{feature}</span>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Hover Effect Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-100/0 group-hover:from-primary-50/30 group-hover:to-primary-100/20 transition-all duration-500 rounded-xl pointer-events-none" />
+      </CardContent>
+    </Card>
+  </motion.div>
+)
+
+const ProcessFlow = () => (
+  <div className="hidden lg:flex items-center justify-between absolute top-1/2 left-0 right-0 transform -translate-y-1/2 z-0 px-8">
+    <div className="w-16 h-1 bg-gradient-to-r from-primary-200 to-primary-400 rounded-full" />
+    <div className="w-16 h-1 bg-gradient-to-r from-primary-200 to-primary-400 rounded-full" />
+    <div className="w-16 h-1 bg-gradient-to-r from-primary-200 to-primary-400 rounded-full" />
+  </div>
+)
+
+const StatsCard = ({ 
+  icon: Icon, 
+  value, 
+  label, 
+  color = "primary" 
+}: { 
+  icon: any, 
+  value: string, 
+  label: string, 
+  color?: string 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8 }}
+    whileInView={{ opacity: 1, scale: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6 }}
+    className="text-center group"
+  >
+    <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+      <Icon className="h-8 w-8 text-primary-600" />
+    </div>
+    <div className="text-3xl font-bold text-gray-900 mb-2">{value}</div>
+    <div className="text-gray-600 font-medium">{label}</div>
+  </motion.div>
+)
 
 export default function HowItWorksSection() {
-  const [activeStep, setActiveStep] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  })
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["50px", "-50px"])
+  const steps = [
+    {
+      step: 1,
+      icon: UserPlus,
+      title: 'Create Your Profile',
+      description: 'Set up your professional vendor profile in minutes',
+      features: [
+        'Upload high-quality photos of your work',
+        'Add detailed service descriptions',
+        'Set your pricing and availability',
+        'Get verified for trust and credibility'
+      ]
+    },
+    {
+      step: 2,
+      icon: Settings,
+      title: 'Configure Services',
+      description: 'Customize your offerings and business settings',
+      features: [
+        'Define your service categories',
+        'Set up payment methods',
+        'Configure booking preferences',
+        'Add your business policies'
+      ]
+    },
+    {
+      step: 3,
+      icon: Calendar,
+      title: 'Start Receiving Bookings',
+      description: 'Begin accepting orders from customers',
+      features: [
+        'Get notified of new bookings instantly',
+        'Review and accept customer requests',
+        'Manage your calendar efficiently',
+        'Communicate with clients seamlessly'
+      ]
+    },
+    {
+      step: 4,
+      icon: TrendingUp,
+      title: 'Scale Your Business',
+      description: 'Grow your revenue and expand your reach',
+      features: [
+        'Track your performance analytics',
+        'Get customer reviews and ratings',
+        'Access marketing tools and promotions',
+        'Expand to new locations and services'
+      ]
+    }
+  ]
+
+  const stats = [
+    { icon: UserPlus, value: '5 min', label: 'Setup Time' },
+    { icon: Calendar, value: '24/7', label: 'Booking Availability' },
+    { icon: Star, value: '4.8★', label: 'Average Rating' },
+    { icon: Zap, value: 'Instant', label: 'Payment Processing' }
+  ]
 
   return (
-    <section 
-      ref={containerRef}
-      className="section-padding bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden"
-    >
-      {/* Animated Background Elements */}
-      <motion.div 
-        className="absolute inset-0 opacity-30"
-        style={{ y }}
-      >
-        <div className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full blur-3xl" />
-      </motion.div>
-      
-      {/* Floating Sparkles */}
+    <section className="section-padding bg-white relative overflow-hidden">
+      {/* Background Elements */}
       <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          >
-            <Sparkles className="h-4 w-4 text-purple-400" />
-          </motion.div>
-        ))}
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(239,68,68,0.03),transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_left,rgba(220,38,38,0.03),transparent_50%)]" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary-50 rounded-full opacity-20"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-50 rounded-full opacity-15"></div>
       </div>
 
       <div className="container-custom relative z-10">
-        {/* Header */}
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -366,73 +200,101 @@ export default function HowItWorksSection() {
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-100 to-pink-100 backdrop-blur-sm px-8 py-4 rounded-full border border-purple-200 shadow-lg mb-8"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="inline-flex items-center space-x-3 bg-primary-100 px-4 py-2 rounded-full border border-primary-200 mb-6"
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            >
-              <Play className="h-6 w-6 text-purple-600" />
-            </motion.div>
-            <span className="text-purple-700 font-bold text-lg">Simple Process</span>
+            <Settings className="h-4 w-4 text-primary-600" />
+            <span className="text-primary-700 font-semibold text-sm">Simple Process</span>
           </motion.div>
 
-          <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-heading">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
             How It{' '}
-            <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 bg-clip-text text-transparent">
-              Works
-            </span>
+            <span className="text-primary-600">Works</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Get started in minutes and begin growing your event services business with our streamlined onboarding process
+
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Get started in just 4 simple steps. Our streamlined process makes it easy to 
+            join thousands of successful vendors on Evea.
           </p>
         </motion.div>
 
-        {/* Interactive Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="mb-16"
-        >
-          <Tabs.Root value={`step${activeStep + 1}`} onValueChange={(value) => setActiveStep(parseInt(value.replace('step', '')) - 1)}>
-            <InteractiveTimeline />
-          </Tabs.Root>
-        </motion.div>
+        {/* Steps Grid */}
+        <div className="relative mb-20">
+          <ProcessFlow />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+            {steps.map((step, index) => (
+              <StepCard
+                key={step.step}
+                step={step.step}
+                icon={step.icon}
+                title={step.title}
+                description={step.description}
+                features={step.features}
+                delay={index * 0.2}
+              />
+            ))}
+          </div>
+        </div>
 
-        {/* Step Details */}
+        {/* Stats Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-center mb-16"
         >
-          <StepDetails activeStep={activeStep} />
+          <h3 className="text-3xl font-bold text-gray-900 mb-12">
+            Why Vendors Love Our{' '}
+            <span className="text-primary-600">Process</span>
+          </h3>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <StatsCard
+                key={stat.label}
+                icon={stat.icon}
+                value={stat.value}
+                label={stat.label}
+                delay={index * 0.1}
+              />
+            ))}
+          </div>
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-center mt-16"
+          className="text-center"
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 inline-flex items-center space-x-3"
-          >
-            <span>Start Your Journey Today</span>
-            <motion.div
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <ArrowRight className="h-5 w-5" />
-            </motion.div>
-          </motion.button>
+          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200 shadow-elegant">
+            <CardContent className="p-8 lg:p-12">
+              <div className="max-w-2xl mx-auto">
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                  Ready to Start Your Journey?
+                </h3>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Join 500+ successful vendors who have transformed their business with Evea. 
+                  Get started today and see the difference.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="primary" size="lg" className="group text-lg px-8 py-4">
+                    <span>Get Started Now</span>
+                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white">
+                    <span>Watch Demo</span>
+                    <Zap className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </section>

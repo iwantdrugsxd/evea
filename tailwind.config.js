@@ -73,6 +73,8 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
         heading: ["var(--font-poppins)", "Poppins", "Inter", "system-ui", "sans-serif"],
+        serif: ["Playfair Display", "serif"],
+        elegant: ["Merriweather", "serif"],
       },
       fontSize: {
         "display-2xl": ["4.5rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }],

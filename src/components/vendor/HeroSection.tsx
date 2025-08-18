@@ -1,329 +1,321 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, ShoppingBag, Star, TrendingUp, Award } from 'lucide-react'
-import CountUp from 'react-countup'
-import Tilt from 'react-parallax-tilt'
+import { 
+  ArrowRight, 
+  TrendingUp, 
+  Star, 
+  Users, 
+  Calendar,
+  CheckCircle,
+  Shield,
+  Zap,
+  Play
+} from 'lucide-react'
 import Button from '@/components/ui/button'
 
-const FloatingCard = ({ children, delay = 0, className = "" }: { 
-  children: React.ReactNode, 
-  delay?: number, 
-  className?: string 
+const StatCard = ({ 
+  icon: Icon, 
+  value, 
+  label, 
+  delay = 0 
+}: { 
+  icon: any, 
+  value: string, 
+  label: string, 
+  delay?: number 
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 50, scale: 0.8 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ 
-      duration: 0.8, 
-      delay,
-      type: "spring",
-      stiffness: 100,
-      damping: 10
-    }}
-    whileHover={{ 
-      y: -10, 
-      scale: 1.05,
-      transition: { duration: 0.3 }
-    }}
-    className={`bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 ${className}`}
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, delay }}
+    className="bg-white rounded-xl p-6 shadow-elegant border border-gray-100 hover:shadow-elegant-hover transition-all duration-300"
   >
-    {children}
+    <div className="flex items-center space-x-4">
+      <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+        <Icon className="h-6 w-6 text-primary-600" />
+      </div>
+      <div>
+        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        <div className="text-sm text-gray-600">{label}</div>
+      </div>
+    </div>
   </motion.div>
 )
 
-const ParticleBackground = () => {
-  const [particles, setParticles] = useState<Array<{ id: number, x: number, y: number, size: number, delay: number }>>([])
-  
-  React.useEffect(() => {
-    const generateParticles = () => {
-      const newParticles = Array.from({ length: 50 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 4 + 1,
-        delay: Math.random() * 2
-      }))
-      setParticles(newParticles)
-    }
-    
-    generateParticles()
-  }, [])
-  
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute bg-red-300/30 rounded-full"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: particle.size,
-            height: particle.size,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0]
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: particle.delay,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
+const FeatureItem = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  delay = 0 
+}: { 
+  icon: any, 
+  title: string, 
+  description: string, 
+  delay?: number 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, x: -20 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, delay }}
+    className="flex items-start space-x-3"
+  >
+    <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+      <CheckCircle className="h-4 w-4 text-primary-600" />
     </div>
-  )
-}
+    <div>
+      <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+      <p className="text-gray-600 text-sm">{description}</p>
+    </div>
+  </motion.div>
+)
 
 export default function VendorHeroSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  })
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+
+  const stats = [
+    { icon: TrendingUp, value: '₹2.5L+', label: 'Average Monthly Revenue' },
+    { icon: Users, value: '500+', label: 'Active Vendors' },
+    { icon: Calendar, value: '10K+', label: 'Events Managed' },
+    { icon: Star, value: '4.8★', label: 'Platform Rating' }
+  ]
+
+  const features = [
+    {
+      icon: Shield,
+      title: 'Verified & Trusted',
+      description: 'Join a platform trusted by thousands of customers'
+    },
+    {
+      icon: Zap,
+      title: 'Instant Bookings',
+      description: 'Get real-time bookings and payments'
+    },
+    {
+      icon: TrendingUp,
+      title: 'Scale Your Business',
+      description: 'Reach more customers and grow your revenue'
+    }
+  ]
 
   return (
-    <section 
-      ref={containerRef}
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-red-900 via-red-800 to-red-900"
-    >
-      {/* Professional Red Animated Background */}
-      <motion.div 
-        className="absolute inset-0"
-        style={{ y, opacity }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/90 via-red-800/80 to-red-900/90"></div>
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(239,68,68,0.3),transparent_50%)]"></div>
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,38,38,0.3),transparent_50%)]"></div>
-        <ParticleBackground />
-      </motion.div>
+    <section className="relative min-h-screen flex items-center bg-white overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-64 h-64 bg-primary-50 rounded-full opacity-50"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-50 rounded-full opacity-30"></div>
+        <div className="absolute inset-0 grid-pattern opacity-5"></div>
+      </div>
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
-
-      <div className="container-custom relative z-10 pt-32 pb-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="container-custom relative z-10 pt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Content */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -60 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 1, ease: "easeOut" }}
             className="space-y-8"
           >
-            {/* Badge */}
+            {/* Professional Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl px-6 py-3 rounded-full border border-purple-300/30"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-flex items-center space-x-3 bg-primary-50 px-4 py-2 rounded-full border border-primary-200"
             >
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-white/90 font-medium text-sm">Live Platform</span>
-              </div>
-              <div className="w-px h-4 bg-white/20" />
-              <span className="text-purple-200 font-medium text-sm">Join 500+ Vendors</span>
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-primary-700 font-medium text-sm">Join India's Leading Event Platform</span>
             </motion.div>
 
             {/* Main Heading */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="space-y-4"
             >
-              <h1 className="text-5xl lg:text-7xl font-bold text-white font-heading leading-tight">
-                Become an
-                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent block">
-                  Evea Vendor
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                Grow Your Event
+                <span className="text-primary-600 block">Business</span>
+                <span className="text-gray-600 text-2xl sm:text-3xl lg:text-4xl block mt-2">
+                  with Evea
                 </span>
               </h1>
+              
+              <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-xl">
+                Join 500+ successful vendors who have transformed their event services business. 
+                Get more bookings, manage clients efficiently, and scale your revenue.
+              </p>
             </motion.div>
 
-            {/* Subtitle */}
-            <motion.p
+            {/* Feature List */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="text-xl lg:text-2xl text-gray-300 leading-relaxed max-w-2xl"
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="space-y-4"
             >
-              Transform your event services business with India's most advanced marketplace platform. 
-              <span className="text-purple-300 font-semibold"> Scale faster, earn more.</span>
-            </motion.p>
+              {features.map((feature, index) => (
+                <FeatureItem
+                  key={feature.title}
+                  icon={feature.icon}
+                  title={feature.title}
+                  description={feature.description}
+                  delay={1.0 + index * 0.1}
+                />
+              ))}
+            </motion.div>
 
             {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1 }}
-              className="flex flex-col sm:flex-row items-start gap-4 pt-4"
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="flex flex-col sm:flex-row gap-4 pt-4"
             >
               <Link href="/vendor/register">
                 <Button 
                   variant="primary" 
                   size="lg" 
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-2xl shadow-purple-500/25 border-0 text-lg px-8 py-4 group transition-all duration-300"
+                  className="group text-base sm:text-lg px-8 py-4"
                 >
                   Start Selling Today
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/vendor/login">
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-lg px-8 py-4"
-                >
-                  Vendor Login
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors duration-300 text-lg font-medium"
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => setIsVideoPlaying(true)}
+                className="text-base sm:text-lg px-8 py-4 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white"
               >
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/20">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 5v10l8-5-8-5z"/>
-                  </svg>
-                </div>
-                <span>Watch Success Stories</span>
-              </motion.button>
+                <Play className="h-5 w-5 mr-2" />
+                Watch Demo
+              </Button>
             </motion.div>
 
             {/* Trust Indicators */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-              className="flex items-center space-x-6 pt-6"
+              transition={{ duration: 0.8, delay: 1.4 }}
+              className="flex items-center space-x-6 pt-6 border-t border-gray-200"
             >
               <div className="flex items-center space-x-2">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full border-2 border-white/20" />
+                    <div key={i} className="w-8 h-8 bg-primary-100 rounded-full border-2 border-white" />
                   ))}
                 </div>
-                <span className="text-white/80 text-sm">500+ Active Vendors</span>
+                <span className="text-gray-600 text-sm">500+ Active Vendors</span>
               </div>
               <div className="flex items-center space-x-1">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
                 ))}
-                <span className="text-white/80 text-sm ml-2">4.9/5 Rating</span>
+                <span className="text-gray-600 text-sm ml-2">4.8/5 Rating</span>
               </div>
             </motion.div>
           </motion.div>
 
-          {/* Right Content - Floating Cards */}
+          {/* Right Content - Stats Grid */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative"
+            transition={{ duration: 1, delay: 0.6 }}
+            className="space-y-6"
           >
-            <div className="grid grid-cols-2 gap-6">
-              {/* Revenue Card */}
-              <FloatingCard delay={0.6} className="p-6 col-span-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly Revenue</h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-4xl font-bold text-green-600">₹</span>
-                      <CountUp
-                        end={2.5}
-                        decimals={1}
-                        duration={2.5}
-                        suffix="L+"
-                        className="text-4xl font-bold text-green-600"
-                      />
-                    </div>
-                    <p className="text-gray-600 text-sm mt-1">Average vendor earnings</p>
-                  </div>
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center">
-                    <TrendingUp className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-              </FloatingCard>
-
-              {/* Events Card */}
-              <FloatingCard delay={0.8} className="p-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <ShoppingBag className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    <CountUp end={10000} duration={2.5} suffix="+" />
-                  </div>
-                  <p className="text-gray-600 text-sm">Events Managed</p>
-                </div>
-              </FloatingCard>
-
-              {/* Rating Card */}
-              <FloatingCard delay={1.0} className="p-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Award className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">4.8★</div>
-                  <p className="text-gray-600 text-sm">Average Rating</p>
-                </div>
-              </FloatingCard>
-
-              {/* Success Story Card */}
-              <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} className="col-span-2">
-                <FloatingCard delay={1.2} className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Rajesh Photography</h4>
-                      <p className="text-gray-600 text-sm mt-1">
-                        "Increased my bookings by 300% in just 3 months. The platform's reach is incredible!"
-                      </p>
-                      <div className="flex items-center mt-2">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                        ))}
-                        <span className="text-xs text-gray-500 ml-2">Verified Review</span>
-                      </div>
-                    </div>
-                  </div>
-                </FloatingCard>
-              </Tilt>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {stats.map((stat, index) => (
+                <StatCard
+                  key={stat.label}
+                  icon={stat.icon}
+                  value={stat.value}
+                  label={stat.label}
+                  delay={0.8 + index * 0.1}
+                />
+              ))}
             </div>
+
+            {/* Success Story Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-6 border border-primary-200"
+            >
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg">R</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Rajesh Photography</h4>
+                  <p className="text-gray-700 text-sm mb-3">
+                    "Increased my bookings by 300% in just 3 months. The platform's reach and professional tools have transformed my business."
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                      ))}
+                      <span className="text-xs text-gray-600 ml-2">Verified Vendor</span>
+                    </div>
+                    <div className="text-sm font-semibold text-primary-600">₹4.2L/month</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
+      </div>
 
-        {/* Scroll Indicator */}
+      {/* Video Modal */}
+      {isVideoPlaying && (
         <motion.div
+          key="video-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 2 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setIsVideoPlaying(false)}
         >
           <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
+            key="video-modal-content"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-2xl p-4 lg:p-6 max-w-4xl w-full"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1 h-3 bg-white/60 rounded-full mt-2"
-            />
+            <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center mb-4 lg:mb-6 relative overflow-hidden">
+              <div className="text-white text-center z-10">
+                <Play className="h-16 w-16 lg:h-20 lg:w-20 mx-auto mb-4 text-primary-400" />
+                <h3 className="text-lg lg:text-xl font-semibold mb-2">Vendor Success Stories</h3>
+                <p className="text-gray-300 text-sm lg:text-base">See how vendors are growing their business with Evea</p>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-transparent"></div>
+            </div>
+            
+            <div className="flex justify-center">
+              <Button
+                variant="primary"
+                onClick={() => setIsVideoPlaying(false)}
+                className="px-6 lg:px-8"
+              >
+                Close Video
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
-      </div>
+      )}
     </section>
   )
 }

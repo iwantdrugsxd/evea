@@ -106,9 +106,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(true)
       setError(null)
 
-      const endpoint = role === 'vendor' ? '/api/auth/vendor-login' 
-                    : role === 'admin' ? '/api/auth/admin-login'
-                    : '/api/auth/login'
+      // Use common login endpoint for all roles
+      const endpoint = '/api/auth/login'
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -138,6 +137,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             console.error('Error refreshing user data:', error)
           }
         }, 100)
+        
+        // All users redirect to marketplace regardless of role
+        router.push('/marketplace')
         
         return true
       } else {

@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         email: validatedData.user.email,
         phone: 'Not provided', // Google users might not have phone
         password_hash: passwordHash,
-        role: 'customer',
+        role: 'customer', // Default to customer for new Google users
         is_active: true,
         email_verified: true, // Google emails are pre-verified
         profile_picture: validatedData.user.picture || null

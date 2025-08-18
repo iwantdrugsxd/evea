@@ -3,12 +3,13 @@
 import { motion } from 'framer-motion'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import VendorHeroSection from '@/components/vendor/HeroSection'
-import WhyJoinSection from '@/components/vendor/WhyJoinSection'
-import HowItWorksSection from '@/components/vendor/HowItWorksSection'
-import BenefitsSection from '@/components/vendor/BenefitsSection'
-import TestimonialsSection from '@/components/vendor/TestimonialsSection'
-import CTASection from '@/components/vendor/CTASection'
+
+// Vendor Components
+import VendorHeroSection from '@/components/landing/VendorHeroSection'
+import VendorWhyJoinSection from '@/components/landing/VendorWhyJoinSection'
+import VendorHowItWorksSection from '@/components/landing/VendorHowItWorksSection'
+import VendorTestimonialsSection from '@/components/landing/VendorTestimonialsSection'
+import VendorCTASection from '@/components/landing/VendorCTASection'
 
 export default function VendorLandingPage() {
   return (
@@ -16,25 +17,24 @@ export default function VendorLandingPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 relative overflow-hidden"
+      className="min-h-screen bg-white relative overflow-hidden"
     >
-      {/* Professional Red Background Elements */}
+      {/* Subtle Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(239,68,68,0.1),transparent_50%)]" />
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,38,38,0.1),transparent_50%)]" />
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-red-100 rounded-full opacity-20 animate-pulse-glow"></div>
-        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-red-200 rounded-full opacity-30 animate-float"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(239,68,68,0.05),transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,38,38,0.05),transparent_50%)]" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary-50 rounded-full opacity-30"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-primary-50 rounded-full opacity-20"></div>
       </div>
       
       <Header />
       
-      <main className="relative z-10 pt-20 lg:pt-24">
+      <main className="relative z-10">
         <VendorHeroSection />
-        <WhyJoinSection />
-        <HowItWorksSection />
-        <BenefitsSection />
-        <TestimonialsSection />
-        <CTASection />
+        <VendorWhyJoinSection />
+        <VendorHowItWorksSection />
+        <VendorTestimonialsSection />
+        <VendorCTASection />
       </main>
 
       <Footer />

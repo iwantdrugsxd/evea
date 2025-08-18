@@ -1,381 +1,297 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import Link from 'next/link'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   ArrowRight, 
-  Mail, 
-  Phone, 
-  Sparkles, 
-  Rocket,
-  Star,
-  CheckCircle,
-  Gift,
-  Clock,
+  CheckCircle, 
+  Star, 
+  Shield, 
+  Zap,
   Users,
   TrendingUp,
-  Zap,
-  Award,
-  Heart,
-  Target
+  Award
 } from 'lucide-react'
-import Tilt from 'react-parallax-tilt'
-import CountUp from 'react-countup'
+import { Card, CardContent } from '@/components/ui/card'
 import Button from '@/components/ui/button'
 
-const benefits = [
-  { icon: CheckCircle, text: 'Zero setup fees' },
-  { icon: Zap, text: 'Instant approval' },
-  { icon: TrendingUp, text: '300% growth potential' },
-  { icon: Award, text: 'Premium vendor badge' }
-]
+const FeatureItem = ({ 
+  icon: Icon, 
+  title, 
+  description 
+}: { 
+  icon: any, 
+  title: string, 
+  description: string 
+}) => (
+  <div className="flex items-start space-x-3">
+    <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+      <CheckCircle className="h-4 w-4 text-primary-600" />
+    </div>
+    <div>
+      <h4 className="font-semibold text-gray-900 mb-1">{title}</h4>
+      <p className="text-gray-600 text-sm">{description}</p>
+    </div>
+  </div>
+)
 
-const FloatingElement = ({ children, delay = 0, className = "" }: {
-  children: React.ReactNode,
-  delay?: number,
-  className?: string
+const StatCard = ({ 
+  icon: Icon, 
+  value, 
+  label, 
+  delay = 0 
+}: { 
+  icon: any, 
+  value: string, 
+  label: string, 
+  delay?: number 
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 50, scale: 0.8 }}
-    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    transition={{ 
-      duration: 0.8, 
-      delay,
-      type: "spring",
-      stiffness: 100,
-      damping: 10
-    }}
-    className={className}
+    transition={{ duration: 0.6, delay }}
+    className="text-center group"
   >
-    {children}
+    <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+      <Icon className="h-6 w-6 text-primary-600" />
+    </div>
+    <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
+    <div className="text-gray-600 text-sm">{label}</div>
   </motion.div>
 )
 
-const ParticleField = () => {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    delay: Math.random() * 2
-  }))
-  
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute bg-white/20 rounded-full"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: particle.size,
-            height: particle.size,
-          }}
-          animate={{
-            y: [0, -50, 0],
-            opacity: [0, 1, 0],
-            scale: [0, 1.5, 0]
-          }}
-          transition={{
-            duration: 4 + Math.random() * 2,
-            repeat: Infinity,
-            delay: particle.delay,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
 export default function CTASection() {
-  const [isHovered, setIsHovered] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  })
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["100px", "-100px"])
-  const rotateX = useTransform(scrollYProgress, [0, 1], [15, -15])
+  const features = [
+    {
+      icon: Shield,
+      title: 'Verified & Secure',
+      description: 'Join a platform trusted by thousands of customers'
+    },
+    {
+      icon: Zap,
+      title: 'Instant Setup',
+      description: 'Get started in under 5 minutes'
+    },
+    {
+      icon: TrendingUp,
+      title: 'Proven Results',
+      description: 'Average 300% growth for vendors'
+    },
+    {
+      icon: Users,
+      title: 'Quality Customers',
+      description: 'Access 50K+ active customers'
+    }
+  ]
+
+  const stats = [
+    { icon: Users, value: '500+', label: 'Active Vendors' },
+    { icon: Star, value: '4.8★', label: 'Platform Rating' },
+    { icon: TrendingUp, value: '300%', label: 'Average Growth' },
+    { icon: Award, value: '₹2.5L+', label: 'Avg Monthly Revenue' }
+  ]
 
   return (
-    <section 
-      ref={containerRef}
-      className="section-padding bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden"
-    >
-      {/* Animated Background */}
-      <motion.div 
-        className="absolute inset-0"
-        style={{ y }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.4),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.3),transparent_50%)]" />
-        <ParticleField />
-      </motion.div>
-
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.03)_1px,transparent_1px)] bg-[size:100px_100px]" />
+    <section className="section-padding bg-gradient-to-br from-primary-50 to-primary-100 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(239,68,68,0.05),transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_left,rgba(220,38,38,0.05),transparent_50%)]" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary-200 rounded-full opacity-10"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-primary-200 rounded-full opacity-10"></div>
+        <div className="absolute inset-0 grid-pattern opacity-5"></div>
+      </div>
 
       <div className="container-custom relative z-10">
-        {/* Main CTA */}
-        <div className="text-center mb-20">
-          <FloatingElement delay={0.2}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl px-8 py-4 rounded-full border border-purple-300/30 mb-8"
-            >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8"
+          >
+            <div>
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="inline-flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-primary-200 mb-6"
               >
-                <Rocket className="h-6 w-6 text-purple-300" />
+                <Star className="h-4 w-4 text-primary-600" />
+                <span className="text-primary-700 font-semibold text-sm">Join India's Leading Platform</span>
               </motion.div>
-              <span className="text-white/90 font-bold text-lg">Launch Your Success</span>
-              <div className="flex items-center space-x-1">
-                {[1, 2, 3].map((i) => (
-                  <motion.div
-                    key={i}
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
-                  >
-                    <Sparkles className="h-4 w-4 text-yellow-400" />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </FloatingElement>
 
-          <FloatingElement delay={0.4}>
-            <h2 className="text-5xl lg:text-7xl font-bold mb-6 font-heading leading-tight">
-              Ready to{' '}
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                Transform
-              </span>
-              <br />
-              Your Business?
-            </h2>
-          </FloatingElement>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+                Ready to{' '}
+                <span className="text-primary-600">Transform</span>
+                <br />
+                Your Business?
+              </h2>
 
-          <FloatingElement delay={0.6}>
-            <p className="text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed">
-              Join India's fastest-growing event marketplace and unlock unlimited growth potential. 
-              <span className="text-purple-300 font-semibold"> Start earning more today!</span>
-            </p>
-          </FloatingElement>
+              <p className="text-xl text-gray-600 leading-relaxed mb-8">
+                Join 500+ successful vendors who have already transformed their event services business. 
+                Start your journey today and see the difference Evea can make.
+              </p>
+            </div>
 
-          {/* Benefits Grid */}
-          <FloatingElement delay={0.8}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-12">
-              {benefits.map((benefit, index) => (
+            {/* Features List */}
+            <div className="space-y-4">
+              {features.map((feature, index) => (
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  key={feature.title}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 1 + index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20"
+                  transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
                 >
-                  <benefit.icon className="h-6 w-6 text-green-400 mx-auto mb-2" />
-                  <p className="text-sm text-white/80 font-medium">{benefit.text}</p>
+                  <FeatureItem
+                    icon={feature.icon}
+                    title={feature.title}
+                    description={feature.description}
+                  />
                 </motion.div>
               ))}
             </div>
-          </FloatingElement>
 
-          {/* Main CTA Button */}
-          <FloatingElement delay={1.0}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link href="/vendor/register">
-                <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10}>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onHoverStart={() => setIsHovered(true)}
-                    onHoverEnd={() => setIsHovered(false)}
-                    className="relative group"
-                  >
-                    {/* Glow Effect */}
-                    <motion.div
-                      className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl blur opacity-75"
-                      animate={{
-                        opacity: isHovered ? 1 : 0.75,
-                        scale: isHovered ? 1.05 : 1
-                      }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    
-                    <Button 
-                      variant="primary" 
-                      size="lg"
-                      className="relative bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 text-xl px-12 py-6 rounded-2xl font-bold shadow-2xl"
-                    >
-                      <span className="flex items-center space-x-3">
-                        <span>Start Your Journey</span>
-                        <motion.div
-                          animate={{ x: isHovered ? 5 : 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <ArrowRight className="h-6 w-6" />
-                        </motion.div>
-                      </span>
-                    </Button>
-                  </motion.div>
-                </Tilt>
-              </Link>
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="flex flex-col sm:flex-row gap-4 pt-4"
+            >
+              <Button variant="primary" size="lg" className="group text-lg px-8 py-4">
+                <span>Start Your Journey</span>
+                <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center space-x-3 text-white/80 hover:text-white transition-colors duration-300 text-lg font-medium group"
-              >
-                <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 5v10l8-5-8-5z"/>
-                  </svg>
-                </div>
-                <span>Watch Demo</span>
-              </motion.button>
-            </div>
-          </FloatingElement>
-        </div>
-
-        {/* Stats Section */}
-        <FloatingElement delay={1.2}>
-          <motion.div
-            style={{ rotateX }}
-            className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 mb-16"
-          >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <CountUp end={500} duration={2.5} suffix="+" />
-                </div>
-                <p className="text-gray-300">Active Vendors</p>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-white mb-2">
-                  ₹<CountUp end={50} duration={2.5} suffix="L+" />
-                </div>
-                <p className="text-gray-300">Monthly Revenue</p>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <CountUp end={10000} duration={2.5} suffix="+" />
-                </div>
-                <p className="text-gray-300">Events Managed</p>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <CountUp end={4.9} decimals={1} duration={2.5} suffix="★" />
-                </div>
-                <p className="text-gray-300">Platform Rating</p>
-              </div>
-            </div>
+              <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-gray-300 text-gray-700 hover:bg-gray-50">
+                <span>Learn More</span>
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+            </motion.div>
           </motion.div>
-        </FloatingElement>
 
-        {/* Support Section */}
-        <FloatingElement delay={1.4}>
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Contact Card */}
-            <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10}>
-              <motion.div
-                whileHover={{ y: -10 }}
-                className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20"
-              >
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
-                    <Users className="h-8 w-8 text-white" />
+          {/* Right Content */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="space-y-8"
+          >
+            {/* Stats Grid */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-elegant">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                  Platform Success Metrics
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  {stats.map((stat, index) => (
+                    <StatCard
+                      key={stat.label}
+                      icon={stat.icon}
+                      value={stat.value}
+                      label={stat.label}
+                      delay={index * 0.1}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Success Story Card */}
+            <Card className="bg-gradient-to-br from-primary-600 to-primary-700 border-primary-600 shadow-elegant">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-lg">P</span>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Need Help?</h3>
-                    <p className="text-gray-300">Our vendor success team is here for you</p>
+                    <h4 className="font-semibold text-white mb-2">Priya Sharma</h4>
+                    <p className="text-primary-100 text-sm mb-3">
+                      "Evea transformed my small photography business into a full-service event company. 
+                      The platform's reach and tools are incredible!"
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 text-yellow-300 fill-current" />
+                        ))}
+                        <span className="text-xs text-primary-100 ml-2">Verified Vendor</span>
+                      </div>
+                      <div className="text-sm font-semibold text-white">₹4.2L/month</div>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <motion.a 
-                    href="mailto:vendors@evea.com"
-                    whileHover={{ x: 5 }}
-                    className="flex items-center space-x-3 text-blue-300 hover:text-blue-200 transition-colors group"
-                  >
-                    <Mail className="h-5 w-5" />
-                    <span>vendors@evea.com</span>
-                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.a>
-                  
-                  <motion.a 
-                    href="tel:+91XXXXXXXXXX"
-                    whileHover={{ x: 5 }}
-                    className="flex items-center space-x-3 text-blue-300 hover:text-blue-200 transition-colors group"
-                  >
-                    <Phone className="h-5 w-5" />
-                    <span>+91-XXXXX-XXXXX</span>
-                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.a>
-                </div>
-              </motion.div>
-            </Tilt>
+              </CardContent>
+            </Card>
 
-            {/* Urgency Card */}
-            <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10}>
-              <motion.div
-                whileHover={{ y: -10 }}
-                className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-3xl p-8 border border-orange-300/30 relative overflow-hidden"
-              >
-                {/* Animated Background */}
-                <div className="absolute top-0 right-0 w-32 h-32 opacity-20">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className="w-full h-full bg-gradient-to-br from-orange-400 to-red-400 rounded-full blur-2xl"
-                  />
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex items-center justify-center space-x-8 pt-4"
+            >
+              <div className="flex items-center space-x-2">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-8 h-8 bg-primary-200 rounded-full border-2 border-white" />
+                  ))}
                 </div>
+                <span className="text-gray-600 text-sm font-medium">500+ Active Vendors</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                ))}
+                <span className="text-gray-600 text-sm font-medium ml-2">4.8/5 Rating</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-center mt-16"
+        >
+          <Card className="bg-white/90 backdrop-blur-sm border-white/50 shadow-elegant">
+            <CardContent className="p-8 lg:p-12">
+              <div className="max-w-3xl mx-auto">
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                  Don't Wait to Start Growing
+                </h3>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Every day you wait is a day you could be earning more. Join Evea today and start 
+                  transforming your event services business immediately.
+                </p>
                 
-                <div className="relative z-10">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
-                      <Gift className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">Limited Time Offer</h3>
-                      <p className="text-orange-200">Early bird benefits for new vendors</p>
-                    </div>
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="primary" size="lg" className="group text-lg px-8 py-4">
+                    <span>Get Started Now</span>
+                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-400" />
-                      <span className="text-white">Zero commission for first month</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-400" />
-                      <span className="text-white">Premium listing for 3 months</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-400" />
-                      <span className="text-white">Dedicated account manager</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 mt-6 text-orange-300">
-                    <Clock className="h-4 w-4" />
-                    <span className="text-sm font-medium">Offer expires in 7 days</span>
-                  </div>
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white">
+                    <span>Schedule a Demo</span>
+                    <Zap className="h-5 w-5 ml-2" />
+                  </Button>
                 </div>
-              </motion.div>
-            </Tilt>
-          </div>
-        </FloatingElement>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </section>
   )

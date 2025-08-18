@@ -45,14 +45,8 @@ export async function POST(request: NextRequest) {
 
     console.log('User found:', userData.full_name, 'Role:', userData.role)
 
-    // Check if user is a customer (not vendor or admin)
-    if (userData.role !== 'customer') {
-      console.error('User is not a customer. Role:', userData.role)
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      )
-    }
+    // Allow all roles to login through common portal
+    // All users will be redirected to marketplace regardless of role
 
     // Check if account is active
     if (!userData.is_active) {

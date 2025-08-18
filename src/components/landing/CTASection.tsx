@@ -47,12 +47,12 @@ const CTASection = () => {
   ]
 
   return (
-    <section className="section-padding bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden">
-      {/* Advanced Background Elements */}
+    <section className="section-padding bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900 relative overflow-hidden">
+      {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-600/10 rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse-glow"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-600/10 rounded-full translate-x-1/2 translate-y-1/2 animate-float"></div>
-        <div className="absolute inset-0 dot-pattern opacity-20"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-600/5 rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse-glow"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-600/5 rounded-full translate-x-1/2 translate-y-1/2 animate-float"></div>
+        <div className="absolute inset-0 dot-pattern opacity-5"></div>
       </div>
 
       <div className="container-custom relative z-10">
@@ -64,11 +64,11 @@ const CTASection = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center space-x-3 glass-red px-8 py-4 rounded-full mb-8 border border-primary-500/30"
+            className="inline-flex items-center space-x-3 bg-primary-100 px-8 py-4 rounded-full mb-8 border border-primary-200 shadow-red-soft"
           >
-            <Gift className="h-6 w-6 text-primary-400" />
-            <span className="text-primary-200 font-semibold text-lg">{cta.badge.text}</span>
-            <Zap className="h-5 w-5 text-yellow-400" />
+            <Gift className="h-6 w-6 text-primary-600" />
+            <span className="text-primary-700 font-semibold text-lg">{cta.badge.text}</span>
+            <Zap className="h-5 w-5 text-yellow-500" />
           </motion.div>
           
           {/* Main CTA Headline */}
@@ -81,7 +81,7 @@ const CTASection = () => {
           >
             {cta.title}
             <motion.span 
-              className="block bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 bg-clip-text text-transparent"
+              className="block bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 bg-clip-text text-transparent"
               animate={{ 
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
               }}
@@ -96,7 +96,7 @@ const CTASection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-12"
+            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-12"
           >
             {cta.description}
           </motion.p>
@@ -126,13 +126,12 @@ const CTASection = () => {
             <Button
               variant="outline"
               size="lg"
-              className="btn-outline btn-lg text-white border-white hover:bg-white hover:text-gray-900"
+              className="btn-outline btn-lg text-primary-600 border-primary-600 hover:bg-primary-600 hover:text-white"
             >
               <Phone className="h-5 w-5 mr-2" />
               Talk to Expert
             </Button>
           </motion.div>
-          {/* Duplicate description removed */}
 
           {/* Benefits Grid */}
           <motion.div
@@ -154,19 +153,15 @@ const CTASection = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-                  className="flex items-center space-x-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700"
+                  className="flex items-center space-x-3 p-4 bg-white rounded-lg border border-gray-200 shadow-elegant hover:shadow-elegant-hover"
                 >
-                  <IconComponent className="h-5 w-5 text-primary-400 flex-shrink-0" />
-                  <span className="text-gray-300 font-medium">{benefit.text}</span>
+                  <IconComponent className="h-5 w-5 text-primary-600 flex-shrink-0" />
+                  <span className="text-gray-700 font-medium">{benefit.text}</span>
                 </motion.div>
               )
             })}
           </motion.div>
-
-          {/* Second set of CTA buttons removed - keeping only the first set */}
         </div>
-
-        {/* Urgency Section removed */}
 
         {/* Final Trust Indicators */}
         <motion.div
@@ -176,21 +171,21 @@ const CTASection = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-center mt-16"
         >
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-400">
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
             <div className="flex items-center space-x-2">
-              <Shield className="h-4 w-4 text-primary-400" />
+              <Shield className="h-4 w-4 text-primary-600" />
               <span>SSL Secured</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Award className="h-4 w-4 text-primary-400" />
+              <Award className="h-4 w-4 text-primary-600" />
               <span>Award Winning</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-primary-400" />
+              <Users className="h-4 w-4 text-primary-600" />
               <span>10K+ Users</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Star className="h-4 w-4 text-primary-400" />
+              <Star className="h-4 w-4 text-primary-600" />
               <span>500+ Vendors</span>
             </div>
           </div>

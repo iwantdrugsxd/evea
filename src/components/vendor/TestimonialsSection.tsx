@@ -1,394 +1,368 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
-import { Star, Quote, ChevronLeft, ChevronRight, Play } from 'lucide-react'
-import Tilt from 'react-parallax-tilt'
+import { motion } from 'framer-motion'
+import { 
+  Star, 
+  Quote, 
+  ArrowLeft, 
+  ArrowRight,
+  Play,
+  Award,
+  TrendingUp,
+  Users
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import Button from '@/components/ui/button'
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Priya & Rajesh Sharma",
-    role: "Wedding Couple",
-    location: "Mumbai, Maharashtra",
-    eventType: "Traditional Indian Wedding",
-    rating: 5,
-    content: "Evea made our dream wedding come true! From finding the perfect venue to coordinating with vendors, everything was seamless. The platform's verified vendor network gave us confidence, and the 24/7 support was incredible.",
-    eventDetails: {
-      guests: 300,
-      vendors: 8,
-      duration: "3 days"
-    },
-    highlight: "Dream Wedding Realized",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    color: "from-pink-500 to-rose-500"
-  },
-  {
-    id: 2,
-    name: "Arjun Patel",
-    role: "Corporate Event Manager",
-    location: "Bangalore, Karnataka", 
-    eventType: "Annual Conference",
-    rating: 5,
-    content: "As a corporate event manager, I need reliable vendors who deliver on time. Evea's vendor verification process is thorough, and the booking system is incredibly efficient. Saved us both time and money!",
-    eventDetails: {
-      guests: 500,
-      vendors: 12,
-      duration: "2 days"
-    },
-    highlight: "Professional Excellence",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    color: "from-blue-500 to-cyan-500"
-  },
-  {
-    id: 3,
-    name: "Meera Singh",
-    role: "Mother",
-    location: "Delhi, NCR",
-    eventType: "16th Birthday Party",
-    rating: 5,
-    content: "My daughter's sweet sixteen was absolutely perfect! The theme party vendors were creative, professional, and within our budget. The seamless coordination made the day stress-free for our family.",
-    eventDetails: {
-      guests: 50,
-      vendors: 4,
-      duration: "6 hours"
-    },
-    highlight: "Memorable Birthday Celebration",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    color: "from-purple-500 to-violet-500"
-  }
-]
-
-const TestimonialCard = ({ testimonial, isActive, onClick }: {
-  testimonial: typeof testimonials[0],
-  isActive: boolean,
-  onClick: () => void
-}) => {
-  return (
-    <Tilt
-      tiltMaxAngleX={10}
-      tiltMaxAngleY={10}
-      perspective={1000}
-      transitionSpeed={1000}
-    >
-      <motion.div
-        layout
-        onClick={onClick}
-        className={`cursor-pointer transition-all duration-500 ${
-          isActive ? 'scale-105' : 'scale-95 opacity-70'
-        }`}
-        whileHover={{ scale: isActive ? 1.05 : 1 }}
-      >
-        {/* Glow Effect */}
-        <motion.div
-          className={`absolute -inset-1 bg-gradient-to-r ${testimonial.color} rounded-3xl blur opacity-75`}
-          animate={{
-            opacity: isActive ? 1 : 0.3,
-            scale: isActive ? 1.02 : 1
-          }}
-          transition={{ duration: 0.3 }}
-        />
-        
-        <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-2xl overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
-            <div className={`w-full h-full bg-gradient-to-br ${testimonial.color} rounded-full blur-2xl`} />
+const TestimonialCard = ({ 
+  name, 
+  business, 
+  role, 
+  quote, 
+  rating, 
+  stats, 
+  image, 
+  delay = 0 
+}: { 
+  name: string, 
+  business: string, 
+  role: string, 
+  quote: string, 
+  rating: number, 
+  stats: { value: string, label: string },
+  image: string,
+  delay?: number 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay }}
+    className="group"
+  >
+    <Card className="h-full bg-white border-gray-200 hover:border-primary-300 shadow-elegant hover:shadow-elegant-hover transition-all duration-500 group-hover:scale-[1.02] overflow-hidden">
+      <CardContent className="p-8">
+        {/* Quote Icon */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+            <Quote className="h-6 w-6 text-primary-600" />
           </div>
-          
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="relative"
-              >
-                <img
-                  src={testimonial.avatar}
-                  alt={testimonial.name}
-                  className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-lg"
-                />
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-                  <Star className="h-3 w-3 text-white fill-current" />
-                </div>
-              </motion.div>
-              
-              <div>
-                <h4 className="font-bold text-gray-900 text-lg">{testimonial.name}</h4>
-                <p className="text-purple-600 font-semibold">{testimonial.role}</p>
-                <p className="text-gray-500 text-sm">{testimonial.location}</p>
-              </div>
-            </div>
-            
-            <motion.div
-              animate={{ rotate: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className={`bg-gradient-to-r ${testimonial.color} px-3 py-1 rounded-full`}
-            >
-              <span className="text-white font-bold text-xs">{testimonial.highlight}</span>
-            </motion.div>
-          </div>
-          
-          {/* Rating */}
-          <div className="flex items-center space-x-1 mb-4">
-            {[...Array(testimonial.rating)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Star className="h-5 w-5 text-yellow-400 fill-current" />
-              </motion.div>
+          <div className="flex items-center space-x-1">
+            {[...Array(rating)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
             ))}
           </div>
-          
-          {/* Quote */}
-          <div className="relative mb-6">
-            <Quote className="h-8 w-8 text-purple-200 absolute -top-2 -left-2" />
-            <blockquote className="text-gray-700 leading-relaxed pl-6 italic">
-              "{testimonial.content}"
-            </blockquote>
+        </div>
+
+        {/* Quote Text */}
+        <blockquote className="text-gray-700 text-lg leading-relaxed mb-6 italic">
+          "{quote}"
+        </blockquote>
+
+        {/* Author Info */}
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-primary-600 font-bold text-lg">{name.charAt(0)}</span>
           </div>
-          
-          {/* Event Details */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-            <div className="text-center">
-              <div className="font-bold text-blue-600 text-lg">{testimonial.eventDetails.guests}</div>
-              <div className="text-xs text-gray-500">Guests</div>
-            </div>
-            <div className="text-center">
-              <div className="font-bold text-green-600 text-lg">{testimonial.eventDetails.vendors}</div>
-              <div className="text-xs text-gray-500">Vendors</div>
-            </div>
-            <div className="text-center">
-              <div className="font-bold text-purple-600 text-lg">{testimonial.eventDetails.duration}</div>
-              <div className="text-xs text-gray-500">Duration</div>
-            </div>
+          <div className="flex-1">
+            <h4 className="font-semibold text-gray-900">{name}</h4>
+            <p className="text-sm text-gray-600">{business}</p>
+            <p className="text-xs text-gray-500">{role}</p>
+          </div>
+          <div className="text-right">
+            <div className="text-lg font-bold text-primary-600">{stats.value}</div>
+            <div className="text-xs text-gray-500">{stats.label}</div>
           </div>
         </div>
-      </motion.div>
-    </Tilt>
-  )
-}
 
-const VideoTestimonial = () => {
-  const [isPlaying, setIsPlaying] = useState(false)
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-      className="relative bg-gradient-to-br from-gray-900 to-slate-900 rounded-3xl overflow-hidden shadow-2xl"
-    >
-      <div className="aspect-video relative">
-        {!isPlaying ? (
-          <>
-            <img
-              src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=450&fit=crop"
-              alt="Video testimonial"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsPlaying(true)}
-                className="w-20 h-20 bg-white/20 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/30"
-              >
-                <Play className="h-8 w-8 text-white ml-1" />
-              </motion.button>
-            </div>
-          </>
-        ) : (
-          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-            <p className="text-white">Video player would be embedded here</p>
+        {/* Hover Effect Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-100/0 group-hover:from-primary-50/30 group-hover:to-primary-100/20 transition-all duration-500 rounded-xl pointer-events-none" />
+      </CardContent>
+    </Card>
+  </motion.div>
+)
+
+const VideoTestimonial = ({ 
+  title, 
+  description, 
+  thumbnail, 
+  duration, 
+  delay = 0 
+}: { 
+  title: string, 
+  description: string, 
+  thumbnail: string, 
+  duration: string, 
+  delay?: number 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    whileInView={{ opacity: 1, scale: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, delay }}
+    className="group cursor-pointer"
+  >
+    <Card className="bg-white border-gray-200 hover:border-primary-300 shadow-elegant hover:shadow-elegant-hover transition-all duration-300 overflow-hidden">
+      <CardContent className="p-0">
+        <div className="relative">
+          <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-transparent"></div>
+            <Play className="h-12 w-12 text-primary-600 group-hover:scale-110 transition-transform duration-300" />
           </div>
-        )}
-      </div>
-      
-      <div className="p-6">
-        <h3 className="text-white font-bold text-xl mb-2">
-          Watch Success Stories
-        </h3>
-        <p className="text-gray-300">
-          Hear directly from our top-performing vendors about their journey with Evea
-        </p>
-      </div>
-    </motion.div>
-  )
-}
+          <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+            {duration}
+          </div>
+        </div>
+        <div className="p-4">
+          <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+            {title}
+          </h4>
+          <p className="text-sm text-gray-600">{description}</p>
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
+)
+
+const StatsCard = ({ 
+  icon: Icon, 
+  value, 
+  label, 
+  delay = 0 
+}: { 
+  icon: any, 
+  value: string, 
+  label: string, 
+  delay?: number 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, delay }}
+    className="text-center group"
+  >
+    <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+      <Icon className="h-8 w-8 text-primary-600" />
+    </div>
+    <div className="text-3xl font-bold text-gray-900 mb-2">{value}</div>
+    <div className="text-gray-600 font-medium">{label}</div>
+  </motion.div>
+)
 
 export default function TestimonialsSection() {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [autoplay, setAutoplay] = useState(true)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  })
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["50px", "-50px"])
-  
-  // Auto-rotate testimonials
-  useEffect(() => {
-    if (!autoplay) return
-    
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % testimonials.length)
-    }, 5000)
-    
-    return () => clearInterval(interval)
-  }, [autoplay])
-  
-  const nextTestimonial = () => {
-    setActiveIndex((prev) => (prev + 1) % testimonials.length)
-    setAutoplay(false)
-  }
-  
-  const prevTestimonial = () => {
-    setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
-    setAutoplay(false)
-  }
+  const testimonials = [
+    {
+      name: 'Priya Sharma',
+      business: 'Priya Events',
+      role: 'Event Planner & Photographer',
+      quote: 'Evea transformed my small photography business into a full-service event company. The platform\'s reach and professional tools have been incredible for growth.',
+      rating: 5,
+      stats: { value: '₹4.2L', label: 'Monthly Revenue' },
+      image: '/testimonials/priya.jpg'
+    },
+    {
+      name: 'Rajesh Kumar',
+      business: 'Royal Catering',
+      role: 'Catering Services',
+      quote: 'Increased my bookings by 300% in just 3 months. The quality of customers and the platform\'s support system is outstanding.',
+      rating: 5,
+      stats: { value: '₹6.8L', label: 'Monthly Revenue' },
+      image: '/testimonials/rajesh.jpg'
+    },
+    {
+      name: 'Anita Patel',
+      business: 'Anita Decorations',
+      role: 'Event Decorator',
+      quote: 'The platform is so easy to use and the support team is always helpful. I\'ve expanded to 3 cities thanks to Evea.',
+      rating: 5,
+      stats: { value: '₹3.5L', label: 'Monthly Revenue' },
+      image: '/testimonials/anita.jpg'
+    },
+    {
+      name: 'Suresh Reddy',
+      business: 'Suresh Entertainment',
+      role: 'DJ & Entertainment',
+      quote: 'Best decision I made for my business. The customer quality and payment system are top-notch. Highly recommended!',
+      rating: 5,
+      stats: { value: '₹5.1L', label: 'Monthly Revenue' },
+      image: '/testimonials/suresh.jpg'
+    }
+  ]
+
+  const videoTestimonials = [
+    {
+      title: 'Success Story: Priya Events',
+      description: 'How Priya transformed her photography business',
+      thumbnail: '/videos/priya-thumb.jpg',
+      duration: '3:45'
+    },
+    {
+      title: 'Growth Journey: Royal Catering',
+      description: 'Rajesh\'s 300% growth in 3 months',
+      thumbnail: '/videos/rajesh-thumb.jpg',
+      duration: '4:12'
+    },
+    {
+      title: 'Platform Overview',
+      description: 'See how vendors use Evea effectively',
+      thumbnail: '/videos/platform-thumb.jpg',
+      duration: '5:30'
+    }
+  ]
+
+  const stats = [
+    { icon: Users, value: '500+', label: 'Active Vendors' },
+    { icon: TrendingUp, value: '300%', label: 'Average Growth' },
+    { icon: Star, value: '4.8★', label: 'Platform Rating' },
+    { icon: Award, value: '₹2.5L+', label: 'Avg Monthly Revenue' }
+  ]
 
   return (
-    <section 
-      ref={containerRef}
-      className="section-padding bg-gradient-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden"
-    >
-      {/* Animated Background */}
-      <motion.div 
-        className="absolute inset-0 opacity-20"
-        style={{ y }}
-      >
-        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-300 to-pink-300 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-r from-blue-300 to-cyan-300 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
-      </motion.div>
+    <section className="section-padding bg-white relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(239,68,68,0.03),transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,38,38,0.03),transparent_50%)]" />
+        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary-50 rounded-full opacity-20"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-primary-50 rounded-full opacity-15"></div>
+      </div>
 
       <div className="container-custom relative z-10">
-        {/* Header */}
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-100 to-pink-100 backdrop-blur-sm px-8 py-4 rounded-full border border-purple-200 shadow-lg mb-8"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="inline-flex items-center space-x-3 bg-primary-100 px-4 py-2 rounded-full border border-primary-200 mb-6"
           >
-            <Quote className="h-6 w-6 text-purple-600" />
-            <span className="text-purple-700 font-bold text-lg">Success Stories</span>
+            <Star className="h-4 w-4 text-primary-600" />
+            <span className="text-primary-700 font-semibold text-sm">Success Stories</span>
           </motion.div>
 
-          <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-heading">
-            What Our{' '}
-            <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 bg-clip-text text-transparent">
-              Vendors Say
-            </span>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+            What Our Vendors{' '}
+            <span className="text-primary-600">Say</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Join thousands of successful vendors who have transformed their businesses with Evea's powerful platform
+
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Hear from successful vendors who have transformed their business with Evea. 
+            Real stories, real results, real success.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-12 items-start">
-          {/* Main Testimonial Carousel */}
-          <div className="lg:col-span-2">
-            <div className="relative">
-              {/* Navigation Buttons */}
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-4">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={prevTestimonial}
-                    className="w-12 h-12 bg-white/80 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/50 shadow-lg hover:shadow-xl transition-all"
-                  >
-                    <ChevronLeft className="h-5 w-5 text-gray-600" />
-                  </motion.button>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={nextTestimonial}
-                    className="w-12 h-12 bg-white/80 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/50 shadow-lg hover:shadow-xl transition-all"
-                  >
-                    <ChevronRight className="h-5 w-5 text-gray-600" />
-                  </motion.button>
-                </div>
-                
-                {/* Progress Indicators */}
-                <div className="flex items-center space-x-2">
-                  {testimonials.map((_, index) => (
-                    <motion.button
-                      key={index}
-                      whileHover={{ scale: 1.2 }}
-                      onClick={() => {
-                        setActiveIndex(index)
-                        setAutoplay(false)
-                      }}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === activeIndex 
-                          ? 'bg-purple-500 w-8' 
-                          : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-              
-              {/* Active Testimonial */}
-              <AnimatePresence mode="wait">
-                <TestimonialCard
-                  key={activeIndex}
-                  testimonial={testimonials[activeIndex]}
-                  isActive={true}
-                  onClick={() => {}}
-                />
-              </AnimatePresence>
-            </div>
+        {/* Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-center mb-16"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <StatsCard
+                key={stat.label}
+                icon={stat.icon}
+                value={stat.value}
+                label={stat.label}
+                delay={index * 0.1}
+              />
+            ))}
           </div>
-          
-          {/* Side Content */}
-          <div className="space-y-8">
-            {/* Video Testimonial */}
-            <VideoTestimonial />
-            
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-xl"
-            >
-              <h3 className="font-bold text-gray-900 mb-4">Platform Success</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Average Rating</span>
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="font-bold">4.9/5</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Vendor Satisfaction</span>
-                  <span className="font-bold text-green-600">98%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Repeat Bookings</span>
-                  <span className="font-bold text-blue-600">85%</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+        </motion.div>
+
+        {/* Testimonials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard
+              key={testimonial.name}
+              name={testimonial.name}
+              business={testimonial.business}
+              role={testimonial.role}
+              quote={testimonial.quote}
+              rating={testimonial.rating}
+              stats={testimonial.stats}
+              image={testimonial.image}
+              delay={index * 0.2}
+            />
+          ))}
         </div>
+
+        {/* Video Testimonials Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mb-16"
+        >
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              Watch Success{' '}
+              <span className="text-primary-600">Stories</span>
+            </h3>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              See how our vendors are growing their businesses and hear their stories firsthand
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {videoTestimonials.map((video, index) => (
+              <VideoTestimonial
+                key={video.title}
+                title={video.title}
+                description={video.description}
+                thumbnail={video.thumbnail}
+                duration={video.duration}
+                delay={index * 0.1}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* CTA Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="text-center"
+        >
+          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200 shadow-elegant">
+            <CardContent className="p-8 lg:p-12">
+              <div className="max-w-2xl mx-auto">
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                  Ready to Join Our Success Stories?
+                </h3>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Join 500+ successful vendors who have transformed their business with Evea. 
+                  Start your journey today and become the next success story.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="primary" size="lg" className="group text-lg px-8 py-4">
+                    <span>Start Your Journey</span>
+                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white">
+                    <span>Watch More Stories</span>
+                    <Play className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </section>
   )

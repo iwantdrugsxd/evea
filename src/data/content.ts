@@ -248,28 +248,16 @@ export const siteContent = {
   export const navigationData = {
     main: [
       { name: 'Home', href: '/' },
-      {
-        name: 'Services',
-        href: '/services',
-        dropdown: [
-          { name: 'Wedding Services', href: '/services/wedding' },
-          { name: 'Corporate Events', href: '/services/corporate' },
-          { name: 'Birthday Parties', href: '/services/birthday' },
-          { name: 'Festivals & Celebrations', href: '/services/festivals' },
-        ]
-      },
+      { name: 'Services', href: '/services', hasDropdown: true },
       { name: 'Marketplace', href: '/marketplace' },
-      { name: 'About', href: '/about' },
-      { name: 'Features', href: '/features' },
-      { name: 'Contact', href: '/contact' },
+      { name: 'Vendor', href: '/vendor' },
     ],
     footer: {
       company: [
-        { name: 'About Us', href: '/about' },
-        { name: 'Our Story', href: '/about#story' },
-        { name: 'Team', href: '/about#team' },
-        { name: 'Careers', href: '/careers' },
-        { name: 'Press Kit', href: '/press' },
+        { name: 'About', href: '/about' },
+        { name: 'Contact', href: '/contact' },
+        { name: 'Privacy Policy', href: '/privacy' },
+        { name: 'Terms of Service', href: '/terms' },
       ],
       services: [
         { name: 'Wedding Planning', href: '/services/wedding' },

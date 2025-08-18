@@ -466,7 +466,6 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Google Sign-In */}
-                <div id="google-signin-button" className="w-full"></div>
                 <Button
                   type="button"
                   onClick={handleGoogleRegister}

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { 
   Play, 
   CheckCircle, 
@@ -14,7 +15,10 @@ import {
   TrendingUp,
   Award,
   Shield,
-  Zap
+  Zap,
+  Search,
+  MapPin,
+  Filter
 } from 'lucide-react'
 import { siteContent } from '@/data/content'
 import Button from '@/components/ui/button'
@@ -22,18 +26,62 @@ import AnimatedCounter from '@/components/common/AnimatedCounter'
 
 const HeroSection = () => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [selectedEventType, setSelectedEventType] = useState('')
+  const [searchLocation, setSearchLocation] = useState('')
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
   const { hero } = siteContent
 
+  // Hero backgrounds and content for home page
+  const heroContent = [
+    {
+      image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1920&h=1080&fit=crop&crop=center',
+      title: 'India\'s #1',
+      subtitle: 'Event Planning',
+      description: 'Connect with 500+ verified vendors, book instantly, and create unforgettable events. Save up to 40% on costs.'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1920&h=1080&fit=crop&crop=center',
+      title: 'Create Unforgettable',
+      subtitle: 'Memories',
+      description: 'From intimate gatherings to grand celebrations, find the perfect vendors to make your special moments extraordinary.'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1920&h=1080&fit=crop&crop=center',
+      title: 'Trusted by',
+      subtitle: 'Thousands',
+      description: 'Join thousands of happy customers who have successfully planned their events with our verified vendor network.'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1920&h=1080&fit=crop&crop=center',
+      title: 'Everything You Need',
+      subtitle: 'In One Place',
+      description: 'Photography, catering, decoration, entertainment - find all your event needs from trusted professionals.'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&h=1080&fit=crop&crop=center',
+      title: 'Seamless',
+      subtitle: 'Experience',
+      description: 'Easy booking, secure payments, and dedicated support to ensure your event planning journey is smooth and stress-free.'
+    }
+  ]
+
+  const eventTypes = [
+    { id: 'wedding', name: 'Wedding', icon: '💒', color: 'bg-pink-100 text-pink-600' },
+    { id: 'corporate', name: 'Corporate', icon: '🏢', color: 'bg-blue-100 text-blue-600' },
+    { id: 'birthday', name: 'Birthday', icon: '🎂', color: 'bg-purple-100 text-purple-600' },
+    { id: 'festival', name: 'Festival', icon: '🎉', color: 'bg-orange-100 text-orange-600' }
+  ]
+
   const features = [
-    { icon: CheckCircle, text: 'Verified vendors across all categories' },
-    { icon: Shield, text: '24/7 customer support & protection' },
-    { icon: Zap, text: 'Transparent pricing & instant booking' }
+    { icon: CheckCircle, text: '500+ Verified Vendors', highlight: 'Verified' },
+    { icon: Shield, text: '24/7 Customer Support', highlight: '24/7' },
+    { icon: Zap, text: 'Instant Booking & Payment', highlight: 'Instant' }
   ]
 
   const floatingCards = [
     {
       title: 'Top Rated',
-      subtitle: '500+ Reviews',
+      subtitle: '4.8/5 Stars',
       icon: Star,
       color: 'bg-yellow-100 text-yellow-600',
       position: 'lg:top-4 lg:left-4 top-2 left-2',
@@ -57,324 +105,262 @@ const HeroSection = () => {
     }
   ]
 
-  return (
-    <section className="relative min-h-screen flex items-center hero-pattern overflow-hidden">
-      {/* Advanced Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-red-50/20 to-white"></div>
-      
-      {/* Floating Animated Elements */}
-      <div className="absolute top-20 left-10 w-24 h-24 bg-primary-100 rounded-full opacity-40 animate-float blur-sm hidden lg:block"></div>
-      <div className="absolute top-40 right-20 w-32 h-32 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full opacity-30 animate-bounce-soft hidden lg:block"></div>
-      <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-primary-200 rounded-full opacity-50 animate-pulse-glow hidden lg:block"></div>
-      <div className="absolute top-1/2 right-10 w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full opacity-60 animate-float hidden lg:block" style={{ animationDelay: '1s' }}></div>
+  // Rotate hero content every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prevIndex) => (prevIndex + 1) % heroContent.length)
+    }, 5000)
 
-      <div className="container-custom relative z-10">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
+    return () => clearInterval(interval)
+  }, [heroContent.length])
+
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Rotating Background Images */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentHeroIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0"
+        >
+          <Image
+            src={heroContent[currentHeroIndex].image}
+            alt="Event planning background"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Semi-transparent overlay */}
+          <div className="absolute inset-0 bg-black/40"></div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="container-custom relative z-10 pt-16 sm:pt-20 lg:pt-24">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 xl:gap-16 items-center">
           {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="space-y-6 lg:space-y-8 order-2 xl:order-1"
+            className="space-y-4 sm:space-y-6 lg:space-y-8 order-2 xl:order-1 text-white"
           >
             {/* Premium Badge */}
             <motion.div
+              key={currentHeroIndex}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-4 lg:px-6 py-3 lg:py-4 rounded-full border border-primary-200 shadow-red-soft"
+              className="inline-flex items-center space-x-2 sm:space-x-3 bg-white/20 backdrop-blur-sm px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 rounded-full border border-white/30"
             >
-              <Sparkles className="h-4 w-4 lg:h-5 lg:w-5 text-primary-600" />
-              <span className="text-primary-700 font-semibold text-base lg:text-lg">{hero.badge.text}</span>
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-yellow-400" />
+              <span className="text-white font-semibold text-sm sm:text-base lg:text-lg">{hero.badge.text}</span>
             </motion.div>
 
             {/* Hero Headline */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.4 }}
-              className="space-y-4"
-            >
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-heading text-gray-900 leading-tight text-balance">
-                {hero.title}{' '}
-                <span className="text-gradient block mt-2">
-                  {hero.subtitle}
-                </span>
-                <span className="block mt-2 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl">
-                  {hero.tagline}
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif text-white leading-tight text-balance">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={`title-${currentHeroIndex}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    {heroContent[currentHeroIndex].title}{' '}
+                  </motion.span>
+                </AnimatePresence>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={`subtitle-${currentHeroIndex}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent block mt-1 sm:mt-2"
+                  >
+                    {heroContent[currentHeroIndex].subtitle}
+                  </motion.span>
+                </AnimatePresence>
+                <span className="block mt-1 sm:mt-2 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white/80">
+                  Platform
                 </span>
               </h1>
               
-              <p className="text-base lg:text-lg xl:text-xl max-w-xl leading-relaxed text-gray-600">
-                {hero.description}
-              </p>
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={`description-${currentHeroIndex}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  className="text-base sm:text-lg lg:text-xl xl:text-2xl max-w-xl leading-relaxed text-white/90"
+                >
+                  {heroContent[currentHeroIndex].description}
+                </motion.p>
+              </AnimatePresence>
+            </div>
+
+            {/* Interactive Search Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="space-y-3 sm:space-y-4"
+            >
+              {/* Event Type Selector */}
+              <div className="space-y-2 sm:space-y-3">
+                <label className="text-xs sm:text-sm font-semibold text-white/90">What type of event are you planning?</label>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                  {eventTypes.map((eventType) => (
+                    <motion.button
+                      key={eventType.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedEventType(eventType.id)}
+                      className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 ${
+                        selectedEventType === eventType.id
+                          ? 'border-yellow-400 bg-yellow-400/20 backdrop-blur-sm'
+                          : 'border-white/30 bg-white/10 backdrop-blur-sm hover:border-white/50 hover:bg-white/20'
+                      }`}
+                    >
+                      <div className="text-lg sm:text-xl lg:text-2xl mb-1">{eventType.icon}</div>
+                      <div className="text-xs font-medium text-white">{eventType.name}</div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location Search */}
+              <div className="space-y-2 sm:space-y-3">
+                <label className="text-xs sm:text-sm font-semibold text-white/90">Where is your event?</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-white/60" />
+                  <input
+                    type="text"
+                    placeholder="Enter city or location"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-200 text-sm sm:text-base text-white placeholder-white/60"
+                  />
+                </div>
+              </div>
+
+              {/* Search Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
+              >
+                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>Find Vendors Now</span>
+              </motion.button>
             </motion.div>
 
             {/* Feature List */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="space-y-3 lg:space-y-4"
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="space-y-2 sm:space-y-3 lg:space-y-4"
             >
               {features.map((feature, index) => (
                 <motion.div
                   key={feature.text}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.9 + index * 0.1 }}
-                  className="flex items-center space-x-3"
+                  transition={{ duration: 0.6, delay: 1.3 + index * 0.1 }}
+                  className="flex items-center space-x-2 sm:space-x-3"
                 >
-                  <div className="w-5 h-5 lg:w-6 lg:h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-3 w-3 lg:h-4 lg:w-4 text-primary-600" />
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 bg-yellow-400/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4 text-yellow-400" />
                   </div>
-                  <span className="text-sm lg:text-base text-gray-700 font-medium">{feature.text}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.2 }}
-              className="flex flex-col sm:flex-row gap-3 lg:gap-4"
-            >
-              <Link href="/marketplace">
-                <Button variant="primary" size="lg" className="group w-full sm:w-auto">
-                  {hero.cta.primary}
-                  <ArrowRight className="h-4 w-4 lg:h-5 lg:w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => setIsVideoPlaying(true)}
-                className="group w-full sm:w-auto"
-              >
-                <Play className="h-4 w-4 lg:h-5 lg:w-5 mr-2 group-hover:scale-110 transition-transform" />
-                {hero.cta.secondary}
-              </Button>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.4 }}
-              className="flex flex-wrap gap-6 lg:gap-8 pt-6 lg:pt-8 border-t border-gray-200"
-            >
-              {hero.stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 1.5 + index * 0.1 }}
-                  className="text-center flex-1 min-w-[120px]"
-                >
-                  <div className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary-600 mb-1 font-heading">
-                    <AnimatedCounter 
-                      end={stat.number} 
-                      suffix={stat.suffix}
-                      duration={2}
-                    />
-                  </div>
-                  <div className="text-xs lg:text-sm font-medium text-gray-600">{stat.label}</div>
+                  <span className="text-xs sm:text-sm lg:text-base text-white/90 font-medium">
+                    {feature.text.split(' ').map((word, i) => 
+                      word === feature.highlight ? (
+                        <span key={i} className="text-yellow-400 font-semibold"> {word}</span>
+                      ) : (
+                        <span key={i}> {word}</span>
+                      )
+                    )}
+                  </span>
                 </motion.div>
               ))}
             </motion.div>
           </motion.div>
 
-          {/* Right Content - Interactive Dashboard Preview */}
+          {/* Right Content - Floating Cards */}
           <motion.div
             initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
             className="relative order-1 xl:order-2"
           >
-            {/* Mobile Floating Cards - Display above dashboard on small screens */}
-            <div className="lg:hidden mb-6">
-              <div className="grid grid-cols-3 gap-3">
-                {floatingCards.map((card, index) => (
-                  <motion.div
-                    key={card.title}
-                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.6, delay: 2.2 + index * 0.2 }}
-                    className="bg-white rounded-xl p-3 shadow-elegant border border-gray-100 text-center"
-                  >
-                    <div className={`w-8 h-8 ${card.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
-                      <card.icon className="h-4 w-4" />
+            <div className="relative w-full max-w-md mx-auto">
+              {/* Main Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 1 }}
+                className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-elegant p-6 sm:p-8 border border-white/30"
+              >
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Book Your Event</h3>
+                  <p className="text-gray-600">Find the perfect vendors for your special day</p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">Available Vendors</span>
+                    <span className="font-semibold text-gray-900">500+</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">Average Rating</span>
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                      <span className="font-semibold text-gray-900 ml-1">4.8</span>
                     </div>
-                    <div className="text-xs font-semibold text-gray-900">{card.title}</div>
-                    <div className="text-xs text-gray-600">{card.subtitle}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative">
-              {/* Main Dashboard Container */}
-              <div className="relative bg-white rounded-2xl shadow-elegant-large border border-gray-100 p-4 lg:p-6 xl:p-8">
-                {/* Dashboard Header */}
-                <div className="flex items-center justify-between mb-4 lg:mb-6">
-                  <div>
-                    <h3 className="text-base lg:text-lg font-semibold text-gray-900 font-heading">Event Dashboard</h3>
-                    <p className="text-xs lg:text-sm text-gray-600">Wedding Planning Progress</p>
                   </div>
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-primary-600" />
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">Success Rate</span>
+                    <span className="font-semibold text-gray-900">98%</span>
                   </div>
                 </div>
+              </motion.div>
 
-                {/* Progress Visualization */}
-                <div className="space-y-3 lg:space-y-4 mb-4 lg:mb-6">
-                  {[
-                    { name: 'Venue', status: 'completed', price: '₹1,50,000' },
-                    { name: 'Catering', status: 'completed', price: '₹45,000' },
-                    { name: 'Photography', status: 'in-progress', price: '₹25,000' },
-                    { name: 'Decoration', status: 'pending', price: '₹35,000' },
-                    { name: 'Music', status: 'pending', price: '₹15,000' }
-                  ].map((service, index) => (
-                    <motion.div
-                      key={service.name}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: 1.8 + index * 0.1 }}
-                      className="flex items-center justify-between p-2 lg:p-3 bg-gray-50 rounded-lg"
-                    >
-                      <div className="flex items-center space-x-2 lg:space-x-3">
-                        <div className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full ${
-                          service.status === 'completed' 
-                            ? 'bg-green-500' 
-                            : service.status === 'in-progress'
-                            ? 'bg-yellow-500'
-                            : 'bg-gray-300'
-                        }`}></div>
-                        <span className="font-medium text-gray-900 text-sm lg:text-base">{service.name}</span>
-                      </div>
-                      <span className="text-xs lg:text-sm font-semibold text-gray-700">{service.price}</span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Progress Bar */}
-                <div className="mb-4 lg:mb-6">
-                  <div className="flex items-center justify-between mb-2 lg:mb-3">
-                    <span className="text-xs lg:text-sm font-medium text-gray-700">Overall Progress</span>
-                    <span className="text-xs lg:text-sm font-bold text-primary-600">75%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 lg:h-3">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: '75%' }}
-                      transition={{ duration: 2, delay: 2.5 }}
-                      className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 lg:h-3 rounded-full relative overflow-hidden"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
-                    </motion.div>
-                  </div>
-                </div>
-
-                {/* Budget Overview */}
-                <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                  <div className="p-3 lg:p-4 bg-primary-50 rounded-lg text-center">
-                    <div className="text-xl lg:text-2xl font-bold text-primary-600 font-heading">₹2.7L</div>
-                    <div className="text-xs text-gray-600">Total Budget</div>
-                  </div>
-                  <div className="p-3 lg:p-4 bg-green-50 rounded-lg text-center">
-                    <div className="text-xl lg:text-2xl font-bold text-green-600 font-heading">₹15K</div>
-                    <div className="text-xs text-gray-600">Savings</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Floating Notification Cards - Only show on large screens */}
+              {/* Floating Cards */}
               {floatingCards.map((card, index) => (
                 <motion.div
                   key={card.title}
-                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 2.2 + index * 0.2 }}
-                  className={`hidden lg:block absolute ${card.position} bg-white rounded-xl p-3 lg:p-4 shadow-elegant border border-gray-100 hover-lift max-w-[200px]`}
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.2 + index * 0.2 }}
+                  className={`${card.position} ${card.responsivePosition} bg-white/95 backdrop-blur-sm rounded-2xl shadow-elegant p-3 sm:p-4 border border-white/30`}
                 >
-                  <div className="flex items-center space-x-2 lg:space-x-3">
-                    <div className={`w-8 h-8 lg:w-10 lg:h-10 ${card.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      <card.icon className="h-4 w-4 lg:h-5 lg:w-5" />
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${card.color}`}>
+                      <card.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs lg:text-sm font-semibold text-gray-900 truncate">{card.title}</div>
-                      <div className="text-xs text-gray-600 truncate">{card.subtitle}</div>
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold text-gray-900">{card.title}</div>
+                      <div className="text-xs text-gray-600">{card.subtitle}</div>
                     </div>
                   </div>
                 </motion.div>
               ))}
-
-              {/* Decorative Elements - Only show on large screens */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full opacity-20 animate-pulse-soft hidden lg:block"></div>
-              <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full opacity-30 animate-float hidden lg:block" style={{ animationDelay: '2s' }}></div>
             </div>
           </motion.div>
         </div>
       </div>
-
-      {/* Video Modal */}
-      {isVideoPlaying && (
-        <motion.div
-          key="video-modal"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setIsVideoPlaying(false)}
-        >
-          <motion.div
-            key="video-modal-content"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl p-4 lg:p-6 max-w-4xl w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center mb-4 lg:mb-6 relative overflow-hidden">
-              <div className="text-white text-center z-10">
-                <Play className="h-16 w-16 lg:h-20 lg:w-20 mx-auto mb-4 text-primary-400" />
-                <h3 className="text-lg lg:text-xl font-semibold mb-2">Platform Demo Video</h3>
-                <p className="text-gray-300 text-sm lg:text-base">See how Evea transforms event planning</p>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-transparent"></div>
-            </div>
-            
-            <div className="flex justify-center">
-              <Button
-                variant="primary"
-                onClick={() => setIsVideoPlaying(false)}
-                className="px-6 lg:px-8"
-              >
-                Close Preview
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:block"
-      >
-        <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex justify-center">
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-1 h-3 bg-gray-400 rounded-full mt-2"
-          />
-        </div>
-      </motion.div>
     </section>
   )
 }

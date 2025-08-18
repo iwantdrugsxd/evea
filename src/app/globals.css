@@ -1,9 +1,417 @@
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom CSS Variables */
+:root {
+  --primary-50: #fef2f2;
+  --primary-100: #fee2e2;
+  --primary-200: #fecaca;
+  --primary-300: #fca5a5;
+  --primary-400: #f87171;
+  --primary-500: #ef4444;
+  --primary-600: #dc2626;
+  --primary-700: #b91c1c;
+  --primary-800: #991b1b;
+  --primary-900: #7f1d1d;
+  --primary-950: #450a0a;
+}
+
+/* High-DPI Display Optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  :root {
+    /* Adjust base font size for high-DPI displays */
+    font-size: 14px;
+  }
+  
+  /* Ensure proper scaling on Retina displays */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Mac-specific optimizations */
+@media screen and (min-width: 1440px) and (max-width: 1920px) {
+  :root {
+    font-size: 15px;
+  }
+}
+
+@media screen and (min-width: 1921px) {
+  :root {
+    font-size: 16px;
+  }
+}
+
+/* Base Styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Improved typography scaling for high-DPI displays */
+  h1 {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl;
+    line-height: 1.1;
+  }
+  
+  h2 {
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl;
+    line-height: 1.2;
+  }
+  
+  h3 {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl;
+    line-height: 1.3;
+  }
+  
+  h4 {
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl;
+    line-height: 1.4;
+  }
+  
+  p {
+    @apply text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl;
+    line-height: 1.6;
+  }
+}
+
+/* Component Styles */
+@layer components {
+  /* Custom Font Classes */
+  .font-serif {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .font-elegant {
+    font-family: 'Merriweather', serif;
+  }
+  
+  /* Responsive Container */
+  .container-custom {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16;
+  }
+  
+  /* Responsive Section Padding */
+  .section-padding {
+    @apply py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28 2xl:py-32;
+  }
+  
+  /* Responsive Grid Patterns */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(rgba(239, 68, 68, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(239, 68, 68, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  .dot-pattern {
+    background-image: radial-gradient(circle, rgba(239, 68, 68, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* Responsive Button Sizes */
+  .btn-sm {
+    @apply px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base;
+  }
+  
+  .btn-md {
+    @apply px-4 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base md:px-8 md:py-3.5 md:text-lg;
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-base sm:px-8 sm:py-4 sm:text-lg md:px-10 md:py-5 md:text-xl;
+  }
+  
+  .btn-xl {
+    @apply px-8 py-4 text-lg sm:px-10 sm:py-5 sm:text-xl md:px-12 md:py-6 md:text-2xl;
+  }
+  
+  /* Responsive Card Spacing */
+  .card-padding {
+    @apply p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12;
+  }
+  
+  .card-padding-sm {
+    @apply p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8;
+  }
+  
+  .card-padding-lg {
+    @apply p-6 sm:p-8 md:p-10 lg:p-12 xl:p-16;
+  }
+  
+  /* Responsive Gap Utilities */
+  .gap-responsive {
+    @apply gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12;
+  }
+  
+  .gap-responsive-sm {
+    @apply gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6;
+  }
+  
+  .gap-responsive-lg {
+    @apply gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-16;
+  }
+  
+  /* Responsive Margin/Padding */
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-10 xl:space-y-12;
+  }
+  
+  .space-responsive-sm {
+    @apply space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5 xl:space-y-6;
+  }
+  
+  .space-responsive-lg {
+    @apply space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 xl:space-y-16;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Text Gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent;
+  }
+  
+  /* Background Gradients */
+  .bg-gradient-red {
+    @apply bg-gradient-to-br from-red-50 via-white to-red-50;
+  }
+  
+  /* Shadow Utilities */
+  .shadow-elegant {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-elegant-hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .shadow-elegant-large {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-red-soft {
+    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.15);
+  }
+  
+  /* Animation Utilities */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-bounce-soft {
+    animation: bounce-soft 4s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-soft {
+    animation: pulse-soft 4s ease-in-out infinite;
+  }
+  
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+  
+  .animate-spin-reverse {
+    animation: spin-reverse 6s linear infinite;
+  }
+  
+  .animate-disco-shimmer {
+    animation: disco-shimmer 2s ease-in-out infinite;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+  
+  /* Hover Effects */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* Responsive Font Sizes */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm md:text-base;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl md:text-3xl;
+  }
+  
+  .text-responsive-2xl {
+    @apply text-2xl sm:text-3xl md:text-4xl;
+  }
+  
+  .text-responsive-3xl {
+    @apply text-3xl sm:text-4xl md:text-5xl;
+  }
+  
+  .text-responsive-4xl {
+    @apply text-4xl sm:text-5xl md:text-6xl;
+  }
+  
+  .text-responsive-5xl {
+    @apply text-5xl sm:text-6xl md:text-7xl;
+  }
+  
+  /* Responsive Spacing */
+  .p-responsive {
+    @apply p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12;
+  }
+  
+  .px-responsive {
+    @apply px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12;
+  }
+  
+  .py-responsive {
+    @apply py-4 sm:py-6 md:py-8 lg:py-10 xl:py-12;
+  }
+  
+  .m-responsive {
+    @apply m-4 sm:m-6 md:m-8 lg:m-10 xl:m-12;
+  }
+  
+  .mx-responsive {
+    @apply mx-4 sm:mx-6 md:mx-8 lg:mx-10 xl:mx-12;
+  }
+  
+  .my-responsive {
+    @apply my-4 sm:my-6 md:my-8 lg:my-10 xl:my-12;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes bounce-soft {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes disco-shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Mac-specific responsive adjustments */
+@media screen and (min-width: 1440px) {
+  .container-custom {
+    @apply max-w-7xl;
+  }
+  
+  .section-padding {
+    @apply py-28 xl:py-32 2xl:py-36;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  .container-custom {
+    @apply max-w-7xl;
+  }
+  
+  .section-padding {
+    @apply py-32 2xl:py-40;
+  }
+}
+
+/* High-DPI display specific adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .shadow-elegant {
+    box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-elegant-hover {
+    box-shadow: 0 5px 8px -3px rgba(0, 0, 0, 0.1), 0 2px 3px -1px rgba(0, 0, 0, 0.05);
+  }
+  
+  .shadow-elegant-large {
+    box-shadow: 0 10px 13px -3px rgba(0, 0, 0, 0.1), 0 5px 5px -3px rgba(0, 0, 0, 0.04);
+  }
+}
 
 /* CSS Variables for Enterprise Theme */
 :root {
@@ -286,18 +694,6 @@ body {
   .btn-ghost:hover {
     background: #f3f4f6;
     color: #ef4444;
-  }
-
-  .btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    border-radius: 0.5rem;
-  }
-
-  .btn-lg {
-    padding: 1rem 2.5rem;
-    font-size: 1.125rem;
-    border-radius: 1rem;
   }
 
   /* Advanced Card System */

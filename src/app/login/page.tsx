@@ -54,15 +54,11 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const success = await login(formData.email, formData.password, 'customer')
+      const success = await login(formData.email, formData.password)
       if (success) {
-        // Check for redirect parameter
-        const urlParams = new URLSearchParams(window.location.search)
-        const redirect = urlParams.get('redirect')
-        
-        // Add a small delay to ensure authentication state is updated
+        // All users redirect to marketplace regardless of role
         setTimeout(() => {
-          router.push(redirect || '/marketplace')
+          router.push('/marketplace')
         }, 100)
       } else {
         setError('Invalid credentials')
@@ -103,15 +99,24 @@ export default function LoginPage() {
           if (notification.isNotDisplayed()) {
             const reason = notification.getNotDisplayedReason()
             console.log('❌ Google Sign-In not displayed:', reason)
-            setError(`Google Sign-In not available: ${reason}`)
+            // Don't show error for common cases like popup blocked
+            if (reason !== 'popup_blocked' && reason !== 'popup_closed_by_user') {
+              setError(`Google Sign-In not available: ${reason}`)
+            }
           } else if (notification.isSkippedMoment()) {
             const reason = notification.getSkippedReason()
             console.log('⏭️ Google Sign-In skipped:', reason)
-            setError(`Google Sign-In was skipped: ${reason}`)
+            // Don't show error for user-initiated skips
+            if (reason !== 'tap_outside' && reason !== 'user_cancel') {
+              setError(`Google Sign-In was skipped: ${reason}`)
+            }
           } else if (notification.isDismissedMoment()) {
             const reason = notification.getDismissedReason()
             console.log('❌ Google Sign-In dismissed:', reason)
-            setError(`Google Sign-In was dismissed: ${reason}`)
+            // Don't show error for user-initiated dismissals
+            if (reason !== 'user_cancel' && reason !== 'tap_outside') {
+              setError(`Google Sign-In was dismissed: ${reason}`)
+            }
           }
         })
       } else {
@@ -157,13 +162,10 @@ export default function LoginPage() {
 
       if (data.success) {
         console.log('✅ Google authentication successful')
-        // Check for redirect parameter
-        const urlParams = new URLSearchParams(window.location.search)
-        const redirect = urlParams.get('redirect')
         
-        // Add a small delay to ensure authentication state is updated
+        // All users redirect to marketplace regardless of role
         setTimeout(() => {
-          router.push(redirect || '/marketplace')
+          router.push('/marketplace')
         }, 100)
       } else {
         console.error('❌ Google authentication failed:', data.error)
