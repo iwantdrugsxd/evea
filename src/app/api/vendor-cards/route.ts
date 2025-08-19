@@ -1,132 +1,172 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { ServiceCard, ServiceCardFormData } from '@/types/card'
+import { uploadMultipleFiles } from '@/lib/utils/upload'
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const formData = await request.formData()
     
-    // Get vendor ID from session (you'll need to implement auth middleware)
-    const vendorId = formData.get('vendorId') as string
+    // Get user ID from form data (this should come from auth session in production)
+    const userId = formData.get('vendorId') as string
     
-    if (!vendorId) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Vendor ID is required' },
+        { error: 'User ID is required' },
         { status: 400 }
       )
     }
+
+    // First, get the actual vendor_id from the vendors table using user_id
+    const { data: vendorData, error: vendorError } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (vendorError || !vendorData) {
+      return NextResponse.json(
+        { error: 'Vendor not found for this user' },
+        { status: 404 }
+      )
+    }
+
+    const vendorId = vendorData.id
 
     // Extract form data
     const title = formData.get('title') as string
     const description = formData.get('description') as string
     const categoryId = formData.get('categoryId') as string
-    const subcategoryId = formData.get('subcategoryId') as string
-    const tags = JSON.parse(formData.get('tags') as string || '[]')
-    const seoKeywords = JSON.parse(formData.get('seoKeywords') as string || '[]')
-    
-    // Pricing
-    const priceType = formData.get('priceType') as string
-    const basePrice = parseFloat(formData.get('basePrice') as string)
-    const priceRange = JSON.parse(formData.get('priceRange') as string || 'null')
-    const packageTiers = JSON.parse(formData.get('packageTiers') as string || '[]')
-    const addOnServices = JSON.parse(formData.get('addOnServices') as string || '[]')
-    const promotionalOffers = JSON.parse(formData.get('promotionalOffers') as string || '[]')
-    
-    // Service specifications
+    const basePrice = parseFloat(formData.get('basePrice') as string) || 0
     const serviceArea = JSON.parse(formData.get('serviceArea') as string || '[]')
-    const capacity = JSON.parse(formData.get('capacity') as string || '{}')
-    const duration = parseInt(formData.get('duration') as string)
-    const advanceBookingDays = parseInt(formData.get('advanceBookingDays') as string)
-    const equipmentProvided = JSON.parse(formData.get('equipmentProvided') as string || '[]')
     const inclusions = JSON.parse(formData.get('inclusions') as string || '[]')
     const exclusions = JSON.parse(formData.get('exclusions') as string || '[]')
-    
-    // Additional settings
-    const isCustomizable = formData.get('isCustomizable') === 'true'
-    const customizationOptions = JSON.parse(formData.get('customizationOptions') as string || '[]')
-    const responseTime = parseInt(formData.get('responseTime') as string)
-    const specialRequirements = formData.get('specialRequirements') as string
 
     // Handle file uploads
     const serviceImages = formData.getAll('serviceImages') as File[]
     const portfolioImages = formData.getAll('portfolioImages') as File[]
-    const videos = formData.getAll('videos') as File[]
 
-    // Upload images to storage
-    const uploadedServiceImages = await Promise.all(
-      serviceImages.map(async (file, index) => {
-        const fileName = `service-images/${vendorId}/${Date.now()}-${index}-${file.name}`
-        const { data, error } = await supabase.storage
-          .from('vendor-cards')
-          .upload(fileName, file)
+    // Upload images to Cloudinary
+    let uploadedServiceImages: any[] = []
+    let uploadedPortfolioImages: any[] = []
+
+    try {
+      if (serviceImages.length > 0) {
+        console.log('Uploading service images to Cloudinary...')
+        uploadedServiceImages = await uploadMultipleFiles(
+          serviceImages,
+          `vendor-cards/service-images/${vendorId}`
+        )
+      }
+
+      if (portfolioImages.length > 0) {
+        console.log('Uploading portfolio images to Cloudinary...')
+        uploadedPortfolioImages = await uploadMultipleFiles(
+          portfolioImages,
+          `vendor-cards/portfolio-images/${vendorId}`
+        )
+      }
+    } catch (error) {
+      console.error('File upload error:', error)
+      return NextResponse.json(
+        { error: 'Failed to upload images', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
+
+    // Validate categoryId - if it's a number, we need to get the actual UUID
+    let actualCategoryId = categoryId
+    if (categoryId && !categoryId.includes('-')) {
+      // If categoryId is a number, get the actual UUID from categories table
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('id', categoryId)
+        .single()
+      
+      if (categoryError || !categoryData) {
+        // If not found by ID, try to get the first category
+        const { data: firstCategory } = await supabase
+          .from('categories')
+          .select('id')
+          .limit(1)
+          .single()
         
-        if (error) throw error
-        
-        return {
-          url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/vendor-cards/${fileName}`,
-          altText: file.name,
-          isPrimary: index === 0,
-          order: index
+        if (!firstCategory) {
+          return NextResponse.json(
+            { error: 'No categories found in database' },
+            { status: 400 }
+          )
         }
-      })
-    )
-
-    const uploadedPortfolioImages = await Promise.all(
-      portfolioImages.map(async (file, index) => {
-        const fileName = `portfolio-images/${vendorId}/${Date.now()}-${index}-${file.name}`
-        const { data, error } = await supabase.storage
-          .from('vendor-cards')
-          .upload(fileName, file)
         
-        if (error) throw error
-        
-        return {
-          url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/vendor-cards/${fileName}`,
-          altText: file.name,
-          isPrimary: false,
-          order: index
-        }
-      })
-    )
+        actualCategoryId = firstCategory.id
+      } else {
+        actualCategoryId = categoryData.id
+      }
+    }
 
-    // Create service card record
+    if (!actualCategoryId) {
+      return NextResponse.json(
+        { error: 'Invalid category ID' },
+        { status: 400 }
+      )
+    }
+
+    // Create service card record with ONLY existing columns from the actual table
+    const insertData = {
+      vendor_id: vendorId,
+      title: title || 'Untitled Service',
+      description: description || '',
+      category_id: actualCategoryId,
+      base_price: basePrice || 0,
+      price_type: 'fixed',
+      service_area: serviceArea || ['General'],
+      max_capacity: null,
+      cancellation_policy: null,
+      inclusions: inclusions || null,
+      exclusions: exclusions || null,
+      equipment_provided: null,
+      images: uploadedServiceImages.map(img => img.url),
+      videos: null,
+      is_active: false,
+      featured: false,
+      average_rating: 0,
+      total_reviews: 0,
+      portfolio_images: uploadedPortfolioImages.map(img => img.url),
+      starting_price: null,
+      subcategory_id: null,
+      simplified_price_type: 'starting_from',
+      seo_description: null,
+      insurance_coverage: null,
+      certifications: null,
+      experience_years: null,
+      emergency_contact: null,
+      tags: null
+    }
+
+    console.log('Inserting vendor card with data:', insertData)
+
+    // Validate required fields
+    if (!insertData.vendor_id || !insertData.title || !insertData.category_id) {
+      return NextResponse.json(
+        { error: 'Missing required fields: vendor_id, title, or category_id' },
+        { status: 400 }
+      )
+    }
+
     const { data: serviceCard, error } = await supabase
       .from('vendor_cards')
-      .insert({
-        vendor_id: vendorId,
-        title,
-        description,
-        category_id: categoryId,
-        subcategory_id: subcategoryId,
-        tags,
-        seo_keywords: seoKeywords,
-        price_type: priceType,
-        base_price: basePrice,
-        price_range: priceRange,
-        package_tiers: packageTiers,
-        add_on_services: addOnServices,
-        promotional_offers: promotionalOffers,
-        service_area: serviceArea,
-        capacity,
-        duration,
-        advance_booking_days: advanceBookingDays,
-        equipment_provided: equipmentProvided,
-        inclusions,
-        exclusions,
-        service_images: uploadedServiceImages,
-        portfolio_images: uploadedPortfolioImages,
-        is_customizable: isCustomizable,
-        customization_options: customizationOptions,
-        response_time: responseTime,
-        special_requirements: specialRequirements,
-        status: 'draft',
-        is_active: false
-      })
+      .insert(insertData)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Database insert error:', error)
+      return NextResponse.json(
+        { error: 'Failed to create service card', details: error.message },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
@@ -150,17 +190,12 @@ export async function GET(request: NextRequest) {
     
     const vendorId = searchParams.get('vendorId')
     const categoryId = searchParams.get('categoryId')
-    const status = searchParams.get('status')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     
     let query = supabase
       .from('vendor_cards')
-      .select(`
-        *,
-        categories(name, slug),
-        vendors(business_name, business_type)
-      `)
+      .select('*')
       .range((page - 1) * limit, page * limit - 1)
       .order('created_at', { ascending: false })
 
@@ -171,28 +206,29 @@ export async function GET(request: NextRequest) {
     if (categoryId) {
       query = query.eq('category_id', categoryId)
     }
-    
-    if (status) {
-      query = query.eq('status', status)
+
+    const { data: serviceCards, error } = await query
+
+    if (error) {
+      console.error('Database query error:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch service cards', details: error.message },
+        { status: 500 }
+      )
     }
-
-    const { data: serviceCards, error, count } = await query
-
-    if (error) throw error
 
     return NextResponse.json({
       success: true,
-      data: serviceCards,
+      data: serviceCards || [],
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: serviceCards?.length || 0
       }
     })
 
   } catch (error) {
-    console.error('Get service cards error:', error)
+    console.error('Fetch service cards error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch service cards' },
       { status: 500 }

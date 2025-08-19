@@ -1,53 +1,87 @@
-import { supabase } from '@/lib/supabase'
+import { CloudinaryService, CloudinaryUploadResult } from '@/lib/cloudinary'
 
-export async function uploadFile(file: File, folder: string): Promise<string> {
+export interface UploadResult {
+  url: string
+  publicId: string
+  secureUrl: string
+  width: number
+  height: number
+  format: string
+  resourceType: string
+}
+
+export async function uploadFile(file: File, folder: string): Promise<UploadResult> {
   try {
-    // Generate unique filename
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+    console.log('Uploading file to Cloudinary:', file.name, 'to folder:', folder)
     
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('uploads')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
+    const result = await CloudinaryService.uploadFile(file, {
+      folder,
+      resource_type: 'image',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+      max_file_size: 10 * 1024 * 1024 // 10MB
+    })
     
-    if (error) {
-      console.error('Upload error:', error)
-      throw new Error('Failed to upload file')
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      secureUrl: result.secure_url,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      resourceType: result.resource_type
     }
-    
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('uploads')
-      .getPublicUrl(fileName)
-    
-    return publicUrl
   } catch (error) {
     console.error('Upload error:', error)
-    // Fallback to mock URL for development
-    const fileName = `${folder}/${Date.now()}-${file.name}`
-    return `/uploads/${fileName}`
+    throw new Error('Failed to upload file')
   }
 }
 
-export async function deleteFile(fileUrl: string): Promise<void> {
+export async function uploadMultipleFiles(files: File[], folder: string): Promise<UploadResult[]> {
   try {
-    // Extract file path from URL
-    const url = new URL(fileUrl)
-    const pathParts = url.pathname.split('/')
-    const fileName = pathParts[pathParts.length - 1]
+    console.log('Uploading multiple files to Cloudinary:', files.length, 'files to folder:', folder)
     
-    const { error } = await supabase.storage
-      .from('uploads')
-      .remove([fileName])
+    const results = await CloudinaryService.uploadMultipleFiles(files, {
+      folder,
+      resource_type: 'image',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+      max_file_size: 10 * 1024 * 1024 // 10MB
+    })
     
-    if (error) {
-      console.error('Delete error:', error)
-    }
+    return results.map(result => ({
+      url: result.secure_url,
+      publicId: result.public_id,
+      secureUrl: result.secure_url,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      resourceType: result.resource_type
+    }))
+  } catch (error) {
+    console.error('Multiple upload error:', error)
+    throw new Error('Failed to upload files')
+  }
+}
+
+export async function deleteFile(publicId: string): Promise<void> {
+  try {
+    await CloudinaryService.deleteFile(publicId)
   } catch (error) {
     console.error('Delete error:', error)
   }
+}
+
+export async function deleteMultipleFiles(publicIds: string[]): Promise<void> {
+  try {
+    await CloudinaryService.deleteMultipleFiles(publicIds)
+  } catch (error) {
+    console.error('Multiple delete error:', error)
+  }
+}
+
+export function getOptimizedUrl(publicId: string, options: any = {}): string {
+  return CloudinaryService.getOptimizedUrl(publicId, options)
+}
+
+export function getThumbnailUrl(publicId: string, width: number = 300, height: number = 200): string {
+  return CloudinaryService.getThumbnailUrl(publicId, width, height)
 }
