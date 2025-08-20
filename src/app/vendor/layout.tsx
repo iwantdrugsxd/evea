@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import Header from '@/components/layout/Header'
+import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import VendorSidebar from '@/components/vendor/layout/VendorSidebar'
 import { Toaster } from 'react-hot-toast'
@@ -7,7 +7,7 @@ import { Toaster } from 'react-hot-toast'
 export default function VendorLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <Header />
+      <FloatingNavbar />
       <main className="pt-20 lg:pt-24 pb-6">
         <div className="w-full px-0">{children}</div>
       </main>

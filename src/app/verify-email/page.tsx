@@ -10,7 +10,7 @@ import {
   ArrowRight,
   Loader2
 } from 'lucide-react'
-import Header from '@/components/layout/Header'
+import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
@@ -108,7 +108,7 @@ export default function VerifyEmailPage() {
               {message}
             </p>
             <div className="space-y-3">
-              <Link href="/register">
+              <Link href="/login">
                 <Button variant="outline" className="w-full">
                   Try Registering Again
                 </Button>
@@ -129,7 +129,7 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <Header />
+      <FloatingNavbar />
       
       <main className="container mx-auto px-4 pt-20 lg:pt-24 pb-8">
         <div className="max-w-md mx-auto">

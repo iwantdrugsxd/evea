@@ -19,7 +19,7 @@ import {
   Utensils,
   Sparkles
 } from 'lucide-react'
-import Header from '@/components/layout/Header'
+import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
@@ -100,7 +100,7 @@ export default function ServiceCategoryPage() {
   if (!data) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-        <Header />
+        <FloatingNavbar />
         <main className="section-padding">
           <div className="container-custom text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Service Category Not Found</h1>
@@ -122,7 +122,7 @@ export default function ServiceCategoryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <Header />
+      <FloatingNavbar />
       
       <main className="section-padding">
         <div className="container-custom">

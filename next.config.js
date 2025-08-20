@@ -19,6 +19,34 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.evea.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh4.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh5.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh6.googleusercontent.com',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
   },

@@ -21,7 +21,7 @@ const vendorOnboardingRoutes = [
 ]
 
 // Public routes that should redirect if authenticated
-const authRoutes = ['/login', '/register']
+const authRoutes = ['/login']
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname

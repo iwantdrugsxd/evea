@@ -15,7 +15,7 @@ import {
   Users,
   Shield
 } from 'lucide-react'
-import Header from '@/components/layout/Header'
+import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Button from '@/components/ui/button'
@@ -95,7 +95,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <FloatingNavbar />
       
       <main className="pt-20 lg:pt-24">
         {/* Hero Section */}

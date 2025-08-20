@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react'
-import Header from '@/components/layout/Header'
+import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import SectionHeader from '@/components/common/SectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
@@ -61,7 +61,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <FloatingNavbar />
       
       <main className="pt-20 lg:pt-24">
         {/* Hero Section */}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEventPlanningStore, useEventPlanningSelectors } from '@/stores/event-planning-store'
 import { EVENT_TYPES } from '@/types/event-planning'
-import Header from '@/components/layout/Header'
+import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import EventTypeSelection from '@/components/event-planning/EventTypeSelection'
 import EventDetailsForm from '@/components/event-planning/EventDetailsForm'
@@ -103,7 +103,7 @@ const EventPlanningPage = () => {
   if (showLanding) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-        <Header />
+        <FloatingNavbar />
         
         {/* Landing Section */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -241,7 +241,7 @@ const EventPlanningPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <Header />
+      <FloatingNavbar />
       
       <main className="pt-20 pb-16">
         <div className="container-custom">
