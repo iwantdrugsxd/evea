@@ -6,6 +6,7 @@ import { useEventPlanningStore, useEventPlanningSelectors } from '@/stores/event
 import { EVENT_TYPES } from '@/types/event-planning'
 import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
+import AnimatedBackground from '@/components/3d/AnimatedBackground'
 import EventTypeSelection from '@/components/event-planning/EventTypeSelection'
 import EventDetailsForm from '@/components/event-planning/EventDetailsForm'
 import ServiceSelection from '@/components/event-planning/ServiceSelection'
@@ -107,11 +108,8 @@ const EventPlanningPage = () => {
         
         {/* Landing Section */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-red-50/20 to-white"></div>
-          <div className="absolute top-20 left-10 w-24 h-24 bg-primary-100 rounded-full opacity-40 animate-float blur-sm"></div>
-          <div className="absolute top-40 right-20 w-32 h-32 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full opacity-30 animate-bounce-soft"></div>
-          <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-primary-200 rounded-full opacity-50 animate-pulse-glow"></div>
+          {/* 3D Animated Background */}
+          <AnimatedBackground />
           
           <div className="container-custom relative z-10">
             <motion.div
@@ -138,14 +136,14 @@ const EventPlanningPage = () => {
                 transition={{ duration: 1, delay: 0.4 }}
                 className="space-y-6"
               >
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading text-gray-900 leading-tight">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading text-white leading-tight">
                   Plan Your Perfect Event
                   <span className="text-gradient block mt-2">
                     in Minutes, Not Months
                   </span>
                 </h1>
                 
-                <p className="text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-xl lg:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
                   Our intelligent platform matches you with the best vendors, creates personalized packages, 
                   and ensures your event is everything you dreamed of.
                 </p>
@@ -185,13 +183,13 @@ const EventPlanningPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-elegant hover:shadow-elegant-hover transition-all duration-300"
+                    className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-elegant hover:shadow-elegant-hover transition-all duration-300"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center mb-4">
-                      <feature.icon className="h-6 w-6 text-primary-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/30 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                    <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -215,17 +213,17 @@ const EventPlanningPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
                 
-                <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
+                <div className="flex items-center justify-center space-x-8 text-sm text-white/70">
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-green-400" />
                     <span>Free Consultation</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-blue-500" />
+                    <Clock className="h-4 w-4 text-blue-400" />
                     <span>5-Minute Setup</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
+                    <Star className="h-4 w-4 text-yellow-400" />
                     <span>Verified Vendors</span>
                   </div>
                 </div>
@@ -243,7 +241,7 @@ const EventPlanningPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
       <FloatingNavbar />
       
-      <main className="pt-20 pb-16">
+              <main className="pb-16">
         <div className="container-custom">
           {/* Progress Stepper */}
           <motion.div

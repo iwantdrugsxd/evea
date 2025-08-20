@@ -105,7 +105,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-white">
       <FloatingNavbar />
       
-      <main className="pt-20 lg:pt-24">
+              <main>
         {/* Hero Section */}
         <section className="section-padding bg-gradient-to-br from-primary-50 to-white hero-pattern">
           <div className="container-custom">

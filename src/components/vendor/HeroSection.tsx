@@ -111,7 +111,7 @@ export default function VendorHeroSection() {
         <div className="absolute inset-0 grid-pattern opacity-5"></div>
       </div>
 
-      <div className="container-custom relative z-10 pt-20">
+              <div className="container-custom relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Content */}
           <motion.div

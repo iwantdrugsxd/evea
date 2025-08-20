@@ -15,11 +15,15 @@ import {
   ChevronDown,
   Quote,
   Award,
-  Zap,
-  Shield,
-  Heart
+  Zap
 } from 'lucide-react';
 import FloatingNavbar from '@/components/layout/FloatingNavbar';
+import AnimatedBackground from '@/components/3d/AnimatedBackground';
+import DividerLayout from '@/components/layout/DividerLayout';
+import AnimatedSection from '@/components/layout/AnimatedSection';
+import { FloatingObject, Balloon, Confetti, SpotlightBeam, AbstractShape } from '@/components/animations/FloatingObjects';
+import GlassCard from '@/components/ui/GlassCard';
+import AppleButton from '@/components/ui/AppleButton';
 
 // Hero background component with local images
 const HeroBackground = () => {
@@ -27,7 +31,7 @@ const HeroBackground = () => {
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-purple-900/60 z-10"></div>
       <Image
-        src="/images/hero/theme.jpeg"
+        src="/images/hero/landin page hero.png"
         alt="Event Planning Hero"
         fill
         className="object-cover"
@@ -117,29 +121,7 @@ const Testimonial = ({ quote, author, role, company, avatar, rating = 5 }: {
   );
 };
 
-// Feature card component
-const FeatureCard = ({ icon: Icon, title, description, delay = 0 }: {
-  icon: any;
-  title: string;
-  description: string;
-  delay?: number;
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300"
-    >
-      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6">
-        <Icon className="w-8 h-8 text-white" />
-      </div>
-      <h3 className="text-xl font-bold text-white mb-4">{title}</h3>
-      <p className="text-white/70 leading-relaxed">{description}</p>
-    </motion.div>
-  );
-};
+
 
 // Service package component
 const ServicePackage = ({ title, price, features, popular = false, delay = 0 }: {
@@ -244,8 +226,29 @@ export default function LandingPage() {
     <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden">
       <FloatingNavbar />
       {/* Hero Section */}
-              <section className="relative h-screen flex items-center justify-center">
-          <HeroBackground />
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
+        <HeroBackground />
+        
+        {/* Floating Objects */}
+        <FloatingObject className="top-20 left-10" speed={0.5} delay={0.5}>
+          <Balloon color="blue" size="large" />
+        </FloatingObject>
+        
+        <FloatingObject className="top-32 right-20" speed={0.8} delay={1} direction="right">
+          <Balloon color="purple" size="medium" />
+        </FloatingObject>
+        
+        <FloatingObject className="bottom-40 left-20" speed={0.6} delay={1.5}>
+          <AbstractShape type="circle" color="blue" />
+        </FloatingObject>
+        
+        <FloatingObject className="top-1/2 right-10" speed={0.7} delay={2}>
+          <SpotlightBeam color="purple" />
+        </FloatingObject>
+        
+        <FloatingObject className="bottom-20 right-1/3" speed={0.4} delay={2.5}>
+          <Confetti color="blue" />
+        </FloatingObject>
         
         <div className="relative z-20 text-center max-w-6xl mx-auto px-4">
           <motion.div
@@ -266,19 +269,34 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            className="flex flex-col sm:flex-row gap-6 justify-center mb-12"
           >
-            <Link
+            <AppleButton
               href="/plan-event"
-              className="group bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center"
+              variant="gradient"
+              size="lg"
+              icon={<ArrowRight className="w-5 h-5" />}
             >
               {heroContent[currentHeroIndex].cta}
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <button className="group bg-white/10 backdrop-blur-lg text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all duration-300 flex items-center justify-center border border-white/20">
-              <Play className="mr-2 w-5 h-5" />
+            </AppleButton>
+            
+            <AppleButton
+              href="/vendor/register"
+              variant="gradient"
+              size="lg"
+              className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+              icon={<ArrowRight className="w-5 h-5" />}
+            >
+              Start Selling
+            </AppleButton>
+            
+            <AppleButton
+              variant="primary"
+              size="lg"
+              icon={<Play className="w-5 h-5" />}
+            >
               Watch Demo
-            </button>
+            </AppleButton>
           </motion.div>
 
           {/* Stats */}
@@ -319,30 +337,106 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-gray-900">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              How It Works
-            </h2>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Our AI-powered platform streamlines every aspect of event planning, from initial concept to flawless execution
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* For Every Moment Section */}
+      <AnimatedSection direction="left-to-right" delay={0}>
+        <section className="py-32 bg-black">
+          <div className="max-w-7xl mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-center"
+              transition={{ duration: 0.8 }}
+                             className="text-center mb-20"
+             >
+ 
+               <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                 For every moment
+              </h2>
+              <p className="text-xl text-white/70 max-w-3xl mx-auto">
+                Weddings, Birthdays, Corporate Events, Concerts
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+              {/* Wedding Card */}
+              <GlassCard delay={0.1} className="overflow-hidden">
+                <div className="relative h-48 overflow-hidden rounded-2xl mb-6">
+                  <Image
+                    src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Wedding"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Weddings</h3>
+                <p className="text-white/70">Magical moments, perfectly planned.</p>
+              </GlassCard>
+
+              {/* Corporate Card */}
+              <GlassCard delay={0.2} className="overflow-hidden">
+                <div className="relative h-48 overflow-hidden rounded-2xl mb-6">
+                  <Image
+                    src="https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Corporate Event"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Corporate</h3>
+                <p className="text-white/70">Professional events that impress.</p>
+              </GlassCard>
+
+              {/* Birthday Card */}
+              <GlassCard delay={0.3} className="overflow-hidden">
+                <div className="relative h-48 overflow-hidden rounded-2xl mb-6">
+                  <Image
+                    src="https://images.unsplash.com/photo-1464349153735-7db50ed83c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Birthday Celebration"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Birthdays</h3>
+                <p className="text-white/70">Celebrations that create memories.</p>
+              </GlassCard>
+
+              {/* Concert Card */}
+              <GlassCard delay={0.4} className="overflow-hidden">
+                <div className="relative h-48 overflow-hidden rounded-2xl mb-6">
+                  <Image
+                    src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Concert"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Concerts</h3>
+                <p className="text-white/70">Live experiences, amplified.</p>
+              </GlassCard>
+            </div>
+          </div>
+        </section>
+      </AnimatedSection>
+
+      {/* How It Works Section */}
+      <AnimatedSection direction="left-to-right" delay={0}>
+        <section className="py-32 bg-gradient-to-b from-black to-gray-900">
+          <div className="max-w-7xl mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-20"
             >
+              <h2 className="text-4xl md:text-6xl font-bold mb-6">
+                How It Works
+              </h2>
+              <p className="text-xl text-white/70 max-w-3xl mx-auto">
+                Our AI-powered platform streamlines every aspect of event planning, from initial concept to flawless execution
+              </p>
+            </motion.div>
+        
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <GlassCard delay={0.1} className="text-center">
               <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
@@ -350,14 +444,9 @@ export default function LandingPage() {
               <p className="text-white/70 leading-relaxed">
                 Use our AI planner to create your perfect event. Get personalized recommendations for venues, vendors, and timelines.
               </p>
-            </motion.div>
+            </GlassCard>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-center"
-            >
+            <GlassCard delay={0.2} className="text-center">
               <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-white">2</span>
               </div>
@@ -365,14 +454,9 @@ export default function LandingPage() {
               <p className="text-white/70 leading-relaxed">
                 Connect with verified vendors, manage communications, and coordinate all aspects through our integrated platform.
               </p>
-            </motion.div>
+            </GlassCard>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-center"
-            >
+            <GlassCard delay={0.3} className="text-center">
               <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-white">3</span>
               </div>
@@ -380,75 +464,21 @@ export default function LandingPage() {
               <p className="text-white/70 leading-relaxed">
                 Monitor everything in real-time, manage guest experiences, and ensure your event is executed flawlessly.
               </p>
-            </motion.div>
+            </GlassCard>
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              Powered by Technology
-            </h2>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Cutting-edge features that make event planning effortless and extraordinary
-            </p>
-          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={Sparkles}
-              title="AI Event Planner"
-              description="Our AI analyzes your requirements and creates personalized event plans with optimal vendor recommendations."
-              delay={0.1}
-            />
-            <FeatureCard
-              icon={Users}
-              title="Vendor Marketplace"
-              description="Access a curated network of verified vendors, from photographers to caterers, all in one place."
-              delay={0.2}
-            />
-            <FeatureCard
-              icon={Calendar}
-              title="Smart Scheduling"
-              description="Intelligent scheduling that optimizes timelines and ensures perfect coordination between all parties."
-              delay={0.3}
-            />
-            <FeatureCard
-              icon={Zap}
-              title="Real-Time Analytics"
-              description="Track guest engagement, manage budgets, and get insights to optimize your event performance."
-              delay={0.4}
-            />
-            <FeatureCard
-              icon={Shield}
-              title="Secure Payments"
-              description="End-to-end encrypted payment processing with escrow protection for your peace of mind."
-              delay={0.5}
-            />
-            <FeatureCard
-              icon={Heart}
-              title="Guest Experience"
-              description="Create memorable experiences with personalized guest management and interactive features."
-              delay={0.6}
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Service Packages Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
+      <AnimatedSection direction="left-to-right" delay={0}>
+        <section className="py-32 bg-gradient-to-b from-gray-900 to-black">
+          <div className="max-w-7xl mx-auto px-4">
+              <motion.div
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
@@ -458,10 +488,10 @@ export default function LandingPage() {
             <p className="text-xl text-white/70 max-w-3xl mx-auto">
               Flexible packages designed to meet every event planning need
             </p>
-          </motion.div>
+              </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ServicePackage
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <ServicePackage
               title="Starter"
               price={15000}
               features={[
@@ -503,116 +533,107 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
-      {/* Plan Event Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/hero/Diwali Decoration Ideas By Artbyte Studio.jpeg"
-            alt="Event Planning Background"
-            fill
-            className="object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 to-black/80"></div>
-        </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Plan Your Perfect Event
-            </h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              From intimate gatherings to grand celebrations, our AI-powered platform helps you create unforgettable moments
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Calendar className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-4">Smart Planning</h3>
-              <p className="text-white/70">
-                AI-powered event planning that adapts to your preferences and budget
+              {/* Plan Event Section with Divider Layout */}
+        <AnimatedSection direction="right-to-left" delay={0}>
+        <DividerLayout
+          leftContent={
+            <div className="text-center">
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                Plan Your Perfect Event
+              </h2>
+              <p className="text-xl text-white/80 mb-8">
+                From intimate gatherings to grand celebrations, our AI-powered platform helps you create unforgettable moments
               </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Users className="w-8 h-8 text-white" />
+              <div className="space-y-6 mb-8">
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Smart Planning</h3>
+                  <p className="text-white/70 text-sm">
+                    AI-powered event planning that adapts to your preferences and budget
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Vendor Matching</h3>
+                  <p className="text-white/70 text-sm">
+                    Connect with the best vendors in your area for every aspect of your event
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Vendor Matching</h3>
-              <p className="text-white/70">
-                Connect with the best vendors in your area for every aspect of your event
+              <Link
+                href="/plan-event"
+                className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+              >
+                Start Planning
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </div>
+          }
+          rightContent={
+            <div className="text-center">
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                Start Selling Today
+              </h2>
+              <p className="text-xl text-white/80 mb-8">
+                Join our network of verified vendors and grow your business with our comprehensive platform
               </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="space-y-6 mb-8">
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Seamless Execution</h3>
+                  <p className="text-white/70 text-sm">
+                    Real-time coordination and management tools for flawless event execution
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Grow Your Business</h3>
+                  <p className="text-white/70 text-sm">
+                    Access new customers, manage bookings, and scale your operations efficiently
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Seamless Execution</h3>
-              <p className="text-white/70">
-                Real-time coordination and management tools for flawless event execution
-              </p>
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-center"
-          >
-            <Link
-              href="/plan-event"
-              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
-            >
-              Start Planning Your Event
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+              <Link
+                href="/vendor/register"
+                className="inline-flex items-center bg-gradient-to-r from-green-600 to-teal-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-green-700 hover:to-teal-700 transition-all duration-300"
+              >
+                Start Selling
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </div>
+          }
+        />
+      </AnimatedSection>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-black">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              What Our Clients Say
-            </h2>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Join thousands of satisfied customers who've created unforgettable events
-            </p>
-          </motion.div>
+      <AnimatedSection direction="left-to-right" delay={0}>
+        <section className="py-32 bg-black">
+          <div className="max-w-7xl mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-20"
+            >
+              <h2 className="text-4xl md:text-6xl font-bold mb-6">
+                What Our Clients Say
+              </h2>
+              <p className="text-xl text-white/70 max-w-3xl mx-auto">
+                Join thousands of satisfied customers who've created unforgettable events
+              </p>
+            </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                          <Testimonial
                quote="Evea transformed our wedding planning experience. The AI recommendations were spot-on, and everything was executed flawlessly."
                author="Priya & Raj"
@@ -640,29 +661,31 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Ready to Create Something Extraordinary?
-            </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of event planners who trust Evea to make their events unforgettable
-            </p>
+      <AnimatedSection direction="right-to-left" delay={0}>
+        <section className="py-32 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="max-w-4xl mx-auto text-center px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                Ready to Create Something Extraordinary?
+              </h2>
+              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                Join thousands of event planners who trust Evea to make their events unforgettable
+              </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/plan-event"
+                             <Link
+                 href="/plan-event"
                 className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-gray-100 transition-all duration-300 flex items-center justify-center"
-              >
+               >
                 Start Planning Now
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
+               </Link>
               <Link
                 href="/marketplace"
                 className="bg-white/20 backdrop-blur-lg text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all duration-300 border border-white/30"
@@ -680,6 +703,7 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+      </AnimatedSection>
     </div>
   );
 }

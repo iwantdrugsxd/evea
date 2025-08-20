@@ -172,7 +172,7 @@ export default function VendorDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
-      <main className="pt-20 lg:pt-24 pb-6">
+              <main className="pb-6">
         <div className="w-full px-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
             <div className="lg:col-span-12">

@@ -97,7 +97,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-gray-50">
       <FloatingNavbar />
       
-      <main className="pt-20 lg:pt-24">
+              <main>
         {/* Hero Section */}
         <section className="section-padding-sm bg-gradient-to-br from-primary-50 to-white">
           <div className="container-custom">

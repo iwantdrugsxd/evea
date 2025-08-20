@@ -8,7 +8,7 @@ export default function VendorLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
       <FloatingNavbar />
-      <main className="pt-20 lg:pt-24 pb-6">
+              <main className="pb-6">
         <div className="w-full px-0">{children}</div>
       </main>
       <Footer />

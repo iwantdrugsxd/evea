@@ -57,7 +57,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
       <FloatingNavbar />
       
-      <main className="container mx-auto px-4 pt-20 lg:pt-24 pb-8">
+              <main className="container mx-auto px-4 pb-8">
         <div className="max-w-4xl mx-auto">
           {/* Welcome Section */}
           <motion.div

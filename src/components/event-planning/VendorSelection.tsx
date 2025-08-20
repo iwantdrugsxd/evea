@@ -60,8 +60,8 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
         services: eventData.selectedServices?.map(s => s.slug).join(',') || ''
       })
 
-      console.log('Fetching vendors with params:', params.toString())
-      const response = await fetch(`/api/vendors?${params}`)
+      console.log('Fetching event planning recommendations with params:', params.toString())
+      const response = await fetch(`/api/event-planning/recommendations?${params}`)
       
       if (response.ok) {
         const data = await response.json()

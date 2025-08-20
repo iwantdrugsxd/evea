@@ -108,7 +108,7 @@ export default function VendorHeroSection() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="relative z-10 container-custom pt-20">
+              <div className="relative z-10 container-custom">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
           <motion.div 
