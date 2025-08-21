@@ -176,12 +176,12 @@ export default function MarketplacePage() {
       <FloatingNavbar />
         
           {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="relative text-white">
         <div className="absolute inset-0">
           <img
-            src="/images/hero/Indian Wedding Decor.jpeg"
+            src="/images/hero/image copy.png"
             alt="Marketplace Hero"
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover"
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">

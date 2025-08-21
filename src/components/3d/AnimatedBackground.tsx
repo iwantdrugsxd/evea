@@ -16,30 +16,27 @@ function DiscoBall({ modelPath }: DiscoBallProps) {
 
   useFrame((state) => {
     if (meshRef.current) {
-      // Rotate the disco ball
-      meshRef.current.rotation.y += 0.01;
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
-      
-      // Add some floating motion
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.1;
+      // Only rotate the disco ball - no position changes
+      meshRef.current.rotation.y += 0.02; // Smooth rotation
+      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.02; // Subtle tilt
     }
   });
 
   useEffect(() => {
     if (gltf.scene) {
-      // Scale the model larger for better visibility
-      gltf.scene.scale.setScalar(2.5);
+      // Fixed scale - no size changes
+      gltf.scene.scale.setScalar(3.0);
       
-      // Add stunning disco ball material
+      // Original white disco ball material with subtle illumination
       gltf.scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.material = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
+            color: 0xffffff, // White color
             metalness: 0.95,
             roughness: 0.05,
-            envMapIntensity: 3.0,
-            emissive: 0x666666,
-            emissiveIntensity: 0.3,
+            envMapIntensity: 2.0,
+            emissive: 0x333333, // Subtle white emissive
+            emissiveIntensity: 0.2,
           });
         }
       });
@@ -50,39 +47,39 @@ function DiscoBall({ modelPath }: DiscoBallProps) {
     <primitive 
       ref={meshRef}
       object={gltf.scene} 
-      position={[-4, 3, 0]} // Position in top left corner
+      position={[0, 2, 0]} // Fixed position in center
     />
   );
 }
 
-// Animated disco lights component
+// Enhanced disco lights component with blue theme
 function DiscoLights() {
   const lightsRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     if (lightsRef.current) {
-      // Animate the lights around the disco ball
+      // Animate the lights around the disco ball in a fixed pattern
       lightsRef.current.children.forEach((light, index) => {
         const time = state.clock.elapsedTime;
-        const angle = (time * 0.5 + index * Math.PI * 2 / 8) % (Math.PI * 2);
-        const radius = 3 + Math.sin(time * 2 + index) * 0.5;
+        const angle = (time * 0.3 + index * Math.PI * 2 / 12) % (Math.PI * 2);
+        const radius = 4; // Fixed radius
         
-        light.position.x = -4 + Math.cos(angle) * radius;
-        light.position.y = 3 + Math.sin(angle) * radius * 0.5;
-        light.position.z = Math.sin(time * 3 + index) * 2;
+        light.position.x = Math.cos(angle) * radius;
+        light.position.y = 2 + Math.sin(angle) * radius * 0.3;
+        light.position.z = Math.sin(time * 2 + index) * 1.5;
       });
     }
   });
 
   return (
     <group ref={lightsRef}>
-      {Array.from({ length: 8 }, (_, i) => (
+      {Array.from({ length: 12 }, (_, i) => (
         <pointLight
           key={i}
           position={[0, 0, 0]}
-          intensity={2}
-          color={['#ff6b6b', '#4ecdc4', '#ffd93d', '#ff8e8e', '#8e8eff', '#ff69b4', '#00ff88', '#ffa500'][i]}
-          distance={6}
+          intensity={3}
+          color={['#3b82f6', '#1d4ed8', '#2563eb', '#1e40af', '#60a5fa', '#93c5fd', '#3b82f6', '#1d4ed8', '#2563eb', '#1e40af', '#60a5fa', '#93c5fd'][i]}
+          distance={8}
         />
       ))}
     </group>
@@ -103,51 +100,51 @@ export default function AnimatedBackground({ className = "" }: AnimatedBackgroun
         {/* Ambient lighting */}
         <ambientLight intensity={0.2} />
         
-        {/* Stunning disco lighting effects */}
+        {/* Blue disco lighting effects */}
         <directionalLight 
           position={[15, 15, 10]} 
           intensity={2} 
-          color="#ff6b6b"
+          color="#3b82f6"
         />
         <directionalLight 
           position={[-15, 15, 10]} 
           intensity={1.5} 
-          color="#4ecdc4"
+          color="#1d4ed8"
         />
         <directionalLight 
           position={[0, -15, 10]} 
           intensity={1.8} 
-          color="#ffd93d"
+          color="#2563eb"
         />
         <directionalLight 
           position={[10, 0, 15]} 
           intensity={1.2} 
-          color="#ff8e8e"
+          color="#1e40af"
         />
         <directionalLight 
           position={[-10, 0, 15]} 
           intensity={1.2} 
-          color="#8e8eff"
+          color="#60a5fa"
         />
         
         {/* Point lights for disco effect */}
         <pointLight 
-          position={[-3, 2, 2]} 
+          position={[0, 2, 2]} 
+          intensity={4} 
+          color="#3b82f6"
+          distance={12}
+        />
+        <pointLight 
+          position={[2, 2, 1]} 
           intensity={3} 
-          color="#ffffff"
+          color="#1d4ed8"
           distance={10}
         />
         <pointLight 
-          position={[-2, 3, 1]} 
-          intensity={2} 
-          color="#ff6b6b"
-          distance={8}
-        />
-        <pointLight 
-          position={[-4, 1, 3]} 
-          intensity={2} 
-          color="#4ecdc4"
-          distance={8}
+          position={[-2, 2, 3]} 
+          intensity={3} 
+          color="#2563eb"
+          distance={10}
         />
         
         {/* Stars background */}
@@ -171,12 +168,12 @@ export default function AnimatedBackground({ className = "" }: AnimatedBackgroun
         <Environment preset="night" />
         
         {/* Disco ball reflections */}
-        <mesh position={[-4, 3, -2]} rotation={[0, 0, 0]}>
+        <mesh position={[0, 2, -2]} rotation={[0, 0, 0]}>
           <sphereGeometry args={[0.1, 16, 16]} />
           <meshStandardMaterial 
             color="#ffffff" 
             emissive="#ffffff"
-            emissiveIntensity={0.5}
+            emissiveIntensity={0.3}
             transparent
             opacity={0.8}
           />

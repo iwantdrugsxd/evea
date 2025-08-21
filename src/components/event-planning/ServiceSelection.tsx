@@ -88,9 +88,9 @@ const ServiceSelection = ({ onComplete }: ServiceSelectionProps) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-3 rounded-full border border-primary-200 shadow-red-soft mb-6">
-          <Sparkles className="h-5 w-5 text-primary-600" />
-          <span className="text-primary-700 font-semibold">Step 3 of 6</span>
+        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-3 rounded-full border border-blue-500/30 shadow-lg mb-6">
+          <Sparkles className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-300 font-semibold">Step 3 of 6</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-gray-900 mb-4">
@@ -145,8 +145,8 @@ const ServiceSelection = ({ onComplete }: ServiceSelectionProps) => {
                     className={`
                       w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
                       ${isCategorySelected(category)
-                        ? 'bg-primary-500 border-primary-500 text-white'
-                        : 'border-gray-300 hover:border-primary-400'
+                        ? 'bg-blue-500 border-blue-500 text-white'
+                        : 'border-gray-300 hover:border-blue-400'
                       }
                     `}
                   >
@@ -206,8 +206,8 @@ const ServiceSelection = ({ onComplete }: ServiceSelectionProps) => {
                           className={`
                             w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
                             ${isSubcategorySelected(subcategory)
-                              ? 'bg-primary-500 border-primary-500 text-white'
-                              : 'border-gray-300 hover:border-primary-400'
+                              ? 'bg-blue-500 border-blue-500 text-white'
+                              : 'border-gray-300 hover:border-blue-400'
                             }
                           `}
                         >
@@ -243,11 +243,11 @@ const ServiceSelection = ({ onComplete }: ServiceSelectionProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mt-8 bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-6 border border-primary-200"
+          className="mt-8 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -262,7 +262,7 @@ const ServiceSelection = ({ onComplete }: ServiceSelectionProps) => {
             
             <button
               onClick={handleContinue}
-              className="btn-primary btn-lg group"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 group"
             >
               <span className="flex items-center space-x-2">
                 <span>Continue</span>

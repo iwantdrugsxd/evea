@@ -24,6 +24,8 @@ import AnimatedSection from '@/components/layout/AnimatedSection';
 import { FloatingObject, Balloon, Confetti, SpotlightBeam, AbstractShape } from '@/components/animations/FloatingObjects';
 import GlassCard from '@/components/ui/GlassCard';
 import AppleButton from '@/components/ui/AppleButton';
+import Enhanced3DEventSection from '@/components/sections/Enhanced3DEventSection';
+import Footer from '@/components/layout/Footer';
 
 // Hero background component with local images
 const HeroBackground = () => {
@@ -195,21 +197,21 @@ export default function LandingPage() {
   // Hero content with storytelling
   const heroContent = [
     {
-      title: "Transform Your Events with AI-Powered Planning",
-      subtitle: "From intimate gatherings to grand celebrations, our technology makes every event extraordinary",
-      cta: "Start Planning",
+      title: "Revolutionize Your Events with AI Magic",
+      subtitle: "Stop dreaming, start creating! Our cutting-edge platform turns your wildest event ideas into reality in record time",
+      cta: "Start Creating Magic",
       stats: { events: 5000, vendors: 2000, satisfaction: 98 }
     },
     {
-      title: "Seamless Vendor Management & Coordination",
-      subtitle: "Connect with the best vendors, manage timelines, and ensure perfect execution",
-      cta: "Explore Vendors",
+      title: "Unlock Your Event Empire",
+      subtitle: "Join the elite circle of event professionals who've discovered the secret to flawless execution and skyrocketing profits",
+      cta: "Claim Your Success",
       stats: { events: 5000, vendors: 2000, satisfaction: 98 }
     },
     {
-      title: "Real-Time Event Analytics & Insights",
-      subtitle: "Track guest engagement, manage budgets, and optimize your event performance",
-      cta: "View Dashboard",
+      title: "Master the Art of Event Domination",
+      subtitle: "From concept to celebration, we give you the superpowers to create events that leave everyone speechless",
+      cta: "Become a Legend",
       stats: { events: 5000, vendors: 2000, satisfaction: 98 }
     }
   ];
@@ -250,79 +252,213 @@ export default function LandingPage() {
           <Confetti color="blue" />
         </FloatingObject>
         
-        <div className="relative z-20 text-center max-w-6xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-8"
-          >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              {heroContent[currentHeroIndex].title}
-            </h1>
-            <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-              {heroContent[currentHeroIndex].subtitle}
-            </p>
-          </motion.div>
+        <div className="relative z-20 max-w-7xl mx-auto px-4">
+          {/* Hero Content - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
+            {/* Left Column - Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-left"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="mb-8"
+              >
+                <div className="relative">
+                  <motion.div
+                    animate={{ 
+                      textShadow: [
+                        "0 0 20px rgba(59, 130, 246, 0.8)",
+                        "0 0 40px rgba(59, 130, 246, 1)",
+                        "0 0 60px rgba(59, 130, 246, 0.8)",
+                        "0 0 20px rgba(59, 130, 246, 0.8)"
+                      ]
+                    }}
+                    transition={{ 
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
+                  >
+                    {heroContent[currentHeroIndex].title}
+                  </motion.div>
+                  {/* Glow effect behind text */}
+                  <motion.div
+                    animate={{ 
+                      opacity: [0.3, 0.8, 0.3],
+                      scale: [0.95, 1.05, 0.95]
+                    }}
+                    transition={{ 
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10"
+                  />
+                </div>
+                <p className="text-xl md:text-2xl text-white/80 mb-8 leading-relaxed">
+                  {heroContent[currentHeroIndex].subtitle}
+                </p>
+              </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center mb-12"
-          >
-            <AppleButton
-              href="/plan-event"
-              variant="gradient"
-              size="lg"
-              icon={<ArrowRight className="w-5 h-5" />}
-            >
-              {heroContent[currentHeroIndex].cta}
-            </AppleButton>
-            
-            <AppleButton
-              href="/vendor/register"
-              variant="gradient"
-              size="lg"
-              className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-              icon={<ArrowRight className="w-5 h-5" />}
-            >
-              Start Selling
-            </AppleButton>
-            
-            <AppleButton
-              variant="primary"
-              size="lg"
-              icon={<Play className="w-5 h-5" />}
-            >
-              Watch Demo
-            </AppleButton>
-          </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex flex-col sm:flex-row gap-6 mb-12"
+              >
+                <AppleButton
+                  href="/plan-event"
+                  variant="gradient"
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                  icon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Plan Event
+                </AppleButton>
+                
+                <AppleButton
+                  href="/vendor/register"
+                  variant="gradient"
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  icon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Start Selling
+                </AppleButton>
+              </motion.div>
 
-          {/* Stats */}
+
+            </motion.div>
+
+            {/* Right Column - Visual Elements */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="relative h-[600px] flex items-center justify-center"
+            >
+              {/* Illuminated Visual Element */}
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  opacity: [0.7, 1, 0.7]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                <div className="w-96 h-96 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-full blur-3xl"></div>
+              </motion.div>
+              
+              {/* Floating Light Particles */}
+              <motion.div
+                animate={{ 
+                  y: [0, -20, 0],
+                  opacity: [0.3, 1, 0.3]
+                }}
+                transition={{ 
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full blur-sm"
+              />
+              <motion.div
+                animate={{ 
+                  y: [0, -15, 0],
+                  opacity: [0.3, 1, 0.3]
+                }}
+                transition={{ 
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 2
+                }}
+                className="absolute top-32 right-32 w-1 h-1 bg-purple-400 rounded-full blur-sm"
+              />
+              <motion.div
+                animate={{ 
+                  y: [0, -25, 0],
+                  opacity: [0.3, 1, 0.3]
+                }}
+                transition={{ 
+                  duration: 7,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 4
+                }}
+                className="absolute bottom-40 left-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full blur-sm"
+              />
+            </motion.div>
+          </div>
+
+          {/* Enhanced Glass Stats */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+            transition={{ duration: 1, delay: 0.8 }}
+            className="mt-20"
           >
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">
-                <AnimatedCounter end={5000} suffix="+" />
-              </div>
-              <p className="text-white/70">Events Planned</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">
-                <AnimatedCounter end={2000} suffix="+" />
-              </div>
-              <p className="text-white/70">Verified Vendors</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">
-                <AnimatedCounter end={98} suffix="%" />
-              </div>
-              <p className="text-white/70">Satisfaction Rate</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <motion.div
+                whileHover={{ scale: 1.05, y: -10 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 text-center hover:border-white/40 transition-all duration-500">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Calendar className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-4xl font-bold text-white mb-3">
+                    <AnimatedCounter end={5000} suffix="+" />
+                  </div>
+                  <p className="text-white/80 text-lg font-medium">Events Planned</p>
+                  <p className="text-white/60 text-sm mt-2">Successfully executed</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -10 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 text-center hover:border-white/40 transition-all duration-500">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-4xl font-bold text-white mb-3">
+                    <AnimatedCounter end={2000} suffix="+" />
+                  </div>
+                  <p className="text-white/80 text-lg font-medium">Verified Vendors</p>
+                  <p className="text-white/60 text-sm mt-2">Background checked</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -10 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 text-center hover:border-white/40 transition-all duration-500">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Star className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-4xl font-bold text-white mb-3">
+                    <AnimatedCounter end={98} suffix="%" />
+                  </div>
+                  <p className="text-white/80 text-lg font-medium">Satisfaction Rate</p>
+                  <p className="text-white/60 text-sm mt-2">Customer happiness</p>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -348,9 +484,38 @@ export default function LandingPage() {
                              className="text-center mb-20"
              >
  
-               <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-                 For every moment
-              </h2>
+               <div className="relative">
+                 <motion.div
+                   animate={{ 
+                     textShadow: [
+                       "0 0 20px rgba(59, 130, 246, 0.8)",
+                       "0 0 40px rgba(59, 130, 246, 1)",
+                       "0 0 60px rgba(59, 130, 246, 0.8)",
+                       "0 0 20px rgba(59, 130, 246, 0.8)"
+                     ]
+                   }}
+                   transition={{ 
+                     duration: 3,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   }}
+                   className="text-4xl md:text-6xl font-bold text-white mb-6"
+                 >
+                   For every moment
+                 </motion.div>
+                 <motion.div
+                   animate={{ 
+                     opacity: [0.3, 0.8, 0.3],
+                     scale: [0.95, 1.05, 0.95]
+                   }}
+                   transition={{ 
+                     duration: 4,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   }}
+                   className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10"
+                 />
+               </div>
               <p className="text-xl text-white/70 max-w-3xl mx-auto">
                 Weddings, Birthdays, Corporate Events, Concerts
               </p>
@@ -427,9 +592,38 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
               className="text-center mb-20"
             >
-              <h2 className="text-4xl md:text-6xl font-bold mb-6">
-                How It Works
-              </h2>
+                             <div className="relative">
+                 <motion.div
+                   animate={{ 
+                     textShadow: [
+                       "0 0 20px rgba(59, 130, 246, 0.8)",
+                       "0 0 40px rgba(59, 130, 246, 1)",
+                       "0 0 60px rgba(59, 130, 246, 0.8)",
+                       "0 0 20px rgba(59, 130, 246, 0.8)"
+                     ]
+                   }}
+                   transition={{ 
+                     duration: 3,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   }}
+                   className="text-4xl md:text-6xl font-bold mb-6"
+                 >
+                   How It Works
+                 </motion.div>
+                 <motion.div
+                   animate={{ 
+                     opacity: [0.3, 0.8, 0.3],
+                     scale: [0.95, 1.05, 0.95]
+                   }}
+                   transition={{ 
+                     duration: 4,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   }}
+                   className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10"
+                 />
+               </div>
               <p className="text-xl text-white/70 max-w-3xl mx-auto">
                 Our AI-powered platform streamlines every aspect of event planning, from initial concept to flawless execution
               </p>
@@ -535,85 +729,10 @@ export default function LandingPage() {
       </section>
       </AnimatedSection>
 
-              {/* Plan Event Section with Divider Layout */}
+              {/* Enhanced 3D Event Planning Section */}
         <AnimatedSection direction="right-to-left" delay={0}>
-        <DividerLayout
-          leftContent={
-            <div className="text-center">
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-                Plan Your Perfect Event
-              </h2>
-              <p className="text-xl text-white/80 mb-8">
-                From intimate gatherings to grand celebrations, our AI-powered platform helps you create unforgettable moments
-              </p>
-              <div className="space-y-6 mb-8">
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Smart Planning</h3>
-                  <p className="text-white/70 text-sm">
-                    AI-powered event planning that adapts to your preferences and budget
-                  </p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Vendor Matching</h3>
-                  <p className="text-white/70 text-sm">
-                    Connect with the best vendors in your area for every aspect of your event
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/plan-event"
-                className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
-              >
-                Start Planning
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </div>
-          }
-          rightContent={
-            <div className="text-center">
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-                Start Selling Today
-              </h2>
-              <p className="text-xl text-white/80 mb-8">
-                Join our network of verified vendors and grow your business with our comprehensive platform
-              </p>
-              <div className="space-y-6 mb-8">
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Seamless Execution</h3>
-                  <p className="text-white/70 text-sm">
-                    Real-time coordination and management tools for flawless event execution
-                  </p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Zap className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Grow Your Business</h3>
-                  <p className="text-white/70 text-sm">
-                    Access new customers, manage bookings, and scale your operations efficiently
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/vendor/register"
-                className="inline-flex items-center bg-gradient-to-r from-green-600 to-teal-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-green-700 hover:to-teal-700 transition-all duration-300"
-              >
-                Start Selling
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </div>
-          }
-        />
-      </AnimatedSection>
+          <Enhanced3DEventSection />
+        </AnimatedSection>
 
       {/* Testimonials Section */}
       <AnimatedSection direction="left-to-right" delay={0}>
@@ -625,9 +744,38 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
               className="text-center mb-20"
             >
-              <h2 className="text-4xl md:text-6xl font-bold mb-6">
-                What Our Clients Say
-              </h2>
+                             <div className="relative">
+                 <motion.div
+                   animate={{ 
+                     textShadow: [
+                       "0 0 20px rgba(59, 130, 246, 0.8)",
+                       "0 0 40px rgba(59, 130, 246, 1)",
+                       "0 0 60px rgba(59, 130, 246, 0.8)",
+                       "0 0 20px rgba(59, 130, 246, 0.8)"
+                     ]
+                   }}
+                   transition={{ 
+                     duration: 3,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   }}
+                   className="text-4xl md:text-6xl font-bold mb-6"
+                 >
+                   What Our Clients Say
+                 </motion.div>
+                 <motion.div
+                   animate={{ 
+                     opacity: [0.3, 0.8, 0.3],
+                     scale: [0.95, 1.05, 0.95]
+                   }}
+                   transition={{ 
+                     duration: 4,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   }}
+                   className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10"
+                 />
+               </div>
               <p className="text-xl text-white/70 max-w-3xl mx-auto">
                 Join thousands of satisfied customers who've created unforgettable events
               </p>
@@ -672,9 +820,38 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-                Ready to Create Something Extraordinary?
-              </h2>
+                              <div className="relative">
+                  <motion.div
+                    animate={{ 
+                      textShadow: [
+                        "0 0 20px rgba(255, 255, 255, 0.8)",
+                        "0 0 40px rgba(255, 255, 255, 1)",
+                        "0 0 60px rgba(255, 255, 255, 0.8)",
+                        "0 0 20px rgba(255, 255, 255, 0.8)"
+                      ]
+                    }}
+                    transition={{ 
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-4xl md:text-6xl font-bold text-white mb-6"
+                  >
+                    Ready to Create Something Extraordinary?
+                  </motion.div>
+                  <motion.div
+                    animate={{ 
+                      opacity: [0.3, 0.8, 0.3],
+                      scale: [0.95, 1.05, 0.95]
+                    }}
+                    transition={{ 
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 via-blue-500/20 to-white/20 blur-3xl -z-10"
+                  />
+                </div>
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
                 Join thousands of event planners who trust Evea to make their events unforgettable
               </p>
@@ -704,6 +881,7 @@ export default function LandingPage() {
         </div>
       </section>
       </AnimatedSection>
+      <Footer />
     </div>
   );
 }

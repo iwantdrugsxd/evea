@@ -53,9 +53,9 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-3 rounded-full border border-primary-200 shadow-red-soft mb-6">
-          <Sparkles className="h-5 w-5 text-primary-600" />
-          <span className="text-primary-700 font-semibold">Step 5 of 6</span>
+        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-3 rounded-full border border-blue-500/30 shadow-lg mb-6">
+          <Sparkles className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-300 font-semibold">Step 5 of 6</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-gray-900 mb-4">
@@ -80,9 +80,9 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-primary-600" />
-                  </div>
+                                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
                   <div>
                     <p className="text-sm text-gray-500">Event Date</p>
                     <p className="font-semibold text-gray-900">
@@ -92,9 +92,9 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <Clock className="h-5 w-5 text-primary-600" />
-                  </div>
+                                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                </div>
                   <div>
                     <p className="text-sm text-gray-500">Time & Duration</p>
                     <p className="font-semibold text-gray-900">
@@ -106,9 +106,9 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
               
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-primary-600" />
-                  </div>
+                                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                </div>
                   <div>
                     <p className="text-sm text-gray-500">Location</p>
                     <p className="font-semibold text-gray-900">
@@ -118,9 +118,9 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <Users className="h-5 w-5 text-primary-600" />
-                  </div>
+                                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
                   <div>
                     <p className="text-sm text-gray-500">Guest Count</p>
                     <p className="font-semibold text-gray-900">
@@ -134,9 +134,9 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
             {eventData.eventDetails.specialRequirements && (
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-primary-600" />
-                  </div>
+                                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
                   <div>
                     <p className="text-sm text-gray-500">Special Requirements</p>
                     <p className="text-gray-900">
@@ -163,7 +163,7 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center text-xl">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center text-xl">
                         {item.serviceCategory.icon}
                       </div>
                       
@@ -233,7 +233,7 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
             
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="mt-6 text-primary-600 hover:text-primary-700 font-medium"
+              className="mt-6 text-blue-600 hover:text-blue-700 font-medium"
             >
               {showDetails ? 'Hide Details' : 'Show Details'}
             </button>
@@ -319,7 +319,7 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
             {/* Continue Button */}
             <button
               onClick={handleContinue}
-              className="btn-primary btn-lg w-full group"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 w-full group"
             >
               <span className="flex items-center justify-center space-x-2">
                 <span>Proceed to Payment</span>
@@ -351,7 +351,7 @@ const PackageReview = ({ onComplete }: PackageReviewProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className="mt-12 bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200"
+                    className="mt-12 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-8 border border-blue-200"
       >
         <div className="text-center">
           <h3 className="text-2xl font-semibold text-gray-900 mb-4">

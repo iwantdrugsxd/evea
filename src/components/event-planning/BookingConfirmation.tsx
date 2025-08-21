@@ -81,9 +81,9 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-3 rounded-full border border-primary-200 shadow-red-soft mb-6">
-          <Sparkles className="h-5 w-5 text-primary-600" />
-          <span className="text-primary-700 font-semibold">Step 6 of 6</span>
+        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-3 rounded-full border border-blue-500/30 shadow-lg mb-6">
+          <Sparkles className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-300 font-semibold">Step 6 of 6</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-gray-900 mb-4">
@@ -113,7 +113,7 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
                   className={`
                     border-2 rounded-xl p-4 cursor-pointer transition-all duration-200
                     ${selectedPaymentMethod === method.id
-                      ? 'border-primary-500 bg-primary-50'
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                     }
                   `}
@@ -122,7 +122,7 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
                     <div className={`
                       w-10 h-10 rounded-xl flex items-center justify-center
                       ${selectedPaymentMethod === method.id
-                        ? 'bg-primary-500 text-white'
+                        ? 'bg-blue-500 text-white'
                         : 'bg-gray-100 text-gray-600'
                       }
                     `}>
@@ -135,7 +135,7 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
                     </div>
                     
                     {selectedPaymentMethod === method.id && (
-                      <CheckCircle className="h-5 w-5 text-primary-500" />
+                      <CheckCircle className="h-5 w-5 text-blue-500" />
                     )}
                   </div>
                 </div>
@@ -234,8 +234,8 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-primary-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Event Date</p>
@@ -249,8 +249,8 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
               
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-4 w-4 text-primary-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Location</p>
@@ -261,8 +261,8 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
               
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <Users className="h-4 w-4 text-primary-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Users className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Guests</p>
@@ -273,8 +273,8 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
               
               <div className="flex items-center justify-between py-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <DollarSign className="h-4 w-4 text-primary-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <DollarSign className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Total Amount</p>
@@ -352,7 +352,7 @@ const BookingConfirmation = ({ onComplete }: BookingConfirmationProps) => {
             <button
               onClick={handlePayment}
               disabled={isProcessing}
-              className="btn-primary btn-lg w-full group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 w-full group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="flex items-center justify-center space-x-2">
                 {isProcessing ? (

@@ -61,9 +61,9 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-3 rounded-full border border-primary-200 shadow-red-soft mb-6">
-          <Sparkles className="h-5 w-5 text-primary-600" />
-          <span className="text-primary-700 font-semibold">Step 2 of 6</span>
+        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-3 rounded-full border border-blue-500/30 shadow-lg mb-6">
+          <Sparkles className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-300 font-semibold">Step 2 of 6</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-gray-900 mb-4">
@@ -83,9 +83,9 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         {/* Date and Time */}
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-elegant">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-primary-600" />
-            </div>
+                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
             <h2 className="text-2xl font-semibold text-gray-900">Date & Time</h2>
           </div>
           
@@ -133,9 +133,9 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         {/* Location */}
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-elegant">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <MapPin className="h-5 w-5 text-primary-600" />
-            </div>
+                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                </div>
             <h2 className="text-2xl font-semibold text-gray-900">Location</h2>
           </div>
           
@@ -167,9 +167,9 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         {/* Guest Count */}
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-elegant">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <Users className="h-5 w-5 text-primary-600" />
-            </div>
+                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
             <h2 className="text-2xl font-semibold text-gray-900">Guest Count</h2>
           </div>
           
@@ -195,9 +195,9 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         {/* Budget */}
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-elegant">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-primary-600" />
-            </div>
+                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-blue-600" />
+                </div>
             <h2 className="text-2xl font-semibold text-gray-900">Budget</h2>
           </div>
           
@@ -223,9 +223,9 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         {/* Special Requirements */}
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-elegant">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <FileText className="h-5 w-5 text-primary-600" />
-            </div>
+                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
             <h2 className="text-2xl font-semibold text-gray-900">Special Requirements</h2>
           </div>
           
@@ -243,12 +243,12 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
 
         {/* Error Display */}
         {errors.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="text-sm font-semibold text-red-900 mb-2">Please fix the following issues:</h4>
-                <ul className="text-sm text-red-700 space-y-1">
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-semibold text-blue-900 mb-2">Please fix the following issues:</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
                   {errors.map((error, index) => (
                     <li key={index}>• {error}</li>
                   ))}
@@ -259,10 +259,10 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
         )}
 
         {/* Continue Button */}
-        <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-6 border border-primary-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
                 {isValid ? (
                   <CheckCircle className="h-6 w-6 text-white" />
                 ) : (
@@ -291,7 +291,7 @@ const EventDetailsForm = ({ onComplete }: EventDetailsFormProps) => {
             <button
               onClick={handleSubmit}
               disabled={!isValid}
-              className="btn-primary btn-lg group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="flex items-center space-x-2">
                 <span>Continue</span>

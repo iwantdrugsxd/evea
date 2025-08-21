@@ -232,9 +232,9 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-8"
       >
-        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-3 rounded-full border border-primary-200 shadow-red-soft mb-6">
-          <Sparkles className="h-5 w-5 text-primary-600" />
-          <span className="text-primary-700 font-semibold">Step 4 of 6</span>
+        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-3 rounded-full border border-blue-500/30 shadow-lg mb-6">
+          <Sparkles className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-300 font-semibold">Step 4 of 6</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-gray-900 mb-4">
@@ -266,7 +266,7 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
                   onClick={() => setSelectedCategory(categorySlug)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                     isSelected 
-                      ? 'border-primary-500 bg-primary-50 text-primary-700' 
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
                       : hasVendor
                       ? 'border-green-500 bg-green-50 text-green-700'
                       : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
@@ -393,7 +393,7 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
         <div className="xl:col-span-2">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Finding the best vendors for your event...</p>
             </div>
           ) : !selectedCategory ? (
@@ -428,7 +428,7 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
               <div className="bg-white rounded-2xl shadow-elegant p-6 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center text-xl">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center text-xl">
                       {getCategoryIcon(selectedCategory)}
                     </div>
                     <div>
@@ -482,7 +482,7 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
                       <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-start space-x-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center text-2xl">
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center text-2xl">
                               {getCategoryIcon(recommendation.category_id)}
                             </div>
                             
@@ -557,8 +557,8 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
                         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
                           <button
                             onClick={() => handleVendorSelect(recommendation)}
-                            className={`btn-sm w-full ${
-                              isSelected ? 'btn-outline bg-green-50 text-green-700 border-green-300' : 'btn-primary'
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full ${
+                              isSelected ? 'bg-green-50 text-green-700 border-green-300 border' : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
                             }`}
                           >
                             {isSelected ? 'Selected' : 'Select Vendor'}
@@ -625,7 +625,7 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
                       
                       <button 
                         onClick={() => removeFromPackage(item.id)}
-                        className="text-gray-400 hover:text-red-500"
+                        className="text-gray-400 hover:text-blue-500"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -668,7 +668,7 @@ const VendorSelection = ({ onComplete }: VendorSelectionProps) => {
                 <button
                   onClick={handleContinue}
                   disabled={eventPackage.items.length === 0}
-                  className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-blue-500/25 w-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="flex items-center justify-center space-x-2">
                     <span>Continue to Review</span>

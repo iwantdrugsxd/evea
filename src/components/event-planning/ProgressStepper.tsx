@@ -15,9 +15,9 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
     <div className="w-full">
       <div className="flex items-center justify-between relative">
         {/* Progress Line */}
-        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
+        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-700 -translate-y-1/2 z-0" />
         <motion.div
-          className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-primary-500 to-primary-600 -translate-y-1/2 z-0"
+          className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 -translate-y-1/2 z-0"
           initial={{ width: 0 }}
           animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -44,10 +44,10 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
                 className={`
                   relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300
                   ${isCompleted 
-                    ? 'bg-primary-500 border-primary-500 text-white shadow-lg shadow-primary-200' 
+                    ? 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/30' 
                     : isCurrent 
-                    ? 'bg-white border-primary-500 text-primary-500 shadow-lg shadow-primary-200' 
-                    : 'bg-white border-gray-300 text-gray-400 hover:border-gray-400'
+                    ? 'bg-white border-blue-500 text-blue-500 shadow-lg shadow-blue-500/30' 
+                    : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-gray-500'
                   }
                   ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed'}
                 `}
@@ -67,7 +67,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
                 {/* Pulse animation for current step */}
                 {isCurrent && (
                   <motion.div
-                    className="absolute inset-0 rounded-full border-2 border-primary-300"
+                    className="absolute inset-0 rounded-full border-2 border-blue-300"
                     animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
@@ -78,7 +78,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
               <div className="mt-3 text-center max-w-32">
                 <motion.p
                   className={`text-sm font-medium transition-colors duration-300 ${
-                    isCompleted || isCurrent ? 'text-gray-900' : 'text-gray-500'
+                    isCompleted || isCurrent ? 'text-white' : 'text-gray-400'
                   }`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -88,7 +88,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
                 </motion.p>
                 
                 <motion.p
-                  className="text-xs text-gray-400 mt-1 leading-tight"
+                  className="text-xs text-gray-500 mt-1 leading-tight"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
@@ -116,17 +116,17 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
       {/* Mobile Progress Bar */}
       <div className="mt-8 lg:hidden">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-white">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-400">
             {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
           </span>
         </div>
         
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-700 rounded-full h-2">
           <motion.div
-            className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -134,10 +134,10 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
         </div>
         
         <div className="mt-3 text-center">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-white">
             {steps[currentStep]?.title}
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             {steps[currentStep]?.description}
           </p>
         </div>
@@ -148,7 +148,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
         <button
           onClick={() => onStepClick(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
-          className="btn-outline btn-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-4 py-2 rounded-lg font-semibold hover:from-gray-700 hover:to-gray-800 transition-all duration-300 border border-gray-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Previous
         </button>
@@ -156,7 +156,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
         <button
           onClick={() => onStepClick(Math.min(steps.length - 1, currentStep + 1))}
           disabled={currentStep === steps.length - 1}
-          className="btn-primary btn-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next
         </button>

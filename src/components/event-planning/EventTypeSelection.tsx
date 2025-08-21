@@ -76,9 +76,9 @@ const EventTypeSelection = ({ onComplete }: EventTypeSelectionProps) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-3 rounded-full border border-primary-200 shadow-red-soft mb-6">
-          <Sparkles className="h-5 w-5 text-primary-600" />
-          <span className="text-primary-700 font-semibold">Step 1 of 6</span>
+        <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-3 rounded-full border border-blue-500/30 shadow-lg mb-6">
+          <Sparkles className="h-5 w-5 text-blue-400" />
+          <span className="text-blue-300 font-semibold">Step 1 of 6</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading text-gray-900 mb-4">
@@ -111,16 +111,16 @@ const EventTypeSelection = ({ onComplete }: EventTypeSelectionProps) => {
               className={`
                 relative cursor-pointer group
                 ${isSelected 
-                  ? 'ring-2 ring-primary-500 ring-offset-2' 
-                  : 'hover:ring-2 hover:ring-primary-300 hover:ring-offset-2'
+                  ? 'ring-2 ring-blue-500 ring-offset-2' 
+                  : 'hover:ring-2 hover:ring-blue-300 hover:ring-offset-2'
                 }
               `}
             >
               <div className={`
                 bg-white rounded-2xl p-6 border-2 transition-all duration-300 h-full
                 ${isSelected 
-                  ? 'border-primary-500 shadow-lg shadow-primary-200' 
-                  : 'border-gray-200 hover:border-primary-300 shadow-elegant hover:shadow-elegant-hover'
+                  ? 'border-blue-500 shadow-lg shadow-blue-200' 
+                  : 'border-gray-200 hover:border-blue-300 shadow-elegant hover:shadow-elegant-hover'
                 }
               `}>
                 {/* Event Icon */}
@@ -128,8 +128,8 @@ const EventTypeSelection = ({ onComplete }: EventTypeSelectionProps) => {
                   <div className={`
                     w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-3
                     ${isSelected 
-                      ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white' 
-                      : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 group-hover:from-primary-100 group-hover:to-primary-200 group-hover:text-primary-600'
+                      ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' 
+                      : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 group-hover:from-blue-100 group-hover:to-blue-200 group-hover:text-blue-600'
                     }
                     transition-all duration-300
                   `}>
@@ -203,7 +203,7 @@ const EventTypeSelection = ({ onComplete }: EventTypeSelectionProps) => {
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center shadow-lg"
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
                   >
                     <CheckCircle className="h-5 w-5 text-white" />
                   </motion.div>
@@ -220,11 +220,11 @@ const EventTypeSelection = ({ onComplete }: EventTypeSelectionProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-6 mb-8 border border-primary-200"
+          className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 mb-8 border border-blue-200"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center text-2xl text-white">
+              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-2xl text-white">
                 {selectedEventType.icon}
               </div>
               <div>
@@ -258,7 +258,7 @@ const EventTypeSelection = ({ onComplete }: EventTypeSelectionProps) => {
         className="text-center text-gray-500"
       >
         <p className="text-sm">
-          Don't see your event type? <button className="text-primary-600 hover:text-primary-700 font-medium underline">Contact us</button> for custom planning
+          Don't see your event type? <button className="text-blue-600 hover:text-blue-700 font-medium underline">Contact us</button> for custom planning
         </p>
       </motion.div>
     </div>

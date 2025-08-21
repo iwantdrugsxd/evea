@@ -103,7 +103,7 @@ const EventPlanningPage = () => {
 
   if (showLanding) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
+      <div className="min-h-screen bg-black">
         <FloatingNavbar />
         
         {/* Landing Section */}
@@ -119,15 +119,15 @@ const EventPlanningPage = () => {
               className="text-center space-y-8"
             >
               {/* Badge */}
-              <motion.div
+              {/* <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-primary-50 via-primary-100 to-primary-50 px-6 py-4 rounded-full border border-primary-200 shadow-red-soft"
+                className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-4 rounded-full border border-blue-500/30 shadow-lg"
               >
-                <Sparkles className="h-5 w-5 text-primary-600" />
-                <span className="text-primary-700 font-semibold text-lg">AI-Powered Event Planning</span>
-              </motion.div>
+                <Sparkles className="h-5 w-5 text-blue-400" />
+                <span className="text-blue-300 font-semibold text-lg">AI-Powered Event Planning</span>
+              </motion.div> */}
 
               {/* Main Headline */}
               <motion.div
@@ -136,12 +136,41 @@ const EventPlanningPage = () => {
                 transition={{ duration: 1, delay: 0.4 }}
                 className="space-y-6"
               >
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading text-white leading-tight">
-                  Plan Your Perfect Event
-                  <span className="text-gradient block mt-2">
-                    in Minutes, Not Months
-                  </span>
-                </h1>
+                <div className="relative">
+                  <motion.div
+                    animate={{ 
+                      textShadow: [
+                        "0 0 20px rgba(59, 130, 246, 0.8)",
+                        "0 0 40px rgba(59, 130, 246, 1)",
+                        "0 0 60px rgba(59, 130, 246, 0.8)",
+                        "0 0 20px rgba(59, 130, 246, 0.8)"
+                      ]
+                    }}
+                    transition={{ 
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading text-white leading-tight"
+                  >
+                    Plan Your Perfect Event
+                    <span className="text-blue-400 block mt-2">
+                      in Minutes, Not Months
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    animate={{ 
+                      opacity: [0.3, 0.8, 0.3],
+                      scale: [0.95, 1.05, 0.95]
+                    }}
+                    transition={{ 
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10"
+                  />
+                </div>
                 
                 <p className="text-xl lg:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
                   Our intelligent platform matches you with the best vendors, creates personalized packages, 
@@ -183,10 +212,10 @@ const EventPlanningPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-                    className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-elegant hover:shadow-elegant-hover transition-all duration-300"
+                    className="bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl hover:border-white/40 transition-all duration-300"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/30 rounded-xl flex items-center justify-center mb-4">
-                      <feature.icon className="h-6 w-6 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="h-6 w-6 text-blue-300" />
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
                     <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
@@ -203,14 +232,14 @@ const EventPlanningPage = () => {
               >
                 <button
                   onClick={handleStartPlanning}
-                  className="btn-primary btn-lg group relative overflow-hidden"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 group relative overflow-hidden"
                   suppressHydrationWarning
                 >
                   <span className="relative z-10 flex items-center space-x-3">
                     <span>Start Planning Today</span>
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
                 
                 <div className="flex items-center justify-center space-x-8 text-sm text-white/70">
@@ -238,10 +267,10 @@ const EventPlanningPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
+    <div className="min-h-screen bg-black">
       <FloatingNavbar />
       
-              <main className="pb-16">
+      <main className="pb-16">
         <div className="container-custom">
           {/* Progress Stepper */}
           <motion.div
@@ -274,24 +303,24 @@ const EventPlanningPage = () => {
             >
               <button
                 onClick={previousStep}
-                className="btn-outline btn-lg"
+                className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-gray-700 hover:to-gray-800 transition-all duration-300 border border-gray-500/30"
                 disabled={currentStep === 0}
               >
                 Previous Step
               </button>
               
               <div className="text-center">
-                <p className="text-sm text-gray-500 mb-2">
+                <p className="text-sm text-gray-400 mb-2">
                   Step {currentStep + 1} of {steps.length}
                 </p>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-lg font-semibold text-white">
                   {steps[currentStep]?.title}
                 </p>
               </div>
               
               <button
                 onClick={nextStep}
-                className="btn-primary btn-lg"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
                 disabled={!steps[currentStep]?.isCompleted}
                 suppressHydrationWarning
               >
