@@ -1,1003 +1,705 @@
-// src/app/(vendor)/cards/create/page.tsx
-'use client'
+'use client';
 
-import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import {
-  Upload,
-  X,
-  Plus,
-  Minus,
-  Camera,
-  MapPin,
-  Users,
-  Clock,
-  DollarSign,
-  Star,
-  Calendar,
-  Package,
-  Eye,
-  Save,
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  AlertCircle,
-  Image as ImageIcon,
-  Tag,
-  FileText,
-  Settings,
-  Loader2
-} from 'lucide-react'
-import toast from 'react-hot-toast'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, ArrowRight, Upload, X, Plus, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+
+interface FormData {
+  title: string;
+  description: string;
+  category_id: string;
+  subcategory_id: string;
+  base_price: number;
+  starting_price: number;
+  price_type: 'fixed' | 'hourly' | 'daily' | 'per_person' | 'custom';
+  service_area: string[];
+  max_capacity: number;
+  inclusions: string[];
+  exclusions: string[];
+  equipment_provided: string[];
+  cancellation_policy: string;
+  tags: string[];
+  images: string[];
+  videos: string[];
+  portfolio_images: string[];
+  discount_percentage?: number; // Optional since not in DB schema
+  years_of_experience: number;
+  insurance_coverage: string;
+  certifications: string;
+  emergency_contact: string;
+}
 
 interface Category {
-  id: string
-  name: string
-  slug: string
-  description?: string
+  id: string;
+  name: string;
+  slug: string;
+  subcategories?: Category[];
 }
 
-interface ServiceCard {
-  // Basic Information
-  title: string
-  description: string
-  category: string
-  subcategory: string
-  
-  // Service Details
-  serviceArea: string[]
-  maxCapacity: number
-  minBookingTime: number
-  maxBookingTime: number
-  advanceBookingDays: number
-  
-  // Inclusions & Exclusions
-  inclusions: string[]
-  exclusions: string[]
-  equipmentProvided: string[]
-  
-  // Media
-  images: File[]
-  videos: File[]
-  
-  // Availability
-  workingDays: string[]
-  workingHours: { start: string; end: string }
-  
-  // SEO
-  tags: string[]
-  seoDescription: string
-  
-  // Pricing (moved to end)
-  basePrice: number
-  priceType: 'fixed' | 'per_hour' | 'per_day' | 'per_person' | 'custom'
-}
+export default function CreateServiceCard() {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [formData, setFormData] = useState<FormData>({
+    title: '',
+    description: '',
+    category_id: '',
+    subcategory_id: '',
+    base_price: 0,
+    starting_price: 0,
+    price_type: 'fixed',
+    service_area: [],
+    max_capacity: 0,
+    inclusions: [''],
+    exclusions: [''],
+    equipment_provided: [''],
+    cancellation_policy: '',
+    tags: [],
+    images: [],
+    videos: [''],
+    portfolio_images: [],
+    years_of_experience: 0,
+    insurance_coverage: '',
+    certifications: '',
+    emergency_contact: ''
+  });
 
-const initialCardData: ServiceCard = {
-  title: '',
-  description: '',
-  category: '',
-  subcategory: '',
-  serviceArea: [],
-  maxCapacity: 0,
-  minBookingTime: 1,
-  maxBookingTime: 30,
-  advanceBookingDays: 7,
-  inclusions: [],
-  exclusions: [],
-  equipmentProvided: [],
-  images: [],
-  videos: [],
-  workingDays: [],
-  workingHours: { start: '09:00', end: '18:00' },
-  tags: [],
-  seoDescription: '',
-  basePrice: 0,
-  priceType: 'fixed'
-}
-
-const priceTypes = [
-  { value: 'fixed', label: 'Fixed Price' },
-  { value: 'per_hour', label: 'Per Hour' },
-  { value: 'per_day', label: 'Per Day' },
-  { value: 'per_person', label: 'Per Person' },
-  { value: 'custom', label: 'Custom Pricing' }
-]
-
-// Reduced to 4 steps
-const steps = [
-  { id: 1, title: 'Basic Info', icon: FileText },
-  { id: 2, title: 'Service Details', icon: Settings },
-  { id: 3, title: 'Media & Images', icon: ImageIcon },
-  { id: 4, title: 'Pricing & Preview', icon: DollarSign }
-]
-
-export default function CreateCardPage() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [cardData, setCardData] = useState<ServiceCard>(initialCardData)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
-  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
-  const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Fetch categories on component mount
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    fetchCategories();
+  }, []);
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories')
+      const response = await fetch('/api/categories');
       if (response.ok) {
-        const data = await response.json()
-        setCategories(data.categories || [])
-      } else {
-        console.error('Failed to fetch categories')
+        const data = await response.json();
+        setCategories(data.categories);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error)
-    } finally {
-      setIsLoadingCategories(false)
+      console.error('Error fetching categories:', error);
     }
-  }
+  };
 
-  const updateCardData = (field: keyof ServiceCard, value: any) => {
-    setCardData(prev => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
-    }
-  }
+  const handleInputChange = (field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
-  const addToArray = (field: keyof ServiceCard, value: string) => {
-    if (value.trim()) {
-      const currentArray = cardData[field] as string[]
-      if (!currentArray.includes(value.trim())) {
-        updateCardData(field, [...currentArray, value.trim()])
+  const handleArrayFieldChange = (field: keyof FormData, index: number, value: string) => {
+    setFormData(prev => {
+      const newArray = [...(prev[field] as string[])];
+      newArray[index] = value;
+      return { ...prev, [field]: newArray };
+    });
+  };
+
+  const addArrayField = (field: keyof FormData) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: [...(prev[field] as string[]), '']
+    }));
+  };
+
+  const removeArrayField = (field: keyof FormData, index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: (prev[field] as string[]).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleImageUpload = async (files: FileList | null, type: 'images' | 'portfolio_images') => {
+    if (!files) return;
+
+    const uploadedUrls: string[] = [];
+    setLoading(true);
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', type === 'images' ? 'service-images' : 'portfolio-images');
+
+        const response = await fetch('/api/upload/image', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          uploadedUrls.push(data.url);
+        } else {
+          throw new Error('Upload failed');
+        }
       }
+
+      setFormData(prev => ({
+        ...prev,
+        [type]: [...(prev[type] as string[]), ...uploadedUrls]
+      }));
+
+      toast.success(`${files.length} image(s) uploaded successfully!`);
+    } catch (error) {
+      toast.error('Failed to upload images');
+      console.error('Upload error:', error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const removeFromArray = (field: keyof ServiceCard, index: number) => {
-    const currentArray = cardData[field] as string[]
-    updateCardData(field, currentArray.filter((_, i) => i !== index))
-  }
-
-  const handleImageUpload = (files: FileList | null) => {
-    if (files) {
-      const newImages = Array.from(files).filter(file => {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          toast.error('Please select only image files')
-          return false
-        }
-        // Validate file size (10MB limit)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error('Image size should be less than 10MB')
-          return false
-        }
-        return true
-      })
-
-      // Create preview URLs for new images
-      const newPreviewUrls = newImages.map(file => URL.createObjectURL(file))
-      setImagePreviewUrls(prev => [...prev, ...newPreviewUrls])
-      
-      updateCardData('images', [...cardData.images, ...newImages])
-    }
-  }
-
-  const removeImage = (index: number) => {
-    const newImages = cardData.images.filter((_, i) => i !== index)
-    const newPreviewUrls = imagePreviewUrls.filter((_, i) => i !== index)
-    
-    updateCardData('images', newImages)
-    setImagePreviewUrls(newPreviewUrls)
-  }
-
-  const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {}
-    
-    switch (step) {
-      case 1:
-        if (!cardData.title.trim()) newErrors.title = 'Title is required'
-        if (!cardData.description.trim()) newErrors.description = 'Description is required'
-        if (!cardData.category) newErrors.category = 'Category is required'
-        if (cardData.title.length > 100) newErrors.title = 'Title must be less than 100 characters'
-        if (cardData.description.length < 50) newErrors.description = 'Description must be at least 50 characters'
-        break
-      case 2:
-        if (cardData.serviceArea.length === 0) newErrors.serviceArea = 'At least one service area is required'
-        if (!cardData.maxCapacity || cardData.maxCapacity <= 0) newErrors.maxCapacity = 'Maximum capacity must be greater than 0'
-        if (cardData.minBookingTime > cardData.maxBookingTime) newErrors.minBookingTime = 'Min booking time cannot be greater than max booking time'
-        break
-      case 3:
-        if (cardData.images.length === 0) newErrors.images = 'At least one image is required'
-        break
-      case 4:
-        if (!cardData.basePrice || cardData.basePrice <= 0) newErrors.basePrice = 'Base price must be greater than 0'
-        break
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  const removeImage = (type: 'images' | 'portfolio_images', index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [type]: (prev[type] as string[]).filter((_, i) => i !== index)
+    }));
+  };
 
   const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, steps.length))
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1))
-  }
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return
-    
-    setIsLoading(true)
+    setLoading(true);
     try {
-      // Submit card data
-      const formData = new FormData()
-      Object.entries(cardData).forEach(([key, value]) => {
-        if (key === 'images' || key === 'videos') {
-          (value as File[]).forEach(file => formData.append(key, file))
-        } else if (typeof value === 'object') {
-          formData.append(key, JSON.stringify(value))
-        } else {
-          formData.append(key, String(value))
-        }
-      })
-      
-      const response = await fetch('/api/vendor/cards', {
+      const response = await fetch('/api/vendor-cards', {
         method: 'POST',
-        body: formData
-      })
-      
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
       if (response.ok) {
-        const result = await response.json()
-        toast.success('Service card created successfully!')
-        router.push('/vendor/cards')
+        const data = await response.json();
+        toast.success('Service card created successfully!');
+        router.push(`/vendor/cards/${data.card.id}`);
       } else {
-        const errorData = await response.json()
-        toast.error(errorData.message || 'Failed to create service card')
+        const error = await response.json();
+        console.error('API Error:', error);
+        toast.error(error.message || error.error || 'Failed to create service card');
       }
     } catch (error) {
-      console.error('Submit error:', error)
-      toast.error('Something went wrong. Please try again.')
+      toast.error('An error occurred while creating the service card');
+      console.error('Submit error:', error);
     } finally {
-      setIsLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const saveDraft = async () => {
-    setIsLoading(true)
-    try {
-      const draftData = { ...cardData, status: 'draft' }
-      const formData = new FormData()
-      Object.entries(draftData).forEach(([key, value]) => {
-        if (key === 'images' || key === 'videos') {
-          (value as File[]).forEach(file => formData.append(key, file))
-        } else if (typeof value === 'object') {
-          formData.append(key, JSON.stringify(value))
-        } else {
-          formData.append(key, String(value))
-        }
-      })
-      
-      // For draft, we'll just save to localStorage for now
-      localStorage.setItem('vendorCardDraft', JSON.stringify(draftData))
-      toast.success('Draft saved successfully!')
-    } catch (error) {
-      toast.error('Failed to save draft')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const handleAutofill = () => {
+    const sampleData: FormData = {
+      title: 'Professional Wedding Photography & Videography',
+      description: 'Capture your special day with our premium wedding photography and videography services. We specialize in creating timeless memories with a blend of traditional and contemporary styles. Our experienced team ensures every moment is beautifully documented with high-quality equipment and creative expertise.',
+      category_id: categories.length > 0 ? categories[0].id : '',
+      subcategory_id: '',
+      base_price: 25000,
+      starting_price: 20000,
+      price_type: 'fixed',
+      service_area: ['Mumbai', 'Pune', 'Nashik', 'Thane'],
+      max_capacity: 500,
+      inclusions: [
+        'Professional photographer and videographer',
+        '8 hours of coverage',
+        'Edited photos (200+ images)',
+        'Wedding video with highlights',
+        'Online gallery access',
+        'Print-ready high-resolution images',
+        'Engagement shoot included',
+        'Drone photography'
+      ],
+      exclusions: [
+        'Travel costs beyond 50km',
+        'Additional editing hours',
+        'Print products',
+        'Wedding album design',
+        'Same-day edits'
+      ],
+      equipment_provided: [
+        'Canon EOS R5 cameras',
+        'Professional lighting setup',
+        'Drone for aerial shots',
+        'Backup equipment',
+        'Multiple lenses'
+      ],
+      cancellation_policy: '50% refund if cancelled 30 days before the event. No refund for cancellations within 7 days of the event.',
+      tags: ['wedding', 'photography', 'videography', 'professional', 'premium'],
+      images: [],
+      videos: ['https://youtube.com/watch?v=sample'],
+      portfolio_images: [],
+      years_of_experience: 8,
+      insurance_coverage: 'Full professional liability insurance coverage included',
+      certifications: 'Certified Professional Photographer (CPP), Member of Professional Photographers of America',
+      emergency_contact: '+91-98765-43210'
+    };
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Title *
-              </label>
-              <input
-                type="text"
-                value={cardData.title}
-                onChange={(e) => updateCardData('title', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., Professional Wedding Photography"
-                maxLength={100}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
-                <span className="text-xs text-gray-500 ml-auto">
-                  {cardData.title.length}/100
-                </span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
-                </label>
-                {isLoadingCategories ? (
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-gray-500">Loading categories...</span>
-                  </div>
-                ) : (
-                  <select
-                    value={cardData.category}
-                    onChange={(e) => updateCardData('category', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                )}
-                {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subcategory
-                </label>
-                <input
-                  type="text"
-                  value={cardData.subcategory}
-                  onChange={(e) => updateCardData('subcategory', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="e.g., Photography, Decoration, Catering"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Description *
-              </label>
-              <textarea
-                value={cardData.description}
-                onChange={(e) => updateCardData('description', e.target.value)}
-                rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Describe your service in detail. Include what makes you unique, your experience, and what customers can expect..."
-                minLength={50}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
-                <span className="text-xs text-gray-500 ml-auto">
-                  {cardData.description.length}/500
-                </span>
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                SEO Description
-              </label>
-              <textarea
-                value={cardData.seoDescription}
-                onChange={(e) => updateCardData('seoDescription', e.target.value)}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="A brief description for search engines (150-160 characters)"
-                maxLength={160}
-              />
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs text-gray-500 ml-auto">
-                  {cardData.seoDescription.length}/160
-                </span>
-              </div>
-            </div>
-          </div>
-        )
-        
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Areas * (Type or select from suggestions)
-              </label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add a service area (e.g., Mumbai, Delhi)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addToArray('serviceArea', e.currentTarget.value)
-                      e.currentTarget.value = ''
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    const input = e.currentTarget.previousElementSibling as HTMLInputElement
-                    addToArray('serviceArea', input.value)
-                    input.value = ''
-                  }}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {cardData.serviceArea.map((area, index) => (
-                  <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm flex items-center">
-                    {area}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray('serviceArea', index)}
-                      className="ml-2 text-purple-600 hover:text-purple-800"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              {errors.serviceArea && <p className="text-red-500 text-sm mt-1">{errors.serviceArea}</p>}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Maximum Capacity * (Type or use arrows)
-                </label>
-                <input
-                  type="number"
-                  value={cardData.maxCapacity}
-                  onChange={(e) => updateCardData('maxCapacity', Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="100"
-                  min="1"
-                />
-                {errors.maxCapacity && <p className="text-red-500 text-sm mt-1">{errors.maxCapacity}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Min Booking Time (hours)
-                </label>
-                <input
-                  type="number"
-                  value={cardData.minBookingTime}
-                  onChange={(e) => updateCardData('minBookingTime', Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="1"
-                  min="1"
-                />
-                {errors.minBookingTime && <p className="text-red-500 text-sm mt-1">{errors.minBookingTime}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Advance Booking (days)
-                </label>
-                <input
-                  type="number"
-                  value={cardData.advanceBookingDays}
-                  onChange={(e) => updateCardData('advanceBookingDays', Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="7"
-                  min="1"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What's Included (Type or select from suggestions)
-              </label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add inclusion (e.g., Professional photographer, Edited photos)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addToArray('inclusions', e.currentTarget.value)
-                      e.currentTarget.value = ''
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    const input = e.currentTarget.previousElementSibling as HTMLInputElement
-                    addToArray('inclusions', input.value)
-                    input.value = ''
-                  }}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="space-y-2">
-                {cardData.inclusions.map((inclusion, index) => (
-                  <div key={index} className="flex items-center justify-between bg-green-50 px-4 py-2 rounded-lg">
-                    <span className="text-green-800 flex items-center">
-                      <Check className="h-4 w-4 mr-2" />
-                      {inclusion}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray('inclusions', index)}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What's Not Included (Type or select from suggestions)
-              </label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add exclusion (e.g., Travel costs, Additional equipment)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addToArray('exclusions', e.currentTarget.value)
-                      e.currentTarget.value = ''
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    const input = e.currentTarget.previousElementSibling as HTMLInputElement
-                    addToArray('exclusions', input.value)
-                    input.value = ''
-                  }}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="space-y-2">
-                {cardData.exclusions.map((exclusion, index) => (
-                  <div key={index} className="flex items-center justify-between bg-red-50 px-4 py-2 rounded-lg">
-                    <span className="text-red-800 flex items-center">
-                      <X className="h-4 w-4" />
-                      {exclusion}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray('exclusions', index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Working Days (Select or type custom)
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                  <label key={day} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={cardData.workingDays.includes(day)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateCardData('workingDays', [...cardData.workingDays, day])
-                        } else {
-                          updateCardData('workingDays', cardData.workingDays.filter(d => d !== day))
-                        }
-                      }}
-                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <span className="text-sm">{day}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Working Hours Start
-                  </label>
-                  <input
-                    type="time"
-                    value={cardData.workingHours.start}
-                    onChange={(e) => updateCardData('workingHours', {
-                      ...cardData.workingHours,
-                      start: e.target.value
-                    })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Working Hours End
-                  </label>
-                  <input
-                    type="time"
-                    value={cardData.workingHours.end}
-                    onChange={(e) => updateCardData('workingHours', {
-                      ...cardData.workingHours,
-                      end: e.target.value
-                    })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-        
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Images * (Upload or drag & drop)
-              </label>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 cursor-pointer transition-colors"
-              >
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-2">Click to upload images or drag and drop</p>
-                <p className="text-sm text-gray-500">PNG, JPG, GIF up to 10MB each</p>
-                <p className="text-sm text-purple-600 mt-2">At least one image is required</p>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e.target.files)}
-                className="hidden"
-              />
-              
-              {cardData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                  {cardData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={imagePreviewUrls[index] || URL.createObjectURL(image)}
-                        alt={`Upload ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {errors.images && <p className="text-red-500 text-sm mt-1">{errors.images}</p>}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags (Type or select from suggestions)
-              </label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add tag (e.g., professional, affordable, premium)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addToArray('tags', e.currentTarget.value)
-                      e.currentTarget.value = ''
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    const input = e.currentTarget.previousElementSibling as HTMLInputElement
-                    addToArray('tags', input.value)
-                    input.value = ''
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {cardData.tags.map((tag, index) => (
-                  <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center">
-                    #{tag}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray('tags', index)}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-        
-      case 4:
-        return (
-          <div className="space-y-6">
-            {/* Pricing Section */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-purple-900 mb-4">Set Your Pricing</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-purple-700 mb-2">
-                    Starting Price (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    value={cardData.basePrice}
-                    onChange={(e) => updateCardData('basePrice', Number(e.target.value))}
-                    className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="10000"
-                    min="0"
-                    step="100"
-                  />
-                  {errors.basePrice && <p className="text-red-500 text-sm mt-1">{errors.basePrice}</p>}
-                  <p className="text-xs text-purple-600 mt-1">This will be displayed as "Starting from ₹X"</p>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-purple-700 mb-2">
-                    Pricing Type
-                  </label>
-                  <select
-                    value={cardData.priceType}
-                    onChange={(e) => updateCardData('priceType', e.target.value as any)}
-                    className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    {priceTypes.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-            
-            {/* Professional Card Preview */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-w-md mx-auto">
-              <div className="relative">
-                {cardData.images.length > 0 ? (
-                  <img
-                    src={imagePreviewUrls[0] || URL.createObjectURL(cardData.images[0])}
-                    alt={cardData.title}
-                    className="w-full h-48 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                    <Camera className="h-12 w-12 text-gray-400" />
-                  </div>
-                )}
-                <div className="absolute top-4 right-4">
-                  <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-900">
-                    {categories.find(c => c.id === cardData.category)?.name || 'Category'}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{cardData.title || 'Service Title'}</h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {cardData.description || 'Service description will appear here...'}
-                </p>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="font-medium">4.8</span>
-                    <span className="text-gray-500">(124)</span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-purple-600">
-                      Starting from ₹{cardData.basePrice.toLocaleString('en-IN')}
-                    </p>
-                    <p className="text-xs text-gray-500">{cardData.priceType.replace('_', ' ')}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{cardData.serviceArea[0] || 'Service Area'}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Users className="h-4 w-4" />
-                    <span>Up to {cardData.maxCapacity || 0}</span>
-                  </div>
-                </div>
-                
-                {cardData.inclusions.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Includes:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {cardData.inclusions.slice(0, 3).map((inclusion, index) => (
-                        <span key={index} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                          {inclusion}
-                        </span>
-                      ))}
-                      {cardData.inclusions.length > 3 && (
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                          +{cardData.inclusions.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all">
-                  View Details & Book
-                </button>
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-gray-600 mb-4">This is how your service card will appear to customers</p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-blue-800">Review your information</p>
-                    <p className="text-sm text-blue-600">
-                      Make sure all details are accurate before publishing your service card.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-        
-      default:
-        return null
-    }
-  }
+    setFormData(sampleData);
+    toast.success('Form autofilled with sample data!');
+  };
+
+  const handleClearForm = () => {
+    const emptyData: FormData = {
+      title: '',
+      description: '',
+      category_id: '',
+      subcategory_id: '',
+      base_price: 0,
+      starting_price: 0,
+      price_type: 'fixed',
+      service_area: [],
+      max_capacity: 0,
+      inclusions: [''],
+      exclusions: [''],
+      equipment_provided: [''],
+      cancellation_policy: '',
+      tags: [],
+      images: [],
+      videos: [''],
+      portfolio_images: [],
+      discount_percentage: 0,
+      years_of_experience: 0,
+      insurance_coverage: '',
+      certifications: '',
+      emergency_contact: ''
+    };
+
+    setFormData(emptyData);
+    setCurrentStep(1);
+    toast.success('Form cleared!');
+  };
+
+  const steps = [
+    { title: 'Basic Information', description: 'Service details and category' },
+    { title: 'Pricing & Packages', description: 'Set your pricing structure' },
+    { title: 'Service Details', description: 'Coverage areas and policies' },
+    { title: 'Media Upload', description: 'Images and portfolio' },
+    { title: 'Review & Publish', description: 'Final review and publish' }
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-4 mb-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Service Card</h1>
-            <p className="text-gray-600">Add a new service to your portfolio</p>
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Create Service Card</h1>
+              <p className="text-white/60">Add a new service to your portfolio</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleAutofill}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-sm font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Autofill
+              </button>
+              <button
+                onClick={handleClearForm}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all duration-300 text-sm font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Clear
+              </button>
+            </div>
           </div>
         </div>
-        
+
         {/* Progress Steps */}
-        <div className="flex items-center justify-between">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                currentStep >= step.id
-                  ? 'bg-purple-600 border-purple-600 text-white'
-                  : 'border-gray-300 text-gray-500'
-              }`}>
-                {currentStep > step.id ? (
-                  <Check className="h-5 w-5" />
-                ) : (
-                  <step.icon className="h-5 w-5" />
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            {steps.map((step, index) => (
+              <div key={index} className="flex items-center">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                  index + 1 <= currentStep 
+                    ? 'bg-blue-600 border-blue-600 text-white' 
+                    : 'border-white/20 text-white/40'
+                }`}>
+                  {index + 1}
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={`w-20 h-0.5 mx-4 ${
+                    index + 1 < currentStep ? 'bg-blue-600' : 'bg-white/20'
+                  }`} />
                 )}
               </div>
-              <div className="ml-3 hidden md:block">
-                <p className={`text-sm font-medium ${
-                  currentStep >= step.id ? 'text-purple-600' : 'text-gray-500'
-                }`}>
-                  {step.title}
-                </p>
+            ))}
+          </div>
+          <div className="mt-4 text-center">
+            <h3 className="text-lg font-semibold">{steps[currentStep - 1].title}</h3>
+            <p className="text-white/60">{steps[currentStep - 1].description}</p>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-8"
+          >
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Service Title *</label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your service title"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Description *</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your service in detail"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Category *</label>
+                    <select
+                      value={formData.category_id}
+                      onChange={(e) => handleInputChange('category_id', e.target.value)}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Years of Experience</label>
+                    <input
+                      type="number"
+                      value={formData.years_of_experience}
+                      onChange={(e) => handleInputChange('years_of_experience', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
               </div>
-              {index < steps.length - 1 && (
-                <div className={`w-12 h-0.5 mx-4 ${
-                  currentStep > step.id ? 'bg-purple-600' : 'bg-gray-300'
-                }`} />
+            )}
+
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Base Price (₹) *</label>
+                    <input
+                      type="number"
+                      value={formData.base_price}
+                      onChange={(e) => handleInputChange('base_price', parseFloat(e.target.value) || 0)}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Starting Price (₹)</label>
+                    <input
+                      type="number"
+                      value={formData.starting_price}
+                      onChange={(e) => handleInputChange('starting_price', parseFloat(e.target.value) || 0)}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Price Type *</label>
+                  <select
+                    value={formData.price_type}
+                    onChange={(e) => handleInputChange('price_type', e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="fixed">Fixed Price</option>
+                    <option value="hourly">Per Hour</option>
+                    <option value="daily">Per Day</option>
+                    <option value="per_person">Per Person</option>
+                    <option value="custom">Custom Quote</option>
+                  </select>
+                </div>
+
+                {/* Discount field removed - not supported in current database schema */}
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Service Areas *</label>
+                  <div className="space-y-2">
+                    {formData.service_area.map((area, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={area}
+                          onChange={(e) => handleArrayFieldChange('service_area', index, e.target.value)}
+                          className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter service area"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeArrayField('service_area', index)}
+                          className="px-3 py-3 bg-red-500/20 border border-red-500/30 rounded-xl hover:bg-red-500/30"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => addArrayField('service_area')}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl hover:bg-blue-500/30"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Service Area
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Max Capacity</label>
+                  <input
+                    type="number"
+                    value={formData.max_capacity}
+                    onChange={(e) => handleInputChange('max_capacity', parseInt(e.target.value) || 0)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Inclusions</label>
+                  <div className="space-y-2">
+                    {formData.inclusions.map((inclusion, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={inclusion}
+                          onChange={(e) => handleArrayFieldChange('inclusions', index, e.target.value)}
+                          className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="What's included in your service"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeArrayField('inclusions', index)}
+                          className="px-3 py-3 bg-red-500/20 border border-red-500/30 rounded-xl hover:bg-red-500/30"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => addArrayField('inclusions')}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl hover:bg-blue-500/30"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Inclusion
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Cancellation Policy</label>
+                  <textarea
+                    value={formData.cancellation_policy}
+                    onChange={(e) => handleInputChange('cancellation_policy', e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your cancellation policy"
+                  />
+                </div>
+              </div>
+            )}
+
+            {currentStep === 4 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Service Images *</label>
+                  <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center">
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-white/40" />
+                    <p className="text-white/60 mb-4">Upload images of your service</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e.target.files, 'images')}
+                      className="hidden"
+                      id="service-images"
+                    />
+                    <label
+                      htmlFor="service-images"
+                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer"
+                    >
+                      Choose Images
+                    </label>
+                  </div>
+                  {formData.images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                      {formData.images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                            alt={`Service ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            onClick={() => removeImage('images', index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Portfolio Images</label>
+                  <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center">
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-white/40" />
+                    <p className="text-white/60 mb-4">Upload portfolio images</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e.target.files, 'portfolio_images')}
+                      className="hidden"
+                      id="portfolio-images"
+                    />
+                    <label
+                      htmlFor="portfolio-images"
+                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer"
+                    >
+                      Choose Images
+                    </label>
+                  </div>
+                  {formData.portfolio_images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                      {formData.portfolio_images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                            alt={`Portfolio ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            onClick={() => removeImage('portfolio_images', index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {currentStep === 5 && (
+              <div className="space-y-6">
+                <div className="bg-white/5 rounded-xl p-6">
+                  <h3 className="text-xl font-semibold mb-4">Service Preview</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-medium mb-2">Basic Information</h4>
+                      <p><strong>Title:</strong> {formData.title}</p>
+                      <p><strong>Category:</strong> {categories.find(c => c.id === formData.category_id)?.name}</p>
+                      <p><strong>Experience:</strong> {formData.years_of_experience} years</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Pricing</h4>
+                                             <p><strong>Base Price:</strong> ₹{formData.base_price}</p>
+                       <p><strong>Starting Price:</strong> ₹{formData.starting_price}</p>
+                       <p><strong>Price Type:</strong> {formData.price_type}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Description</h4>
+                    <p className="text-white/80">{formData.description}</p>
+                  </div>
+                  {formData.service_area.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Service Areas</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.service_area.map((area, index) => (
+                          <span key={index} className="px-3 py-1 bg-blue-500/20 rounded-full text-sm">
+                            {area}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className="flex items-center gap-2 px-6 py-3 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Previous
+              </button>
+
+              {currentStep < 5 ? (
+                <button
+                  onClick={nextStep}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+                >
+                  Next
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
+                >
+                  {loading ? 'Creating...' : 'Create Service Card'}
+                </button>
               )}
             </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Form Content */}
-      <motion.div
-        key={currentStep}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8"
-      >
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          {steps.find(step => step.id === currentStep)?.title}
-        </h2>
-        {renderStepContent()}
-      </motion.div>
-      
-      {/* Navigation Buttons */}
-      <div className="flex justify-between">
-        <button
-          onClick={prevStep}
-          disabled={currentStep === 1}
-          className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Previous
-        </button>
-        
-        <div className="flex space-x-4">
-          <button 
-            onClick={saveDraft}
-            disabled={isLoading}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 flex items-center"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            Save Draft
-          </button>
-          
-          {currentStep < steps.length ? (
-            <button
-              onClick={nextStep}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 flex items-center"
-            >
-              Next
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 flex items-center"
-            >
-              {isLoading ? (
-                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-              ) : (
-                <Check className="h-4 w-4 mr-2" />
-              )}
-              Publish Service
-            </button>
-          )}
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
-  )
+  );
 }

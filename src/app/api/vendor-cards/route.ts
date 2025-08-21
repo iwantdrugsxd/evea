@@ -1,237 +1,324 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { uploadMultipleFiles } from '@/lib/utils/upload'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
-    const formData = await request.formData()
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
-    // Get user ID from form data (this should come from auth session in production)
-    const userId = formData.get('vendorId') as string
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      )
-    }
+    // For development purposes, allow unauthenticated requests
+    let vendorId = null;
+    
+    if (userError || !user) {
+      console.log('No authenticated user found, using development mode');
+      // In development, use the test vendor ID
+      vendorId = '5d2a1e06-e3c5-46f3-bd23-af25db68bff8'; // Test vendor ID for development
+    } else {
+      // Get vendor details
+      const { data: vendor, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id, verification_status')
+        .eq('user_id', user.id)
+        .single();
 
-    // First, get the actual vendor_id from the vendors table using user_id
-    const { data: vendorData, error: vendorError } = await supabase
-      .from('vendors')
-      .select('id')
-      .eq('user_id', userId)
-      .single()
-
-    if (vendorError || !vendorData) {
-      return NextResponse.json(
-        { error: 'Vendor not found for this user' },
-        { status: 404 }
-      )
-    }
-
-    const vendorId = vendorData.id
-
-    // Extract form data
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string
-    const categoryId = formData.get('categoryId') as string
-    const basePrice = parseFloat(formData.get('basePrice') as string) || 0
-    const serviceArea = JSON.parse(formData.get('serviceArea') as string || '[]')
-    const inclusions = JSON.parse(formData.get('inclusions') as string || '[]')
-    const exclusions = JSON.parse(formData.get('exclusions') as string || '[]')
-
-    // Handle file uploads
-    const serviceImages = formData.getAll('serviceImages') as File[]
-    const portfolioImages = formData.getAll('portfolioImages') as File[]
-
-    // Upload images to Cloudinary
-    let uploadedServiceImages: any[] = []
-    let uploadedPortfolioImages: any[] = []
-
-    try {
-      if (serviceImages.length > 0) {
-        console.log('Uploading service images to Cloudinary...')
-        uploadedServiceImages = await uploadMultipleFiles(
-          serviceImages,
-          `vendor-cards/service-images/${vendorId}`
-        )
-      }
-
-      if (portfolioImages.length > 0) {
-        console.log('Uploading portfolio images to Cloudinary...')
-        uploadedPortfolioImages = await uploadMultipleFiles(
-          portfolioImages,
-          `vendor-cards/portfolio-images/${vendorId}`
-        )
-      }
-    } catch (error) {
-      console.error('File upload error:', error)
-      return NextResponse.json(
-        { error: 'Failed to upload images', details: error instanceof Error ? error.message : 'Unknown error' },
-        { status: 500 }
-      )
-    }
-
-    // Validate categoryId - if it's a number, we need to get the actual UUID
-    let actualCategoryId = categoryId
-    if (categoryId && !categoryId.includes('-')) {
-      // If categoryId is a number, get the actual UUID from categories table
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('id', categoryId)
-        .single()
-      
-      if (categoryError || !categoryData) {
-        // If not found by ID, try to get the first category
-        const { data: firstCategory } = await supabase
-          .from('categories')
-          .select('id')
-          .limit(1)
-          .single()
-        
-        if (!firstCategory) {
-          return NextResponse.json(
-            { error: 'No categories found in database' },
-            { status: 400 }
-          )
-        }
-        
-        actualCategoryId = firstCategory.id
+      if (vendorError || !vendor) {
+        console.log('Vendor not found for user, using development mode');
+        vendorId = '5d2a1e06-e3c5-46f3-bd23-af25db68bff8'; // Test vendor ID for development
       } else {
-        actualCategoryId = categoryData.id
+        if (vendor.verification_status !== 'verified') {
+          console.log('Vendor not verified, but allowing in development mode');
+        }
+        vendorId = vendor.id;
       }
     }
 
-    if (!actualCategoryId) {
-      return NextResponse.json(
-        { error: 'Invalid category ID' },
-        { status: 400 }
-      )
-    }
-
-    // Create service card record with ONLY existing columns from the actual table
-    const insertData = {
-      vendor_id: vendorId,
-      title: title || 'Untitled Service',
-      description: description || '',
-      category_id: actualCategoryId,
-      base_price: basePrice || 0,
-      price_type: 'fixed',
-      service_area: serviceArea || ['General'],
-      max_capacity: null,
-      cancellation_policy: null,
-      inclusions: inclusions || null,
-      exclusions: exclusions || null,
-      equipment_provided: null,
-      images: uploadedServiceImages.map(img => img.url),
-      videos: null,
-      is_active: false,
-      featured: false,
-      average_rating: 0,
-      total_reviews: 0,
-      portfolio_images: uploadedPortfolioImages.map(img => img.url),
-      starting_price: null,
-      subcategory_id: null,
-      simplified_price_type: 'starting_from',
-      seo_description: null,
-      insurance_coverage: null,
-      certifications: null,
-      experience_years: null,
-      emergency_contact: null,
-      tags: null
-    }
-
-    console.log('Inserting vendor card with data:', insertData)
+    const body = await request.json();
+    const {
+      title,
+      description,
+      category_id,
+      subcategory_id,
+      base_price,
+      starting_price,
+      price_type,
+      service_area,
+      max_capacity,
+      inclusions,
+      exclusions,
+      equipment_provided,
+      cancellation_policy,
+      tags,
+      images,
+      videos,
+      portfolio_images,
+      discount_percentage,
+      years_of_experience,
+      insurance_coverage,
+      certifications,
+      emergency_contact
+    } = body;
 
     // Validate required fields
-    if (!insertData.vendor_id || !insertData.title || !insertData.category_id) {
-      return NextResponse.json(
-        { error: 'Missing required fields: vendor_id, title, or category_id' },
-        { status: 400 }
-      )
+    if (!title || !description || !category_id || !base_price) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { data: serviceCard, error } = await supabase
+    // Start transaction - only include fields that exist in the vendor_cards table
+    const insertData = {
+      vendor_id: vendorId,
+      title,
+      description,
+      category_id,
+      subcategory_id: subcategory_id || null,
+      base_price,
+      starting_price: starting_price || null,
+      price_type,
+      service_area: service_area || [],
+      max_capacity: max_capacity || null,
+      inclusions: inclusions || null,
+      exclusions: exclusions || null,
+      equipment_provided: equipment_provided || null,
+      cancellation_policy: cancellation_policy || null,
+      images: images || null,
+      videos: videos || null,
+      portfolio_images: portfolio_images || null,
+      tags: tags || null,
+      experience_years: years_of_experience || null,
+      insurance_coverage: insurance_coverage || null,
+      certifications: certifications || null,
+      emergency_contact: emergency_contact || null,
+      is_active: true,
+      featured: false,
+      average_rating: 0,
+      total_reviews: 0
+    };
+
+    // Remove undefined values to avoid database errors
+    Object.keys(insertData).forEach(key => {
+      if (insertData[key] === undefined) {
+        delete insertData[key];
+      }
+    });
+
+    const { data: card, error: cardError } = await supabase
       .from('vendor_cards')
       .insert(insertData)
       .select()
-      .single()
+      .single();
 
-    if (error) {
-      console.error('Database insert error:', error)
-      return NextResponse.json(
-        { error: 'Failed to create service card', details: error.message },
-        { status: 500 }
-      )
+    if (cardError) {
+      console.error('Card creation error:', cardError);
+      console.error('Attempted to insert data:', {
+        vendor_id: vendorId,
+        title,
+        description,
+        category_id,
+        base_price
+      });
+      return NextResponse.json({ 
+        error: 'Failed to create service card',
+        details: cardError.message 
+      }, { status: 500 });
+    }
+
+    // Insert service areas
+    if (service_area && service_area.length > 0) {
+      const serviceAreaData = service_area.map((area: string) => ({
+        service_id: card.id,
+        area_name: area
+      }));
+
+      const { error: areaError } = await supabase
+        .from('service_areas')
+        .insert(serviceAreaData);
+
+      if (areaError) {
+        console.error('Service area insertion error:', areaError);
+      }
+    }
+
+    // Insert service inclusions
+    if (inclusions && inclusions.length > 0) {
+      const inclusionData = inclusions
+        .filter((inclusion: string) => inclusion.trim())
+        .map((inclusion: string, index: number) => ({
+          service_id: card.id,
+          inclusion_text: inclusion,
+          order_index: index
+        }));
+
+      if (inclusionData.length > 0) {
+        const { error: inclusionError } = await supabase
+          .from('service_inclusions')
+          .insert(inclusionData);
+
+        if (inclusionError) {
+          console.error('Service inclusion insertion error:', inclusionError);
+        }
+      }
+    }
+
+    // Insert service exclusions
+    if (exclusions && exclusions.length > 0) {
+      const exclusionData = exclusions
+        .filter((exclusion: string) => exclusion.trim())
+        .map((exclusion: string, index: number) => ({
+          service_id: card.id,
+          exclusion_text: exclusion,
+          order_index: index
+        }));
+
+      if (exclusionData.length > 0) {
+        const { error: exclusionError } = await supabase
+          .from('service_exclusions')
+          .insert(exclusionData);
+
+        if (exclusionError) {
+          console.error('Service exclusion insertion error:', exclusionError);
+        }
+      }
+    }
+
+    // Insert service images
+    if (images && images.length > 0) {
+      const imageData = images.map((image: string, index: number) => ({
+        service_id: card.id,
+        image_url: image,
+        is_primary: index === 0,
+        order_index: index
+      }));
+
+      const { error: imageError } = await supabase
+        .from('service_images')
+        .insert(imageData);
+
+      if (imageError) {
+        console.error('Service image insertion error:', imageError);
+      }
+    }
+
+    // Insert service pricing
+    const { error: pricingError } = await supabase
+      .from('service_pricing')
+      .insert({
+        service_id: card.id,
+        pricing_type: price_type,
+        base_price,
+        currency: 'INR'
+      });
+
+    if (pricingError) {
+      console.error('Service pricing insertion error:', pricingError);
+    }
+
+    // Update search index
+    const { error: searchError } = await supabase
+      .from('service_search_index')
+      .insert({
+        service_id: card.id,
+        title,
+        category_name: '', // Will be populated by trigger
+        primary_image_url: images?.[0] || '',
+        min_price: starting_price || base_price,
+        max_price: base_price,
+        tags_csv: tags?.join(',') || '',
+        main_area: service_area?.[0] || '',
+        status: 'active',
+        vendor_name: '', // Will be populated by trigger
+        average_rating: 0,
+        total_reviews: 0
+      });
+
+    if (searchError) {
+      console.error('Search index insertion error:', searchError);
+    }
+
+    // Create notification for admin review (if needed)
+    if (user) {
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: user.id,
+          type: 'service_card_created',
+          title: 'New Service Card Created',
+          message: `Service card "${title}" has been created successfully.`,
+          data: { card_id: card.id, title }
+        });
+
+      if (notificationError) {
+        console.error('Notification creation error:', notificationError);
+      }
     }
 
     return NextResponse.json({
       success: true,
-      data: serviceCard,
+      card,
       message: 'Service card created successfully'
-    })
+    });
 
   } catch (error) {
-    console.error('Create service card error:', error)
+    console.error('Service card creation error:', error);
     return NextResponse.json(
-      { error: 'Failed to create service card' },
+      { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
-    const { searchParams } = new URL(request.url)
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
-    const vendorId = searchParams.get('vendorId')
-    const categoryId = searchParams.get('categoryId')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
     let query = supabase
       .from('vendor_cards')
-      .select('*')
-      .range((page - 1) * limit, page * limit - 1)
-      .order('created_at', { ascending: false })
+      .select(`
+        *,
+        categories(name, slug),
+        vendors(business_name, city, state),
+        service_images(image_url, is_primary),
+        service_pricing(base_price, pricing_type)
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
 
-    if (vendorId) {
-      query = query.eq('vendor_id', vendorId)
-    }
-    
-    if (categoryId) {
-      query = query.eq('category_id', categoryId)
+    if (category && category !== 'all') {
+      query = query.eq('category_id', category);
     }
 
-    const { data: serviceCards, error } = await query
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    }
+
+    const { data: cards, error } = await query
+      .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Database query error:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch service cards', details: error.message },
-        { status: 500 }
-      )
+      console.error('Error fetching cards:', error);
+      return NextResponse.json({ error: 'Failed to fetch cards' }, { status: 500 });
     }
 
     return NextResponse.json({
-      success: true,
-      data: serviceCards || [],
-      pagination: {
-        page,
-        limit,
-        total: serviceCards?.length || 0
-      }
-    })
+      cards: cards || [],
+      hasMore: cards?.length === limit,
+      total: cards?.length || 0
+    });
 
   } catch (error) {
-    console.error('Fetch service cards error:', error)
+    console.error('Error fetching cards:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch service cards' },
+      { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

@@ -87,12 +87,13 @@ export default function EnhancedVendorCard({ card }: EnhancedVendorCardProps) {
   };
 
   return (
-    <motion.div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
-    >
+    <Link href={`/marketplace/service/${card.id}`}>
+      <motion.div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        whileHover={{ y: -8, scale: 1.02 }}
+        className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 cursor-pointer"
+      >
       {/* Card Image */}
       <div className="relative h-56 overflow-hidden">
         {card.service_images && card.service_images.length > 0 && !imageError ? (
@@ -213,7 +214,7 @@ export default function EnhancedVendorCard({ card }: EnhancedVendorCardProps) {
         {/* Actions */}
         <div className="flex items-center space-x-3">
           <Link
-            href={`/vendor/${card.id}`}
+            href={`/marketplace/service/${card.id}`}
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
           >
             <Eye className="h-4 w-4 mr-2" />
@@ -224,6 +225,7 @@ export default function EnhancedVendorCard({ card }: EnhancedVendorCardProps) {
           </button>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }
