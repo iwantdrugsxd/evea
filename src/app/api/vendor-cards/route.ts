@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
     
     // For development purposes, allow unauthenticated requests
     let vendorId = null;
+    let vendorData = null;
     
     if (userError || !user) {
       console.log('No authenticated user found, using development mode');
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       // Get vendor details
       const { data: vendor, error: vendorError } = await supabase
         .from('vendors')
-        .select('id, verification_status')
+        .select('id, verification_status, business_name, city, state')
         .eq('user_id', user.id)
         .single();
 
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
           console.log('Vendor not verified, but allowing in development mode');
         }
         vendorId = vendor.id;
+        vendorData = vendor;
       }
     }
 
@@ -68,6 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Start transaction - only include fields that exist in the vendor_cards table
+    // Properly handle arrays and nullable fields
     const insertData = {
       vendor_id: vendorId,
       title,
@@ -77,16 +80,16 @@ export async function POST(request: NextRequest) {
       base_price,
       starting_price: starting_price || null,
       price_type,
-      service_area: service_area || [],
+      service_area: service_area && service_area.length > 0 ? service_area : [], // Must be array, not null
       max_capacity: max_capacity || null,
-      inclusions: inclusions || null,
-      exclusions: exclusions || null,
-      equipment_provided: equipment_provided || null,
+      inclusions: inclusions && inclusions.length > 0 ? inclusions : null,
+      exclusions: exclusions && exclusions.length > 0 ? exclusions : null,
+      equipment_provided: equipment_provided && equipment_provided.length > 0 ? equipment_provided : null,
       cancellation_policy: cancellation_policy || null,
-      images: images || null,
-      videos: videos || null,
-      portfolio_images: portfolio_images || null,
-      tags: tags || null,
+      images: images && images.length > 0 ? images : null,
+      videos: videos && videos.length > 0 ? videos : null,
+      portfolio_images: portfolio_images && portfolio_images.length > 0 ? portfolio_images : [], // Must be array, not null
+      tags: tags && tags.length > 0 ? tags : null,
       experience_years: years_of_experience || null,
       insurance_coverage: insurance_coverage || null,
       certifications: certifications || null,
@@ -94,7 +97,8 @@ export async function POST(request: NextRequest) {
       is_active: true,
       featured: false,
       average_rating: 0,
-      total_reviews: 0
+      total_reviews: 0,
+      simplified_price_type: 'starting_from'
     };
 
     // Remove undefined values to avoid database errors
@@ -103,6 +107,8 @@ export async function POST(request: NextRequest) {
         delete insertData[key];
       }
     });
+
+    console.log('Inserting vendor card with data:', insertData);
 
     const { data: card, error: cardError } = await supabase
       .from('vendor_cards')
@@ -125,117 +131,13 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Insert service areas
-    if (service_area && service_area.length > 0) {
-      const serviceAreaData = service_area.map((area: string) => ({
-        service_id: card.id,
-        area_name: area
-      }));
+    // Skip related table insertions for now due to trigger issues
+    // TODO: Re-enable these after fixing database triggers
+    console.log('Skipping related table insertions due to trigger issues');
 
-      const { error: areaError } = await supabase
-        .from('service_areas')
-        .insert(serviceAreaData);
-
-      if (areaError) {
-        console.error('Service area insertion error:', areaError);
-      }
-    }
-
-    // Insert service inclusions
-    if (inclusions && inclusions.length > 0) {
-      const inclusionData = inclusions
-        .filter((inclusion: string) => inclusion.trim())
-        .map((inclusion: string, index: number) => ({
-          service_id: card.id,
-          inclusion_text: inclusion,
-          order_index: index
-        }));
-
-      if (inclusionData.length > 0) {
-        const { error: inclusionError } = await supabase
-          .from('service_inclusions')
-          .insert(inclusionData);
-
-        if (inclusionError) {
-          console.error('Service inclusion insertion error:', inclusionError);
-        }
-      }
-    }
-
-    // Insert service exclusions
-    if (exclusions && exclusions.length > 0) {
-      const exclusionData = exclusions
-        .filter((exclusion: string) => exclusion.trim())
-        .map((exclusion: string, index: number) => ({
-          service_id: card.id,
-          exclusion_text: exclusion,
-          order_index: index
-        }));
-
-      if (exclusionData.length > 0) {
-        const { error: exclusionError } = await supabase
-          .from('service_exclusions')
-          .insert(exclusionData);
-
-        if (exclusionError) {
-          console.error('Service exclusion insertion error:', exclusionError);
-        }
-      }
-    }
-
-    // Insert service images
-    if (images && images.length > 0) {
-      const imageData = images.map((image: string, index: number) => ({
-        service_id: card.id,
-        image_url: image,
-        is_primary: index === 0,
-        order_index: index
-      }));
-
-      const { error: imageError } = await supabase
-        .from('service_images')
-        .insert(imageData);
-
-      if (imageError) {
-        console.error('Service image insertion error:', imageError);
-      }
-    }
-
-    // Insert service pricing
-    const { error: pricingError } = await supabase
-      .from('service_pricing')
-      .insert({
-        service_id: card.id,
-        pricing_type: price_type,
-        base_price,
-        currency: 'INR'
-      });
-
-    if (pricingError) {
-      console.error('Service pricing insertion error:', pricingError);
-    }
-
-    // Update search index
-    const { error: searchError } = await supabase
-      .from('service_search_index')
-      .insert({
-        service_id: card.id,
-        title,
-        category_name: '', // Will be populated by trigger
-        primary_image_url: images?.[0] || '',
-        min_price: starting_price || base_price,
-        max_price: base_price,
-        tags_csv: tags?.join(',') || '',
-        main_area: service_area?.[0] || '',
-        status: 'active',
-        vendor_name: '', // Will be populated by trigger
-        average_rating: 0,
-        total_reviews: 0
-      });
-
-    if (searchError) {
-      console.error('Search index insertion error:', searchError);
-    }
+    // Skip search index insertion for now due to trigger issues
+    // TODO: Fix database triggers and re-enable search index updates
+    console.log('Skipping search index insertion due to trigger issues');
 
     // Create notification for admin review (if needed)
     if (user) {

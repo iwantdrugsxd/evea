@@ -11,9 +11,11 @@ export async function GET(
     const supabase = createClient(cookieStore);
     
     const { id } = params;
+    const { searchParams } = new URL(request.url);
+    const isVendorView = searchParams.get('vendor') === 'true';
 
-    // Fetch service card with all related data
-    const { data: service, error: serviceError } = await supabase
+    // Build the query
+    let query = supabase
       .from('vendor_cards')
       .select(`
         *,
@@ -37,9 +39,14 @@ export async function GET(
         service_pricing(base_price, pricing_type, currency),
         service_areas(area_name, city, state)
       `)
-      .eq('id', id)
-      .eq('is_active', true)
-      .single();
+      .eq('id', id);
+
+    // Only filter by is_active for public view
+    if (!isVendorView) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data: service, error: serviceError } = await query.single();
 
     if (serviceError || !service) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 });
@@ -100,6 +107,74 @@ export async function GET(
 
   } catch (error) {
     console.error('Error fetching service details:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    
+    const { id } = params;
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get vendor details
+    const { data: vendor, error: vendorError } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (vendorError || !vendor) {
+      return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
+    }
+
+    // Check if the card belongs to the vendor
+    const { data: card, error: cardError } = await supabase
+      .from('vendor_cards')
+      .select('id, vendor_id')
+      .eq('id', id)
+      .single();
+
+    if (cardError || !card) {
+      return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+    }
+
+    if (card.vendor_id !== vendor.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Delete the card
+    const { error: deleteError } = await supabase
+      .from('vendor_cards')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('Error deleting card:', deleteError);
+      return NextResponse.json({ error: 'Failed to delete card' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Card deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error deleting card:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
