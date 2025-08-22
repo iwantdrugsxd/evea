@@ -24,8 +24,8 @@ function DiscoBall({ modelPath }: DiscoBallProps) {
 
   useEffect(() => {
     if (gltf.scene) {
-      // Fixed scale - no size changes
-      gltf.scene.scale.setScalar(3.0);
+      // Reduced scale for smaller disco ball
+      gltf.scene.scale.setScalar(1.5);
       
       // Original white disco ball material with subtle illumination
       gltf.scene.traverse((child) => {

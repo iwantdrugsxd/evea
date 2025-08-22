@@ -15,7 +15,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
     <div className="w-full">
       <div className="flex items-center justify-between relative">
         {/* Progress Line */}
-        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-700 -translate-y-1/2 z-0" />
+        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-600 -translate-y-1/2 z-0" />
         <motion.div
           className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 -translate-y-1/2 z-0"
           initial={{ width: 0 }}
@@ -47,7 +47,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
                     ? 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/30' 
                     : isCurrent 
                     ? 'bg-white border-blue-500 text-blue-500 shadow-lg shadow-blue-500/30' 
-                    : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-gray-500'
+                    : 'bg-gray-700 border-gray-500 text-gray-300 hover:border-gray-400'
                   }
                   ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed'}
                 `}
@@ -78,7 +78,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
               <div className="mt-3 text-center max-w-32">
                 <motion.p
                   className={`text-sm font-medium transition-colors duration-300 ${
-                    isCompleted || isCurrent ? 'text-white' : 'text-gray-400'
+                    isCompleted || isCurrent ? 'text-white' : 'text-gray-300'
                   }`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -124,7 +124,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }: ProgressStepperPro
           </span>
         </div>
         
-        <div className="w-full bg-gray-700 rounded-full h-2">
+        <div className="w-full bg-gray-600 rounded-full h-2">
           <motion.div
             className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
             initial={{ width: 0 }}

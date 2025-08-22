@@ -6,11 +6,11 @@ import { Toaster } from 'react-hot-toast'
 
 export default function VendorLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-red-50/30">
+    <div className="min-h-screen bg-black text-white">
       <FloatingNavbar />
-              <main className="pb-6">
+      <div className="pt-24 pb-6"> {/* Added proper spacing from navbar */}
         <div className="w-full px-0">{children}</div>
-      </main>
+      </div>
       <Footer />
       <Toaster position="top-right" />
     </div>

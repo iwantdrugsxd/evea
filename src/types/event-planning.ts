@@ -14,7 +14,8 @@ export interface EventType {
     min: number
     max: number
   }
-  popularServices: string[]
+  popularServices?: string[]
+  color?: string
 }
 
 export interface ServiceCategory {
@@ -258,145 +259,105 @@ export type OrderStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' 
 // Event Planning Constants
 export const EVENT_PLANNING_STEPS = [
   {
-    id: 'event-type',
-    title: 'Choose Event Type',
-    description: 'Select the type of event you want to plan',
-    component: 'EventTypeSelection'
+    id: 'event-profiling',
+    title: 'Event Profiling',
+    description: 'Tell us about your event',
+    component: 'EventProfiling'
   },
   {
-    id: 'event-details',
-    title: 'Event Details',
-    description: 'Provide event details like date, time, location, and budget',
-    component: 'EventDetailsForm'
+    id: 'service-requirements',
+    title: 'Service Requirements',
+    description: 'Choose your services',
+    component: 'ServiceRequirements'
   },
   {
-    id: 'service-selection',
-    title: 'Select Services',
-    description: 'Choose the services you need for your event',
-    component: 'ServiceSelection'
+    id: 'package-preview',
+    title: 'Package Preview',
+    description: 'Review your options',
+    component: 'PackagePreview'
   },
   {
-    id: 'vendor-selection',
-    title: 'Choose Vendors',
-    description: 'Select vendors for each service category',
-    component: 'VendorSelection'
+    id: 'customization',
+    title: 'Customization',
+    description: 'Fine-tune your selection',
+    component: 'Customization'
   },
   {
-    id: 'package-review',
-    title: 'Review Package',
-    description: 'Review your complete event package',
-    component: 'PackageReview'
-  },
-  {
-    id: 'booking',
-    title: 'Book & Pay',
-    description: 'Complete your booking and payment',
-    component: 'BookingConfirmation'
+    id: 'quote-confirmation',
+    title: 'Quote & Next Steps',
+    description: 'Complete your booking',
+    component: 'QuoteConfirmation'
   }
 ]
 
 export const EVENT_TYPES: EventType[] = [
   {
-    id: 'wedding',
-    name: 'Wedding',
-    description: 'Your special day with all the perfect details',
-    icon: '💒',
-    estimatedBudget: { min: 50000, max: 500000 },
-    typicalDuration: 8,
+    id: 'navratri',
+    name: 'Navratri',
+    description: 'Nine nights of celebration and devotion',
+    icon: '🕉️',
+    estimatedBudget: { min: 25000, max: 100000 },
     guestCount: { min: 50, max: 500 },
-    popularServices: ['venue-location', 'catering-food', 'photography-videography', 'decoration-styling', 'entertainment']
+    typicalDuration: 9,
+    color: 'from-purple-500 to-pink-500'
   },
   {
-    id: 'birthday-party',
-    name: 'Birthday Party',
-    description: 'Celebrate your special day in style',
-    icon: '🎂',
-    estimatedBudget: { min: 5000, max: 50000 },
-    typicalDuration: 4,
-    guestCount: { min: 10, max: 100 },
-    popularServices: ['venue-location', 'catering-food', 'decoration-styling', 'entertainment']
+    id: 'diwali',
+    name: 'Diwali',
+    description: 'Festival of lights and prosperity',
+    icon: '🪔',
+    estimatedBudget: { min: 30000, max: 150000 },
+    guestCount: { min: 30, max: 300 },
+    typicalDuration: 1,
+    color: 'from-yellow-500 to-orange-500'
   },
   {
-    id: 'corporate-event',
-    name: 'Corporate Event',
-    description: 'Professional events for your business',
-    icon: '🏢',
-    estimatedBudget: { min: 10000, max: 100000 },
-    typicalDuration: 6,
+    id: 'pooja',
+    name: 'Pooja',
+    description: 'Traditional religious ceremonies',
+    icon: '🙏',
+    estimatedBudget: { min: 15000, max: 75000 },
     guestCount: { min: 20, max: 200 },
-    popularServices: ['venue-location', 'catering-food', 'technology-av', 'decoration-styling']
+    typicalDuration: 1,
+    color: 'from-red-500 to-pink-500'
   },
   {
-    id: 'anniversary',
-    name: 'Anniversary',
-    description: 'Celebrate your love and commitment',
-    icon: '💕',
-    estimatedBudget: { min: 15000, max: 100000 },
-    typicalDuration: 6,
-    guestCount: { min: 30, max: 150 },
-    popularServices: ['venue-location', 'catering-food', 'photography-videography', 'decoration-styling']
-  },
-  {
-    id: 'baby-shower',
-    name: 'Baby Shower',
-    description: 'Welcome the little one with joy',
-    icon: '👶',
-    estimatedBudget: { min: 8000, max: 40000 },
+    id: 'other',
+    name: 'Other',
+    description: 'Custom event or celebration',
+    icon: '🎉',
+    estimatedBudget: { min: 20000, max: 100000 },
+    guestCount: { min: 10, max: 300 },
     typicalDuration: 4,
-    guestCount: { min: 20, max: 80 },
-    popularServices: ['venue-location', 'catering-food', 'decoration-styling', 'photography-videography']
-  },
-  {
-    id: 'engagement',
-    name: 'Engagement',
-    description: 'The beginning of forever',
-    icon: '💍',
-    estimatedBudget: { min: 20000, max: 150000 },
-    typicalDuration: 5,
-    guestCount: { min: 50, max: 200 },
-    popularServices: ['venue-location', 'catering-food', 'photography-videography', 'decoration-styling']
-  },
-  {
-    id: 'graduation-party',
-    name: 'Graduation Party',
-    description: 'Celebrate academic achievements',
-    icon: '🎓',
-    estimatedBudget: { min: 10000, max: 60000 },
-    typicalDuration: 5,
-    guestCount: { min: 30, max: 120 },
-    popularServices: ['venue-location', 'catering-food', 'decoration-styling', 'entertainment']
-  },
-  {
-    id: 'house-warming',
-    name: 'House Warming',
-    description: 'Warm your new home with love',
-    icon: '🏠',
-    estimatedBudget: { min: 5000, max: 30000 },
-    typicalDuration: 4,
-    guestCount: { min: 20, max: 80 },
-    popularServices: ['catering-food', 'decoration-styling', 'entertainment']
-  },
-  {
-    id: 'product-launch',
-    name: 'Product Launch',
-    description: 'Launch your product with impact',
-    icon: '🚀',
-    estimatedBudget: { min: 25000, max: 200000 },
-    typicalDuration: 6,
-    guestCount: { min: 50, max: 300 },
-    popularServices: ['venue-location', 'technology-av', 'catering-food', 'photography-videography']
-  },
-  {
-    id: 'conference',
-    name: 'Conference',
-    description: 'Professional conferences and seminars',
-    icon: '🎤',
-    estimatedBudget: { min: 30000, max: 300000 },
-    typicalDuration: 8,
-    guestCount: { min: 100, max: 500 },
-    popularServices: ['venue-location', 'technology-av', 'catering-food', 'transportation']
+    color: 'from-blue-500 to-cyan-500'
   }
 ]
+
+export const BUDGET_RANGES = [
+  { id: '10k-25k', label: '₹10k–25k', min: 10000, max: 25000 },
+  { id: '25k-50k', label: '₹25k–50k', min: 25000, max: 50000 },
+  { id: '50k-1L', label: '₹50k–1L', min: 50000, max: 100000 },
+  { id: '1L+', label: '₹1L+', min: 100000, max: 1000000 },
+  { id: 'not-sure', label: 'Not Sure', min: 0, max: 0 }
+]
+
+export const SERVICE_PACKAGES = {
+  basic: {
+    name: 'Basic',
+    description: 'Essential services for your event',
+    color: 'from-gray-500 to-gray-600'
+  },
+  standard: {
+    name: 'Standard',
+    description: 'Popular choice with enhanced features',
+    color: 'from-blue-500 to-purple-500'
+  },
+  premium: {
+    name: 'Premium',
+    description: 'Luxury experience with premium services',
+    color: 'from-purple-500 to-pink-500'
+  }
+}
 
 // Recommendation scoring weights
 export const RECOMMENDATION_WEIGHTS = {

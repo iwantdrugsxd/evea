@@ -14,30 +14,12 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const isVendorView = searchParams.get('vendor') === 'true';
 
-    // Build the query
+    // Build the query - simplified to avoid join issues
     let query = supabase
       .from('vendor_cards')
       .select(`
         *,
-        categories(name, slug),
-        vendors(
-          id,
-          business_name,
-          city,
-          state,
-          description,
-          average_rating,
-          total_reviews,
-          years_in_business,
-          business_website,
-          instagram_handle,
-          facebook_page
-        ),
-        service_images(image_url, is_primary, order_index),
-        service_inclusions(inclusion_text, order_index),
-        service_exclusions(exclusion_text, order_index),
-        service_pricing(base_price, pricing_type, currency),
-        service_areas(area_name, city, state)
+        categories!vendor_cards_category_id_fkey(name, slug)
       `)
       .eq('id', id);
 
@@ -47,6 +29,10 @@ export async function GET(
     }
 
     const { data: service, error: serviceError } = await query.single();
+
+    console.log('API Debug - ID:', id);
+    console.log('API Debug - Service Error:', serviceError);
+    console.log('API Debug - Service Data:', service);
 
     if (serviceError || !service) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 });
@@ -87,17 +73,18 @@ export async function GET(
       ? transformedReviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
       : 0;
 
-    // Transform service data
+    // Transform service data - simplified
     const transformedService = {
       ...service,
       reviews: transformedReviews,
       average_rating: averageRating,
       total_reviews: totalReviews,
       total_orders: 0, // TODO: Calculate from orders table
-      images: service.service_images?.map(img => img.image_url) || [],
-      inclusions: service.service_inclusions?.map(inc => inc.inclusion_text) || [],
-      exclusions: service.service_exclusions?.map(exc => exc.exclusion_text) || [],
-      service_area: service.service_areas?.map(area => area.area_name) || []
+      // Use arrays directly from the vendor_cards table
+      images: service.images || [],
+      inclusions: service.inclusions || [],
+      exclusions: service.exclusions || [],
+      service_area: service.service_area || []
     };
 
     return NextResponse.json({

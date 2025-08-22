@@ -17,26 +17,37 @@ import {
   Users,
   Calendar,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  ArrowRight,
+  Sparkles,
+  CreditCard,
+  BarChart3,
+  Target,
+  Award,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle
 } from 'lucide-react'
+import Button from '@/components/ui/button'
 
 interface ServiceCard {
   id: string
   title: string
   description: string
   category: string
-  base_price: number
+  base_price?: number
   price_type: string
   service_area: string[]
-  max_capacity: number
+  max_capacity?: number
   images: string[]
   status: string
   is_published: boolean
   created_at: string
-  views: number
-  inquiries: number
-  rating: number
-  total_reviews: number
+  views?: number
+  inquiries?: number
+  rating?: number
+  total_reviews?: number
 }
 
 export default function ServiceCardsPage() {
@@ -53,10 +64,13 @@ export default function ServiceCardsPage() {
 
   const fetchCards = async () => {
     try {
+      setLoading(true)
       const response = await fetch('/api/vendor/cards')
       if (response.ok) {
         const data = await response.json()
         setCards(data.cards || [])
+      } else {
+        console.error('Failed to fetch cards:', response.statusText)
       }
     } catch (error) {
       console.error('Error fetching cards:', error)
@@ -89,328 +103,299 @@ export default function ServiceCardsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800'
-      case 'inactive': return 'bg-red-100 text-red-800'
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'active': return 'bg-green-500/20 text-green-400'
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400'
+      case 'draft': return 'bg-gray-500/20 text-gray-400'
+      case 'rejected': return 'bg-red-500/20 text-red-400'
+      default: return 'bg-gray-500/20 text-gray-400'
     }
   }
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'photography': return '📸'
-      case 'catering': return '🍽️'
-      case 'decoration': return '🎨'
-      case 'music': return '🎵'
-      case 'venue': return '🏛️'
-      case 'transportation': return '🚗'
-      case 'planning': return '📋'
-      case 'beauty': return '💄'
-      default: return '✨'
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active': return CheckCircle
+      case 'pending': return Clock
+      case 'draft': return AlertCircle
+      case 'rejected': return XCircle
+      default: return AlertCircle
     }
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-black text-white">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              <div className="h-8 bg-white/10 rounded-2xl w-1/3"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-64 bg-white/10 rounded-3xl"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Service Cards</h1>
-          <p className="text-gray-600 mt-2">Manage your service offerings and track performance</p>
-        </div>
-        <button
-          onClick={() => router.push('/vendor/cards/create')}
-          className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Create New Card
-        </button>
-      </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <motion.h1 
+                  animate={{ 
+                    textShadow: [
+                      "0 0 20px rgba(59, 130, 246, 0.8)",
+                      "0 0 40px rgba(59, 130, 246, 1)",
+                      "0 0 60px rgba(59, 130, 246, 0.8)",
+                      "0 0 20px rgba(59, 130, 246, 0.8)"
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"
+                >
+                  Service Cards
+                </motion.h1>
+                <p className="text-white/60 mt-1">Manage your service offerings and track their performance</p>
+              </div>
+              <Button 
+                onClick={() => router.push('/vendor/cards/create')}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Card
+              </Button>
+            </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {[
+                { title: 'Total Cards', value: cards.length, icon: CreditCard, color: 'bg-blue-500' },
+                { title: 'Active Cards', value: cards.filter(c => c.status === 'active').length, icon: CheckCircle, color: 'bg-green-500' },
+                { title: 'Total Views', value: cards.reduce((sum, c) => sum + (c.views || 0), 0), icon: Eye, color: 'bg-purple-500' },
+                { title: 'Total Inquiries', value: cards.reduce((sum, c) => sum + (c.inquiries || 0), 0), icon: Target, color: 'bg-orange-500' },
+              ].map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 hover:border-white/40 transition-all duration-500">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white/60 mb-1">{stat.title}</p>
+                        <p className="text-2xl font-bold text-white">{stat.value.toLocaleString()}</p>
+                      </div>
+                      <div className={`p-3 rounded-xl ${stat.color}`}>
+                        <stat.icon className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Cards</p>
-              <p className="text-2xl font-bold text-gray-900">{cards.length}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Eye className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Views</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {cards.reduce((sum, card) => sum + (card.views || 0), 0).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Inquiries</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {cards.reduce((sum, card) => sum + (card.inquiries || 0), 0).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Star className="h-6 w-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Rating</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {cards.length > 0 
-                  ? (cards.reduce((sum, card) => sum + (card.rating || 0), 0) / cards.length).toFixed(1)
-                  : '0.0'
-                }
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
 
-      {/* Filters and Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search service cards..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
+          {/* Filters and Search */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 mb-8"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="Search cards by title or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/50"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="draft">Draft</option>
+                <option value="rejected">Rejected</option>
+              </select>
             </div>
+          </motion.div>
+
+          {/* Service Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCards.map((card, index) => {
+              const StatusIcon = getStatusIcon(card.status)
+              return (
+                <motion.div
+                  key={card.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl overflow-hidden hover:border-white/40 transition-all duration-500">
+                    {/* Card Header */}
+                    <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
+                      <div className="absolute inset-0 bg-black/20"></div>
+                      <div className="absolute top-4 right-4">
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getStatusColor(card.status)}`}>
+                          <StatusIcon className="h-3 w-3" />
+                          <span className="capitalize">{card.status}</span>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <h3 className="text-lg font-bold text-white mb-1">{card.title}</h3>
+                        <p className="text-white/90 text-sm">{card.category}</p>
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-6">
+                      <p className="text-white/60 text-sm mb-4 line-clamp-2">{card.description}</p>
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="text-2xl font-bold text-white">
+                          {formatCurrency(card.base_price || 0)}
+                        </div>
+                        <div className="flex items-center space-x-1 text-yellow-400">
+                          <Star className="h-4 w-4 fill-current" />
+                          <span className="text-sm font-medium text-white/70">
+                            {(card.rating || 0).toFixed(1)} ({card.total_reviews || 0})
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-white">{card.views || 0}</p>
+                          <p className="text-xs text-white/50">Views</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-white">{card.inquiries || 0}</p>
+                          <p className="text-xs text-white/50">Inquiries</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-white">{card.max_capacity || 0}</p>
+                          <p className="text-xs text-white/50">Capacity</p>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/vendor/cards/${card.id}`)}
+                          className="flex-1 text-blue-400 border-blue-500/20 hover:bg-blue-500/10"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/vendor/cards/${card.id}/edit`)}
+                          className="flex-1 text-green-400 border-green-500/20 hover:bg-green-500/10"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowDeleteModal(card.id)}
+                          className="text-red-400 border-red-500/20 hover:bg-red-500/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
-          
-          <div className="flex gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+
+          {/* Empty State */}
+          {filteredCards.length === 0 && !loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="pending">Pending</option>
-            </select>
-            
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center">
-              <Filter className="h-4 w-4 mr-2" />
-              More Filters
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Service Cards Grid */}
-      {filteredCards.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <Plus className="h-16 w-16 mx-auto" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No service cards found</h3>
-          <p className="text-gray-600 mb-6">
-            {searchTerm || statusFilter !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Create your first service card to get started'
-            }
-          </p>
-          {!searchTerm && statusFilter === 'all' && (
-            <button
-              onClick={() => router.push('/vendor/cards/create')}
-              className="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Create Service Card
-            </button>
+              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="h-12 w-12 text-white/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">No service cards found</h3>
+              <p className="text-white/60 mb-6">Create your first service card to start attracting customers</p>
+              <Button 
+                onClick={() => router.push('/vendor/cards/create')}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Your First Card
+              </Button>
+            </motion.div>
           )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCards.map((card) => (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              {/* Card Image */}
-              <div className="relative h-48 bg-gray-200 overflow-hidden">
-                {card.images && card.images.length > 0 ? (
-                  <img
-                    src={card.images[0]}
-                    alt={card.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  (() => {
-                    const categoryImage = getCategoryImage(card.category)
-                    return (
-                      <img
-                        src={categoryImage.url}
-                        alt={categoryImage.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    )
-                  })()
-                )}
-                
-                {/* Status Badge */}
-                <div className="absolute top-3 left-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(card.status)}`}>
-                    {card.status}
-                  </span>
-                </div>
-                
-                {/* Published Badge */}
-                {card.is_published && (
-                  <div className="absolute top-3 right-3">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Published
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Card Content */}
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{card.title}</h3>
-                  <div className="relative">
-                    <button className="p-1 hover:bg-gray-100 rounded">
-                      <MoreVertical className="h-4 w-4 text-gray-500" />
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{card.description}</p>
-
-                {/* Price */}
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-2xl font-bold text-purple-600">
-                      ₹{card.base_price.toLocaleString('en-IN')}
-                    </p>
-                    <p className="text-xs text-gray-500 capitalize">
-                      {card.price_type.replace('_', ' ')}
-                    </p>
-                  </div>
-                  
-                  {/* Rating */}
-                  <div className="text-right">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 font-medium">{card.rating || 0}</span>
-                    </div>
-                    <p className="text-xs text-gray-500">({card.total_reviews || 0} reviews)</p>
-                  </div>
-                </div>
-
-                {/* Service Details */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span>{card.service_area[0] || 'Service Area'}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>Up to {card.max_capacity} people</span>
-                  </div>
-                </div>
-
-                {/* Performance Metrics */}
-                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                  <div className="text-center p-2 bg-gray-50 rounded">
-                    <p className="font-medium text-gray-900">{card.views || 0}</p>
-                    <p className="text-gray-500">Views</p>
-                  </div>
-                  <div className="text-center p-2 bg-gray-50 rounded">
-                    <p className="font-medium text-gray-900">{card.inquiries || 0}</p>
-                    <p className="text-gray-500">Inquiries</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => router.push(`/vendor/cards/${card.id}`)}
-                    className="flex-1 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </button>
-                  
-                  <button
-                    onClick={() => router.push(`/vendor/cards/${card.id}/edit`)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </button>
-                  
-                  <button
-                    onClick={() => setShowDeleteModal(card.id)}
-                    className="px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
+      </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Service Card</h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this service card? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-white mb-4">Delete Service Card</h3>
+            <p className="text-white/60 mb-6">Are you sure you want to delete this service card? This action cannot be undone.</p>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
                 onClick={() => setShowDeleteModal(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50"
+                className="flex-1 text-white border-white/20 hover:bg-white/10"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleDelete(showDeleteModal)}
-                className="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               >
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import FloatingNavbar from '@/components/layout/FloatingNavbar';
 import EnhancedVendorCard from '@/components/marketplace/EnhancedVendorCard';
 import { Search, Filter, MapPin, Star, TrendingUp, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
+import { EVENT_CATEGORIES } from '@/data/enhanced-services';
 
 interface ServiceCard {
   id: string;
@@ -151,16 +152,7 @@ export default function MarketplacePage() {
 
   const categories = [
     { id: 'all', name: 'All Categories', icon: '🎉' },
-    { id: '1', name: 'Photography & Video', icon: '📸' },
-    { id: '2', name: 'Catering & Food', icon: '🍽️' },
-    { id: '3', name: 'Decoration & Styling', icon: '🎨' },
-    { id: '4', name: 'Music & Entertainment', icon: '🎵' },
-    { id: '5', name: 'Transportation', icon: '🚗' },
-    { id: '6', name: 'Venues & Locations', icon: '🏛️' },
-    { id: '7', name: 'Wedding Services', icon: '💒' },
-    { id: '8', name: 'Corporate Events', icon: '🏢' },
-    { id: '9', name: 'Party Planning', icon: '🎊' },
-    { id: '10', name: 'Beauty & Makeup', icon: '💄' }
+    ...EVENT_CATEGORIES
   ];
 
   const sortOptions = [

@@ -202,10 +202,14 @@ export default function ServiceDetailsPage() {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <nav className="flex items-center space-x-2 text-sm text-white/60">
           <Link href="/marketplace" className="hover:text-white">Marketplace</Link>
-          <span>/</span>
-          <Link href={`/marketplace/${service.category.slug}`} className="hover:text-white">
-            {service.category.name}
-          </Link>
+          {service.category && (
+            <>
+              <span>/</span>
+              <Link href={`/marketplace/${service.category.slug}`} className="hover:text-white">
+                {service.category.name}
+              </Link>
+            </>
+          )}
           <span>/</span>
           <span className="text-white">{service.title}</span>
         </nav>
@@ -220,15 +224,15 @@ export default function ServiceDetailsPage() {
               <div className="flex items-center gap-6 text-white/60 mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{service.service_area[0]}</span>
+                  <span>{service.service_area?.[0] || 'Location not specified'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span>{service.average_rating.toFixed(1)} ({service.total_reviews} reviews)</span>
+                  <span>{(service.average_rating || 0).toFixed(1)} ({service.total_reviews || 0} reviews)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  <span>{service.total_orders} orders completed</span>
+                  <span>{service.total_orders || 0} orders completed</span>
                 </div>
               </div>
             </div>
@@ -259,7 +263,7 @@ export default function ServiceDetailsPage() {
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative aspect-video bg-white/5 rounded-2xl overflow-hidden">
-                {service.images[0] && (
+                {service.images?.[0] && (
                   <Image
                     src={service.images[0]}
                     alt={service.title}
@@ -269,7 +273,7 @@ export default function ServiceDetailsPage() {
                   />
                 )}
               </div>
-              {service.images.length > 1 && (
+              {service.images && service.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-4">
                   {service.images.slice(1, 5).map((image, index) => (
                     <div
@@ -297,7 +301,7 @@ export default function ServiceDetailsPage() {
 
             {/* Inclusions & Exclusions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {service.inclusions.length > 0 && (
+              {service.inclusions && service.inclusions.length > 0 && (
                 <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-green-400" />
@@ -314,7 +318,7 @@ export default function ServiceDetailsPage() {
                 </div>
               )}
 
-              {service.exclusions.length > 0 && (
+              {service.exclusions && service.exclusions.length > 0 && (
                 <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <X className="w-5 h-5 text-red-400" />
@@ -333,7 +337,7 @@ export default function ServiceDetailsPage() {
             </div>
 
             {/* Portfolio Images */}
-            {service.portfolio_images.length > 0 && (
+            {service.portfolio_images && service.portfolio_images.length > 0 && (
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
                 <h3 className="text-xl font-semibold mb-6">Portfolio</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -356,7 +360,7 @@ export default function ServiceDetailsPage() {
             )}
 
             {/* Reviews */}
-            {service.reviews.length > 0 && (
+            {service.reviews && service.reviews.length > 0 && (
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
                 <h3 className="text-xl font-semibold mb-6">Customer Reviews</h3>
                 <div className="space-y-6">
@@ -447,55 +451,57 @@ export default function ServiceDetailsPage() {
             </div>
 
             {/* Vendor Info */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
-              <h3 className="text-lg font-semibold mb-4">About {service.vendor.business_name}</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span>{service.vendor.average_rating.toFixed(1)} ({service.vendor.total_reviews} reviews)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Award className="w-4 h-4 text-blue-400" />
-                  <span>{service.vendor.years_in_business} years in business</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-green-400" />
-                  <span>{service.vendor.city}, {service.vendor.state}</span>
-                </div>
-                {service.vendor.business_website && (
+            {service.vendor && (
+              <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
+                <h3 className="text-lg font-semibold mb-4">About {service.vendor.business_name || 'Vendor'}</h3>
+                <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-purple-400" />
-                    <a href={service.vendor.business_website} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                      Visit Website
-                    </a>
+                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                    <span>{(service.vendor.average_rating || 0).toFixed(1)} ({service.vendor.total_reviews || 0} reviews)</span>
                   </div>
-                )}
-              </div>
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-blue-400" />
+                    <span>{service.vendor.years_in_business || 'Unknown'} years in business</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-400" />
+                    <span>{service.vendor.city || 'Unknown'}, {service.vendor.state || 'Unknown'}</span>
+                  </div>
+                  {service.vendor.business_website && (
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-purple-400" />
+                      <a href={service.vendor.business_website} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                        Visit Website
+                      </a>
+                    </div>
+                  )}
+                </div>
 
-              {/* Social Links */}
-              <div className="flex gap-3 mt-4">
-                {service.vendor.instagram_handle && (
-                  <a
-                    href={`https://instagram.com/${service.vendor.instagram_handle}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                  >
-                    <Instagram className="w-4 h-4" />
-                  </a>
-                )}
-                {service.vendor.facebook_page && (
-                  <a
-                    href={service.vendor.facebook_page}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                  >
-                    <Facebook className="w-4 h-4" />
-                  </a>
-                )}
+                {/* Social Links */}
+                <div className="flex gap-3 mt-4">
+                  {service.vendor.instagram_handle && (
+                    <a
+                      href={`https://instagram.com/${service.vendor.instagram_handle}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  )}
+                  {service.vendor.facebook_page && (
+                    <a
+                      href={service.vendor.facebook_page}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                    >
+                      <Facebook className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Cancellation Policy */}
             {service.cancellation_policy && (
@@ -508,7 +514,7 @@ export default function ServiceDetailsPage() {
         </div>
 
         {/* Recommendations */}
-        {recommendations.length > 0 && (
+        {recommendations && recommendations.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold mb-8">Similar Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -519,7 +525,7 @@ export default function ServiceDetailsPage() {
                   className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 group"
                 >
                   <div className="relative aspect-video">
-                    {rec.images[0] && (
+                    {rec.images?.[0] && (
                       <Image
                         src={rec.images[0]}
                         alt={rec.title}
@@ -531,10 +537,10 @@ export default function ServiceDetailsPage() {
                   <div className="p-4">
                     <h3 className="font-semibold mb-2 line-clamp-2">{rec.title}</h3>
                     <div className="flex items-center justify-between text-sm text-white/60">
-                      <span>₹{rec.base_price.toLocaleString()}</span>
+                      <span>₹{(rec.base_price || 0).toLocaleString()}</span>
                       <div className="flex items-center gap-1">
                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        <span>{rec.average_rating.toFixed(1)}</span>
+                        <span>{(rec.average_rating || 0).toFixed(1)}</span>
                       </div>
                     </div>
                   </div>

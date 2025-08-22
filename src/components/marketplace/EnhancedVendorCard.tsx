@@ -213,13 +213,10 @@ export default function EnhancedVendorCard({ card }: EnhancedVendorCardProps) {
 
         {/* Actions */}
         <div className="flex items-center space-x-3">
-          <Link
-            href={`/marketplace/service/${card.id}`}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
-          >
+          <button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center">
             <Eye className="h-4 w-4 mr-2" />
             View Details
-          </Link>
+          </button>
           <button className="p-3 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-500 rounded-xl transition-all duration-200">
             <ShoppingCart className="h-4 w-4" />
           </button>

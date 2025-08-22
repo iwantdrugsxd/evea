@@ -1,547 +1,200 @@
-// src/app/(vendor)/messages/page.tsx
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Search,
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { 
+  MessageSquare,
   Send,
-  Phone,
-  Video,
+  Search,
+  Filter,
   MoreVertical,
-  Paperclip,
-  Smile,
-  Star,
-  Calendar,
+  Phone,
+  Mail,
   MapPin,
-  Users,
-  DollarSign,
+  Calendar,
   Clock,
+  User,
   CheckCircle,
-  Circle,
-  Image as ImageIcon,
-  Download,
+  AlertCircle,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Star,
+  Eye,
+  Reply,
   Archive,
-  Trash2
+  Trash2,
+  Pin,
+  Bell
 } from 'lucide-react'
+import Button from '@/components/ui/button'
 
 interface Message {
   id: string
-  content: string
-  senderId: string
-  senderType: 'vendor' | 'customer'
-  timestamp: string
-  type: 'text' | 'image' | 'file' | 'system'
-  attachments?: {
-    name: string
-    url: string
-    type: string
-    size: number
-  }[]
-  read: boolean
-}
-
-interface Conversation {
-  id: string
-  customerId: string
   customerName: string
-  customerAvatar?: string
+  customerEmail: string
+  customerPhone: string
+  subject: string
+  message: string
+  date: string
+  time: string
+  status: 'unread' | 'read' | 'replied' | 'archived'
+  priority: 'high' | 'medium' | 'low'
   orderId?: string
-  orderNumber?: string
-  serviceName: string
-  lastMessage: Message
-  unreadCount: number
-  status: 'active' | 'archived' | 'blocked'
-  createdAt: string
-  updatedAt: string
-  customerInfo: {
-    email: string
-    phone: string
-    eventDate?: string
-    eventLocation?: string
-    guestCount?: number
-    totalAmount?: number
-  }
+  serviceTitle?: string
+  response?: string
+  responseDate?: string
 }
 
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    customerId: 'c1',
-    customerName: 'Priya Sharma',
-    customerAvatar: '/api/placeholder/40/40',
-    orderId: 'o1',
-    orderNumber: 'EVA-2024-001',
-    serviceName: 'Wedding Photography',
-    lastMessage: {
-      id: 'm1',
-      content: 'Can you provide a detailed timeline for the wedding day?',
-      senderId: 'c1',
-      senderType: 'customer',
-      timestamp: '2024-11-10T14:30:00Z',
-      type: 'text',
-      read: false
-    },
-    unreadCount: 2,
-    status: 'active',
-    createdAt: '2024-11-01T10:00:00Z',
-    updatedAt: '2024-11-10T14:30:00Z',
-    customerInfo: {
-      email: 'priya.sharma@email.com',
-      phone: '+91 9876543210',
-      eventDate: '2024-12-15',
-      eventLocation: 'Hotel Grand Palace, Mumbai',
-      guestCount: 250,
-      totalAmount: 45000
-    }
-  },
-  {
-    id: '2',
-    customerId: 'c2',
-    customerName: 'Raj Patel',
-    orderId: 'o2',
-    orderNumber: 'EVA-2024-002',
-    serviceName: 'Birthday Decoration',
-    lastMessage: {
-      id: 'm2',
-      content: 'Perfect! Thank you for the superhero theme suggestions.',
-      senderId: 'v1',
-      senderType: 'vendor',
-      timestamp: '2024-11-09T16:45:00Z',
-      type: 'text',
-      read: true
-    },
-    unreadCount: 0,
-    status: 'active',
-    createdAt: '2024-11-05T12:00:00Z',
-    updatedAt: '2024-11-09T16:45:00Z',
-    customerInfo: {
-      email: 'raj.patel@email.com',
-      phone: '+91 9876543211',
-      eventDate: '2024-11-28',
-      eventLocation: 'Community Hall, Thane',
-      guestCount: 50,
-      totalAmount: 12000
-    }
-  },
-  {
-    id: '3',
-    customerId: 'c3',
-    customerName: 'Anita Verma',
-    orderId: 'o3',
-    orderNumber: 'EVA-2024-003',
-    serviceName: 'Corporate Catering',
-    lastMessage: {
-      id: 'm3',
-      content: 'The event was fantastic! Thank you for the excellent service.',
-      senderId: 'c3',
-      senderType: 'customer',
-      timestamp: '2024-11-08T18:20:00Z',
-      type: 'text',
-      read: true
-    },
-    unreadCount: 0,
-    status: 'active',
-    createdAt: '2024-10-15T09:00:00Z',
-    updatedAt: '2024-11-08T18:20:00Z',
-    customerInfo: {
-      email: 'anita.verma@email.com',
-      phone: '+91 9876543212',
-      eventDate: '2024-11-20',
-      eventLocation: 'Office Complex, Navi Mumbai',
-      guestCount: 100,
-      totalAmount: 28000
+export default function MessagesPage() {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [priorityFilter, setPriorityFilter] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+  const [replyText, setReplyText] = useState('')
+
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setMessages([
+        {
+          id: '1',
+          customerName: 'Priya Sharma',
+          customerEmail: 'priya.sharma@email.com',
+          customerPhone: '+91 98765 43210',
+          subject: 'Wedding Photography Inquiry',
+          message: 'Hi! I\'m planning my wedding for next month and would like to know about your photography packages. Can you please share your rates and availability for December 28th?',
+          date: '2024-12-15',
+          time: '10:30',
+          status: 'unread',
+          priority: 'high',
+          orderId: 'ORD-2024-001',
+          serviceTitle: 'Wedding Photography Package'
+        },
+        {
+          id: '2',
+          customerName: 'Rajesh Kumar',
+          customerEmail: 'rajesh.kumar@email.com',
+          customerPhone: '+91 87654 32109',
+          subject: 'Corporate Event Catering - Follow up',
+          message: 'Thank you for the excellent service at our corporate event last week. The food was delicious and the team was very professional. We would like to book you again for our next event.',
+          date: '2024-12-14',
+          time: '14:20',
+          status: 'read',
+          priority: 'medium',
+          orderId: 'ORD-2024-002',
+          serviceTitle: 'Corporate Event Catering',
+          response: 'Thank you Rajesh! We\'re delighted that you enjoyed our service. We would be happy to cater your next event. I\'ll send you our updated menu and availability.',
+          responseDate: '2024-12-14'
+        },
+        {
+          id: '3',
+          customerName: 'Anita Patel',
+          customerEmail: 'anita.patel@email.com',
+          customerPhone: '+91 76543 21098',
+          subject: 'Birthday Decoration - Thank you',
+          message: 'The decoration for my daughter\'s birthday was absolutely perfect! All the guests were impressed. Thank you so much for making her day special.',
+          date: '2024-12-13',
+          time: '16:45',
+          status: 'replied',
+          priority: 'low',
+          orderId: 'ORD-2024-003',
+          serviceTitle: 'Birthday Party Decoration',
+          response: 'Thank you Anita! We\'re so glad that your daughter had a wonderful birthday celebration. It was our pleasure to make her day special!',
+          responseDate: '2024-12-13'
+        }
+      ])
+      setLoading(false)
+    }, 1000)
+  }, [])
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'unread': return 'bg-blue-500/20 text-blue-400'
+      case 'read': return 'bg-gray-500/20 text-gray-400'
+      case 'replied': return 'bg-green-500/20 text-green-400'
+      case 'archived': return 'bg-yellow-500/20 text-yellow-400'
+      default: return 'bg-gray-500/20 text-gray-400'
     }
   }
-]
 
-const mockMessages: { [key: string]: Message[] } = {
-  '1': [
-    {
-      id: 'm1-1',
-      content: 'Hi! I\'m excited about the wedding photography service. Can we discuss the details?',
-      senderId: 'c1',
-      senderType: 'customer',
-      timestamp: '2024-11-01T10:30:00Z',
-      type: 'text',
-      read: true
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-500/20 text-red-400'
+      case 'medium': return 'bg-yellow-500/20 text-yellow-400'
+      case 'low': return 'bg-green-500/20 text-green-400'
+      default: return 'bg-gray-500/20 text-gray-400'
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const filteredMessages = messages.filter(message => {
+    const matchesSearch = message.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         message.message.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || message.status === statusFilter
+    const matchesPriority = priorityFilter === 'all' || message.priority === priorityFilter
+    return matchesSearch && matchesStatus && matchesPriority
+  })
+
+  const stats = [
+    { 
+      title: 'Total Messages', 
+      value: messages.length, 
+      icon: MessageSquare, 
+      color: 'bg-blue-500', 
+      change: 15.2, 
+      trend: 'up'
     },
-    {
-      id: 'm1-2',
-      content: 'Hello Priya! Thank you for choosing our service. I\'d be happy to discuss all the details. What specific aspects would you like to cover?',
-      senderId: 'v1',
-      senderType: 'vendor',
-      timestamp: '2024-11-01T11:00:00Z',
-      type: 'text',
-      read: true
+    { 
+      title: 'Unread Messages', 
+      value: messages.filter(m => m.status === 'unread').length, 
+      icon: Bell, 
+      color: 'bg-red-500', 
+      change: 8.7, 
+      trend: 'up'
     },
-    {
-      id: 'm1-3',
-      content: 'I\'d like to know about the different packages and what\'s included in each one.',
-      senderId: 'c1',
-      senderType: 'customer',
-      timestamp: '2024-11-01T11:30:00Z',
-      type: 'text',
-      read: true
+    { 
+      title: 'Response Rate', 
+      value: (messages.filter(m => m.response).length / messages.length * 100), 
+      icon: Reply, 
+      color: 'bg-green-500', 
+      change: 12.3, 
+      trend: 'up',
+      format: 'percentage'
     },
-    {
-      id: 'm1-4',
-      content: 'Here are our wedding photography packages with detailed information.',
-      senderId: 'v1',
-      senderType: 'vendor',
-      timestamp: '2024-11-01T12:00:00Z',
-      type: 'file',
-      attachments: [{
-        name: 'Wedding_Photography_Packages.pdf',
-        url: '/files/packages.pdf',
-        type: 'application/pdf',
-        size: 2048000
-      }],
-      read: true
-    },
-    {
-      id: 'm1-5',
-      content: 'Can you provide a detailed timeline for the wedding day?',
-      senderId: 'c1',
-      senderType: 'customer',
-      timestamp: '2024-11-10T14:30:00Z',
-      type: 'text',
-      read: false
+    { 
+      title: 'Avg Response Time', 
+      value: '2.5', 
+      icon: Clock, 
+      color: 'bg-purple-500', 
+      change: -5.1, 
+      trend: 'down',
+      format: 'time'
     }
   ]
-}
 
-export default function VendorMessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (selectedConversation) {
-      setMessages(mockMessages[selectedConversation.id] || [])
-      // Mark messages as read
-      markConversationAsRead(selectedConversation.id)
-    }
-  }, [selectedConversation])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  const markConversationAsRead = (conversationId: string) => {
-    setConversations(prev => 
-      prev.map(conv => 
-        conv.id === conversationId 
-          ? { ...conv, unreadCount: 0 }
-          : conv
-      )
-    )
-  }
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return
-
-    const message: Message = {
-      id: `m-${Date.now()}`,
-      content: newMessage,
-      senderId: 'v1',
-      senderType: 'vendor',
-      timestamp: new Date().toISOString(),
-      type: 'text',
-      read: true
-    }
-
-    setMessages(prev => [...prev, message])
-    setNewMessage('')
-
-    // Update conversation last message
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.id === selectedConversation.id
-          ? { ...conv, lastMessage: message, updatedAt: message.timestamp }
-          : conv
-      )
-    )
-  }
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      })
-    } else if (diffInHours < 168) {
-      return date.toLocaleDateString('en-US', { weekday: 'short' })
-    } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      })
-    }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
-
-  const filteredConversations = conversations.filter(conv =>
-    conv.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const ConversationsList = () => (
-    <div className="w-full md:w-1/3 bg-white border-r border-gray-200">
-      {/* Search */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-
-      {/* Conversations List */}
-      <div className="overflow-y-auto h-full">
-        {filteredConversations.map(conversation => (
-          <motion.div
-            key={conversation.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-              selectedConversation?.id === conversation.id ? 'bg-purple-50 border-purple-200' : ''
-            }`}
-            onClick={() => setSelectedConversation(conversation)}
-          >
-            <div className="flex items-start space-x-3">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-medium">
-                  {conversation.customerName.charAt(0)}
-                </div>
-                {conversation.unreadCount > 0 && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {conversation.unreadCount}
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-medium text-gray-900 truncate">
-                    {conversation.customerName}
-                  </h3>
-                  <span className="text-xs text-gray-500">
-                    {formatTime(conversation.lastMessage.timestamp)}
-                  </span>
-                </div>
-                
-                <p className="text-sm text-gray-600 mb-1">{conversation.serviceName}</p>
-                
-                <p className={`text-sm truncate ${
-                  conversation.unreadCount > 0 ? 'font-medium text-gray-900' : 'text-gray-500'
-                }`}>
-                  {conversation.lastMessage.senderType === 'vendor' ? 'You: ' : ''}
-                  {conversation.lastMessage.content}
-                </p>
-                
-                {conversation.orderNumber && (
-                  <p className="text-xs text-purple-600 mt-1">
-                    Order: {conversation.orderNumber}
-                  </p>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  )
-
-  const MessageArea = () => {
-    if (!selectedConversation) {
-      return (
-        <div className="flex-1 flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Select a conversation</h3>
-            <p className="text-gray-600">Choose a conversation from the sidebar to start messaging</p>
-          </div>
-        </div>
-      )
-    }
-
+  if (loading) {
     return (
-      <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <div className="bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-medium">
-                {selectedConversation.customerName.charAt(0)}
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">{selectedConversation.customerName}</h3>
-                <p className="text-sm text-gray-600">{selectedConversation.serviceName}</p>
+      <div className="min-h-screen bg-black text-white">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              <div className="h-8 bg-white/10 rounded-2xl w-1/3"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-32 bg-white/10 rounded-3xl"></div>
+                ))}
               </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Phone className="h-5 w-5 text-gray-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Video className="h-5 w-5 text-gray-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <MoreVertical className="h-5 w-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Customer Info Panel */}
-        <div className="bg-blue-50 border-b border-gray-200 p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 text-blue-600 mr-2" />
-              <span className="text-gray-600">
-                {selectedConversation.customerInfo.eventDate 
-                  ? new Date(selectedConversation.customerInfo.eventDate).toLocaleDateString('en-IN')
-                  : 'No date set'
-                }
-              </span>
-            </div>
-            <div className="flex items-center">
-              <MapPin className="h-4 w-4 text-blue-600 mr-2" />
-              <span className="text-gray-600 truncate">
-                {selectedConversation.customerInfo.eventLocation || 'Location TBD'}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Users className="h-4 w-4 text-blue-600 mr-2" />
-              <span className="text-gray-600">
-                {selectedConversation.customerInfo.guestCount || 0} guests
-              </span>
-            </div>
-            <div className="flex items-center">
-              <DollarSign className="h-4 w-4 text-blue-600 mr-2" />
-              <span className="text-gray-600 font-medium">
-                {selectedConversation.customerInfo.totalAmount 
-                  ? formatCurrency(selectedConversation.customerInfo.totalAmount)
-                  : 'Price pending'
-                }
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-          {messages.map(message => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex ${message.senderType === 'vendor' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`max-w-xs md:max-w-md ${
-                message.senderType === 'vendor'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white text-gray-900 border border-gray-200'
-              } rounded-lg p-3 shadow-sm`}>
-                {message.type === 'text' && (
-                  <p className="text-sm">{message.content}</p>
-                )}
-                
-                {message.type === 'file' && message.attachments && (
-                  <div className="space-y-2">
-                    <p className="text-sm">{message.content}</p>
-                    {message.attachments.map((attachment, index) => (
-                      <div key={index} className="flex items-center space-x-2 p-2 bg-white/10 rounded">
-                        <Paperclip className="h-4 w-4" />
-                        <span className="text-sm flex-1 truncate">{attachment.name}</span>
-                        <button className="text-sm hover:underline">
-                          <Download className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <div className={`flex items-center justify-between mt-2 text-xs ${
-                  message.senderType === 'vendor' ? 'text-purple-200' : 'text-gray-500'
-                }`}>
-                  <span>{formatTime(message.timestamp)}</span>
-                  {message.senderType === 'vendor' && (
-                    <div className="flex items-center space-x-1">
-                      {message.read ? (
-                        <CheckCircle className="h-3 w-3" />
-                      ) : (
-                        <Circle className="h-3 w-3" />
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Message Input */}
-        <div className="bg-white border-t border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Paperclip className="h-5 w-5 text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <ImageIcon className="h-5 w-5 text-gray-600" />
-            </button>
-            
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type your message..."
-                className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded transition-colors">
-                <Smile className="h-4 w-4 text-gray-600" />
-              </button>
-            </div>
-            
-            <button
-              onClick={sendMessage}
-              disabled={!newMessage.trim()}
-              className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Send className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
@@ -549,25 +202,262 @@ export default function VendorMessagesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="mt-[100px] flex flex-col md:flex-row md:items-center md:justify-start md:gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
-          <p className="text-gray-600 mt-1">Communicate with your customers</p>
-        </div>
-        
-        <div className="flex items-center space-x-4 mt-4 md:mt-0">
-          <div className="text-sm text-gray-600">
-            {conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)} unread messages
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <motion.h1 
+                  animate={{ 
+                    textShadow: [
+                      "0 0 20px rgba(59, 130, 246, 0.8)",
+                      "0 0 40px rgba(59, 130, 246, 1)",
+                      "0 0 60px rgba(59, 130, 246, 0.8)",
+                      "0 0 20px rgba(59, 130, 246, 0.8)"
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"
+                >
+                  Customer Messages
+                </motion.h1>
+                <p className="text-white/60 mt-1">Manage customer inquiries and communications</p>
+              </div>
+            </div>
 
-      {/* Messages Interface */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-200px)] flex">
-        <ConversationsList />
-        <MessageArea />
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 hover:border-white/40 transition-all duration-500">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`p-3 rounded-xl ${stat.color}`}>
+                        <stat.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {stat.trend === 'up' ? (
+                          <TrendingUp className="h-4 w-4 text-green-400" />
+                        ) : (
+                          <TrendingDown className="h-4 w-4 text-red-400" />
+                        )}
+                        <span className={`text-sm font-semibold ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
+                          {stat.change}%
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                                             <p className="text-2xl font-bold text-white mb-1">
+                         {stat.format === 'percentage' 
+                           ? `${typeof stat.value === 'number' ? stat.value.toFixed(1) : stat.value}%`
+                           : stat.format === 'time'
+                           ? `${stat.value}h`
+                           : typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value
+                         }
+                       </p>
+                      <p className="text-sm text-white/60">{stat.title}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Filters and Search */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 mb-8"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="Search messages by customer name, subject, or content..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/50"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              >
+                <option value="all">All Status</option>
+                <option value="unread">Unread</option>
+                <option value="read">Read</option>
+                <option value="replied">Replied</option>
+                <option value="archived">Archived</option>
+              </select>
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              >
+                <option value="all">All Priority</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </motion.div>
+
+          {/* Messages List */}
+          <div className="space-y-6">
+            {filteredMessages.map((message, index) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 hover:border-white/40 transition-all duration-500">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">{message.customerName}</h3>
+                        <p className="text-white/60 text-sm">{message.customerEmail}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(message.priority)}`}>
+                        {message.priority}
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(message.status)}`}>
+                        {message.status}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <h4 className="text-lg font-semibold text-white mb-2">{message.subject}</h4>
+                    <p className="text-white/80 leading-relaxed line-clamp-2">{message.message}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4 text-white/60" />
+                      <div>
+                        <p className="text-sm font-medium text-white">Date</p>
+                        <p className="text-xs text-white/50">{formatDate(message.date)} at {message.time}</p>
+                      </div>
+                    </div>
+                    {message.orderId && (
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-white/60" />
+                        <div>
+                          <p className="text-sm font-medium text-white">Order</p>
+                          <p className="text-xs text-white/50">{message.orderId}</p>
+                        </div>
+                      </div>
+                    )}
+                    {message.serviceTitle && (
+                      <div className="flex items-center space-x-2">
+                        <Star className="h-4 w-4 text-white/60" />
+                        <div>
+                          <p className="text-sm font-medium text-white">Service</p>
+                          <p className="text-xs text-white/50">{message.serviceTitle}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Vendor Response */}
+                  {message.response && (
+                    <div className="bg-white/5 rounded-xl p-4 border-l-4 border-blue-500 mb-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Reply className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm font-medium text-blue-400">Your Response</span>
+                        <span className="text-xs text-white/50">({formatDate(message.responseDate!)})</span>
+                      </div>
+                      <p className="text-white/80 text-sm">{message.response}</p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-blue-400 border-blue-500/20 hover:bg-blue-500/10"
+                      >
+                        <Phone className="h-4 w-4 mr-2" />
+                        Call
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-green-400 border-green-500/20 hover:bg-green-500/10"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Email
+                      </Button>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-purple-400 border-purple-500/20 hover:bg-purple-500/10"
+                      >
+                        <Reply className="h-4 w-4 mr-2" />
+                        Reply
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-yellow-400 border-yellow-500/20 hover:bg-yellow-500/10"
+                      >
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredMessages.length === 0 && !loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-12 w-12 text-white/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">No messages found</h3>
+              <p className="text-white/60 mb-6">Messages from customers will appear here</p>
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

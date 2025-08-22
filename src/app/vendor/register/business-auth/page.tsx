@@ -44,7 +44,6 @@ export default function BusinessDetailsPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [documents, setDocuments] = useState<File[]>([])
 
   const [formData, setFormData] = useState<BusinessDetailsForm>({
     businessType: '',
@@ -115,11 +114,6 @@ export default function BusinessDetailsPage() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        // Upload documents if any
-        if (documents.length > 0) {
-          await uploadDocuments()
-        }
-
         // Redirect to next step (services setup)
         router.push(`/vendor/onboarding/services?vendorId=${vendorId}&step=3`)
       } else {
@@ -133,32 +127,9 @@ export default function BusinessDetailsPage() {
     }
   }
 
-  const uploadDocuments = async () => {
-    if (documents.length === 0) return
 
-    const formData = new FormData()
-    formData.append('vendorId', vendorId!)
-    
-    documents.forEach((doc, index) => {
-      formData.append('documents', doc)
-      formData.append('documentTypes', `business_document_${index}`)
-    })
 
-    const response = await fetch('/api/vendor/upload-documents', {
-      method: 'POST',
-      body: formData,
-    })
 
-    if (!response.ok) {
-      throw new Error('Document upload failed')
-    }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setDocuments(Array.from(e.target.files))
-    }
-  }
 
   const updateBusinessHours = (day: keyof typeof formData.businessHours, field: string, value: any) => {
     setFormData(prev => ({
@@ -342,48 +313,7 @@ export default function BusinessDetailsPage() {
             </div>
           </div>
 
-          {/* Document Upload */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Documents</h2>
-            <p className="text-gray-600 mb-4">Upload relevant business documents (optional at this step)</p>
-            
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-              <div className="text-center">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-2">
-                  Drop files here or click to browse
-                </p>
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileChange}
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                  className="hidden"
-                  id="documents"
-                />
-                <label
-                  htmlFor="documents"
-                  className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-                >
-                  Choose Files
-                </label>
-              </div>
-              
-              {documents.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Files:</h4>
-                  <ul className="space-y-1">
-                    {documents.map((file, index) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                        {file.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
+
 
           {/* Action Buttons */}
           <div className="flex justify-between">

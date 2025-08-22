@@ -1,30 +1,30 @@
-// src/app/(vendor)/orders/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import {
-  Search,
-  Filter,
-  Calendar,
+import { 
+  ShoppingCart,
   Clock,
   CheckCircle,
   XCircle,
-  AlertTriangle,
+  Eye,
+  Package,
+  Calendar,
   DollarSign,
-  Users,
+  User,
   MapPin,
-  MessageSquare,
   Phone,
   Mail,
-  MoreVertical,
-  Eye,
-  Download,
-  RefreshCw,
+  ArrowRight,
+  Filter,
+  Search,
   TrendingUp,
-  Package
+  TrendingDown,
+  Star,
+  MessageCircle,
+  AlertCircle
 } from 'lucide-react'
+import Button from '@/components/ui/button'
 
 interface Order {
   id: string
@@ -32,505 +32,362 @@ interface Order {
   customerName: string
   customerEmail: string
   customerPhone: string
-  serviceName: string
-  serviceCategory: string
+  serviceTitle: string
+  amount: number
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
+  orderDate: string
   eventDate: string
-  eventTime: string
-  eventLocation: string
+  location: string
   guestCount: number
-  eventDuration: number
   specialRequirements: string
-  subtotal: number
-  platformFee: number
-  totalAmount: number
-  advancePayment: number
-  remainingPayment: number
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'refunded'
-  paymentStatus: 'pending' | 'advance_paid' | 'paid' | 'failed' | 'refunded'
-  createdAt: string
-  updatedAt: string
-  lastMessage?: string
-  unreadMessages: number
+  rating?: number
+  review?: string
 }
 
-const mockOrders: Order[] = [
-  {
-    id: '1',
-    orderNumber: 'EVA-2024-001',
-    customerName: 'Priya Sharma',
-    customerEmail: 'priya.sharma@email.com',
-    customerPhone: '+91 9876543210',
-    serviceName: 'Professional Wedding Photography',
-    serviceCategory: 'Photography',
-    eventDate: '2024-12-15',
-    eventTime: '10:00',
-    eventLocation: 'Hotel Grand Palace, Mumbai',
-    guestCount: 250,
-    eventDuration: 8,
-    specialRequirements: 'Need drone shots and traditional ceremony coverage',
-    subtotal: 45000,
-    platformFee: 2250,
-    totalAmount: 47250,
-    advancePayment: 14175,
-    remainingPayment: 33075,
-    status: 'confirmed',
-    paymentStatus: 'advance_paid',
-    createdAt: '2024-11-01',
-    updatedAt: '2024-11-02',
-    lastMessage: 'Can you provide a timeline for the day?',
-    unreadMessages: 2
-  },
-  {
-    id: '2',
-    orderNumber: 'EVA-2024-002',
-    customerName: 'Raj Patel',
-    customerEmail: 'raj.patel@email.com',
-    customerPhone: '+91 9876543211',
-    serviceName: 'Birthday Party Decoration',
-    serviceCategory: 'Decoration',
-    eventDate: '2024-11-28',
-    eventTime: '16:00',
-    eventLocation: 'Community Hall, Thane',
-    guestCount: 50,
-    eventDuration: 4,
-    specialRequirements: 'Superhero theme with balloon arch',
-    subtotal: 12000,
-    platformFee: 600,
-    totalAmount: 12600,
-    advancePayment: 0,
-    remainingPayment: 12600,
-    status: 'pending',
-    paymentStatus: 'pending',
-    createdAt: '2024-11-05',
-    updatedAt: '2024-11-05',
-    unreadMessages: 1
-  },
-  {
-    id: '3',
-    orderNumber: 'EVA-2024-003',
-    customerName: 'Anita Verma',
-    customerEmail: 'anita.verma@email.com',
-    customerPhone: '+91 9876543212',
-    serviceName: 'Corporate Event Catering',
-    serviceCategory: 'Catering',
-    eventDate: '2024-11-20',
-    eventTime: '12:00',
-    eventLocation: 'Office Complex, Navi Mumbai',
-    guestCount: 100,
-    eventDuration: 3,
-    specialRequirements: 'Vegetarian menu only, setup by 11:30 AM',
-    subtotal: 28000,
-    platformFee: 1400,
-    totalAmount: 29400,
-    advancePayment: 29400,
-    remainingPayment: 0,
-    status: 'completed',
-    paymentStatus: 'paid',
-    createdAt: '2024-10-15',
-    updatedAt: '2024-11-21',
-    unreadMessages: 0
-  }
-]
-
-const statusConfig = {
-  pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  confirmed: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-  in_progress: { color: 'bg-purple-100 text-purple-800', icon: RefreshCw },
-  completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  cancelled: { color: 'bg-red-100 text-red-800', icon: XCircle },
-  refunded: { color: 'bg-gray-100 text-gray-800', icon: RefreshCw }
-}
-
-const paymentStatusConfig = {
-  pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Payment Pending' },
-  advance_paid: { color: 'bg-blue-100 text-blue-800', label: 'Advance Paid' },
-  paid: { color: 'bg-green-100 text-green-800', label: 'Fully Paid' },
-  failed: { color: 'bg-red-100 text-red-800', label: 'Payment Failed' },
-  refunded: { color: 'bg-gray-100 text-gray-800', label: 'Refunded' }
-}
-
-export default function VendorOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders)
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('all')
-  const [dateFilter, setDateFilter] = useState('all')
-  const [showFilters, setShowFilters] = useState(false)
+
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setOrders([
+        {
+          id: '1',
+          orderNumber: 'ORD-2024-001',
+          customerName: 'Priya Sharma',
+          customerEmail: 'priya.sharma@email.com',
+          customerPhone: '+91 98765 43210',
+          serviceTitle: 'Wedding Photography Package',
+          amount: 25000,
+          status: 'confirmed',
+          orderDate: '2024-12-15',
+          eventDate: '2024-12-28',
+          location: 'Mumbai, Maharashtra',
+          guestCount: 150,
+          specialRequirements: 'Traditional Indian wedding ceremony with reception'
+        },
+        {
+          id: '2',
+          orderNumber: 'ORD-2024-002',
+          customerName: 'Rajesh Kumar',
+          customerEmail: 'rajesh.kumar@email.com',
+          customerPhone: '+91 87654 32109',
+          serviceTitle: 'Corporate Event Catering',
+          amount: 45000,
+          status: 'in_progress',
+          orderDate: '2024-12-14',
+          eventDate: '2024-12-20',
+          location: 'Delhi, NCR',
+          guestCount: 200,
+          specialRequirements: 'Vegetarian menu with international cuisine options'
+        },
+        {
+          id: '3',
+          orderNumber: 'ORD-2024-003',
+          customerName: 'Anita Patel',
+          customerEmail: 'anita.patel@email.com',
+          customerPhone: '+91 76543 21098',
+          serviceTitle: 'Birthday Party Decoration',
+          amount: 12000,
+          status: 'completed',
+          orderDate: '2024-12-10',
+          eventDate: '2024-12-15',
+          location: 'Bangalore, Karnataka',
+          guestCount: 50,
+          specialRequirements: 'Pink and gold theme for 10th birthday'
+        }
+      ])
+      setLoading(false)
+    }, 1000)
+  }, [])
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400'
+      case 'confirmed': return 'bg-blue-500/20 text-blue-400'
+      case 'in_progress': return 'bg-purple-500/20 text-purple-400'
+      case 'completed': return 'bg-green-500/20 text-green-400'
+      case 'cancelled': return 'bg-red-500/20 text-red-400'
+      default: return 'bg-gray-500/20 text-gray-400'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending': return Clock
+      case 'confirmed': return CheckCircle
+      case 'in_progress': return Package
+      case 'completed': return CheckCircle
+      case 'cancelled': return XCircle
+      default: return AlertCircle
+    }
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount)
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  const handleStatusUpdate = (orderId: string, newStatus: Order['status']) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus, updatedAt: new Date().toISOString() } : order
-    ))
-  }
-
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.serviceName.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus
-    const matchesPaymentStatus = selectedPaymentStatus === 'all' || order.paymentStatus === selectedPaymentStatus
-    return matchesSearch && matchesStatus && matchesPaymentStatus
+    const matchesSearch = order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.serviceTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter
+    return matchesSearch && matchesStatus
   })
 
-  const StatsOverview = () => {
-    const totalOrders = orders.length
-    const pendingOrders = orders.filter(order => order.status === 'pending').length
-    const completedOrders = orders.filter(order => order.status === 'completed').length
-    const totalRevenue = orders
-      .filter(order => order.status === 'completed')
-      .reduce((sum, order) => sum + order.subtotal, 0)
-    
+  const stats = [
+    { title: 'Total Orders', value: orders.length, icon: ShoppingCart, color: 'bg-blue-500', change: 12.5, trend: 'up' },
+    { title: 'Pending Orders', value: orders.filter(o => o.status === 'pending').length, icon: Clock, color: 'bg-yellow-500', change: -5.2, trend: 'down' },
+    { title: 'Completed Orders', value: orders.filter(o => o.status === 'completed').length, icon: CheckCircle, color: 'bg-green-500', change: 8.7, trend: 'up' },
+    { title: 'Total Revenue', value: orders.reduce((sum, o) => sum + o.amount, 0), icon: DollarSign, color: 'bg-purple-500', change: 15.3, trend: 'up' }
+  ]
+
+  if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
-            </div>
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <Package className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{pendingOrders}</p>
-            </div>
-            <div className="bg-yellow-100 p-3 rounded-lg">
-              <Clock className="h-6 w-6 text-yellow-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{completedOrders}</p>
-            </div>
-            <div className="bg-green-100 p-3 rounded-lg">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalRevenue)}</p>
-            </div>
-            <div className="bg-purple-100 p-3 rounded-lg">
-              <DollarSign className="h-6 w-6 text-purple-600" />
+      <div className="min-h-screen bg-black text-white">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              <div className="h-8 bg-white/10 rounded-2xl w-1/3"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-32 bg-white/10 rounded-3xl"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    )
-  }
-
-  const OrderCard = ({ order }: { order: Order }) => {
-    const [showActions, setShowActions] = useState(false)
-    const StatusIcon = statusConfig[order.status].icon
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-      >
-        {/* Order Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-lg font-semibold text-gray-900">{order.orderNumber}</h3>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusConfig[order.status].color}`}>
-                {order.status.replace('_', ' ').toUpperCase()}
-              </span>
-              {order.unreadMessages > 0 && (
-                <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
-                  {order.unreadMessages} new
-                </span>
-              )}
-            </div>
-            <p className="text-gray-600">{order.serviceName}</p>
-          </div>
-          
-          <div className="relative">
-            <button
-              onClick={() => setShowActions(!showActions)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </button>
-            
-            {showActions && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                <div className="p-2">
-                  <Link
-                    href={`/vendor/orders/${order.id}`}
-                    className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </Link>
-                  <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Invoice
-                  </button>
-                  <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Send Message
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Customer Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Customer Details</h4>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-900 font-medium">{order.customerName}</p>
-              <div className="flex items-center text-sm text-gray-600">
-                <Mail className="h-3 w-3 mr-1" />
-                {order.customerEmail}
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Phone className="h-3 w-3 mr-1" />
-                {order.customerPhone}
-              </div>
-            </div>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Event Details</h4>
-            <div className="space-y-1">
-              <div className="flex items-center text-sm text-gray-600">
-                <Calendar className="h-3 w-3 mr-1" />
-                {formatDate(order.eventDate)} at {order.eventTime}
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPin className="h-3 w-3 mr-1" />
-                {order.eventLocation}
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Users className="h-3 w-3 mr-1" />
-                {order.guestCount} guests • {order.eventDuration}h duration
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Special Requirements */}
-        {order.specialRequirements && (
-          <div className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">Special Requirements</h4>
-            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-              {order.specialRequirements}
-            </p>
-          </div>
-        )}
-        
-        {/* Payment Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Total Amount</p>
-            <p className="text-lg font-bold text-gray-900">{formatCurrency(order.totalAmount)}</p>
-          </div>
-          <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm text-gray-600">Advance Paid</p>
-            <p className="text-lg font-bold text-blue-600">{formatCurrency(order.advancePayment)}</p>
-          </div>
-          <div className="text-center p-3 bg-yellow-50 rounded-lg">
-            <p className="text-sm text-gray-600">Remaining</p>
-            <p className="text-lg font-bold text-yellow-600">{formatCurrency(order.remainingPayment)}</p>
-          </div>
-        </div>
-        
-        {/* Payment Status */}
-        <div className="flex items-center justify-between mb-4">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${paymentStatusConfig[order.paymentStatus].color}`}>
-            {paymentStatusConfig[order.paymentStatus].label}
-          </span>
-          <p className="text-xs text-gray-500">
-            Updated {formatDate(order.updatedAt)}
-          </p>
-        </div>
-        
-        {/* Last Message */}
-        {order.lastMessage && (
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <MessageSquare className="h-4 w-4 inline mr-1" />
-              "{order.lastMessage}"
-            </p>
-          </div>
-        )}
-        
-        {/* Action Buttons */}
-        <div className="flex space-x-3">
-          {order.status === 'pending' && (
-            <>
-              <button
-                onClick={() => handleStatusUpdate(order.id, 'confirmed')}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-              >
-                Accept Order
-              </button>
-              <button
-                onClick={() => handleStatusUpdate(order.id, 'cancelled')}
-                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
-              >
-                Decline
-              </button>
-            </>
-          )}
-          
-          {order.status === 'confirmed' && (
-            <button
-              onClick={() => handleStatusUpdate(order.id, 'in_progress')}
-              className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-            >
-              Start Service
-            </button>
-          )}
-          
-          {order.status === 'in_progress' && (
-            <button
-              onClick={() => handleStatusUpdate(order.id, 'completed')}
-              className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-            >
-              Mark Complete
-            </button>
-          )}
-          
-          <Link
-            href={`/vendor/orders/${order.id}`}
-            className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors text-center"
-          >
-            View Details
-          </Link>
-          
-          <Link
-            href={`/vendor/messages?order=${order.id}`}
-            className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center"
-          >
-            <MessageSquare className="h-4 w-4" />
-          </Link>
-        </div>
-      </motion.div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
-        <p className="text-gray-600 mt-1">Track and manage your service bookings</p>
-      </div>
-
-      {/* Stats Overview */}
-      <StatsOverview />
-
-      {/* Filters and Search */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="mt-[100px] flex flex-col md:flex-row md:items-center md:justify-start md:gap-4 space-y-4 md:space-y-0">
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search orders..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </button>
-            
-            {showFilters && (
-              <div className="flex items-center space-x-4">
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+    <div className="min-h-screen bg-black text-white">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <motion.h1 
+                  animate={{ 
+                    textShadow: [
+                      "0 0 20px rgba(59, 130, 246, 0.8)",
+                      "0 0 40px rgba(59, 130, 246, 1)",
+                      "0 0 60px rgba(59, 130, 246, 0.8)",
+                      "0 0 20px rgba(59, 130, 246, 0.8)"
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"
                 >
-                  <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-                
-                <select
-                  value={selectedPaymentStatus}
-                  onChange={(e) => setSelectedPaymentStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="all">All Payments</option>
-                  <option value="pending">Pending</option>
-                  <option value="advance_paid">Advance Paid</option>
-                  <option value="paid">Fully Paid</option>
-                  <option value="failed">Failed</option>
-                </select>
+                  Orders Management
+                </motion.h1>
+                <p className="text-white/60 mt-1">Track and manage all your customer orders</p>
               </div>
-            )}
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 hover:border-white/40 transition-all duration-500">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`p-3 rounded-xl ${stat.color}`}>
+                        <stat.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {stat.trend === 'up' ? (
+                          <TrendingUp className="h-4 w-4 text-green-400" />
+                        ) : (
+                          <TrendingDown className="h-4 w-4 text-red-400" />
+                        )}
+                        <span className={`text-sm font-semibold ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
+                          {stat.change}%
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-2xl font-bold text-white mb-1">
+                        {typeof stat.value === 'number' && stat.title.includes('Revenue') 
+                          ? formatCurrency(stat.value)
+                          : stat.value.toLocaleString()
+                        }
+                      </p>
+                      <p className="text-sm text-white/60">{stat.title}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Filters and Search */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 mb-8"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="Search orders by customer name, service, or order number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/50"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </motion.div>
+
+          {/* Orders List */}
+          <div className="space-y-6">
+            {filteredOrders.map((order, index) => {
+              const StatusIcon = getStatusIcon(order.status)
+              return (
+                <motion.div
+                  key={order.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative bg-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 hover:border-white/40 transition-all duration-500">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-bold text-white mb-1">{order.serviceTitle}</h3>
+                            <p className="text-white/60 text-sm">{order.orderNumber}</p>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getStatusColor(order.status)}`}>
+                            <StatusIcon className="h-3 w-3" />
+                            <span className="capitalize">{order.status.replace('_', ' ')}</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <User className="h-4 w-4 text-white/60" />
+                            <div>
+                              <p className="text-sm font-medium text-white">{order.customerName}</p>
+                              <p className="text-xs text-white/50">{order.customerEmail}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="h-4 w-4 text-white/60" />
+                            <div>
+                              <p className="text-sm font-medium text-white">Event Date</p>
+                              <p className="text-xs text-white/50">{new Date(order.eventDate).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="h-4 w-4 text-white/60" />
+                            <div>
+                              <p className="text-sm font-medium text-white">Location</p>
+                              <p className="text-xs text-white/50">{order.location}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <DollarSign className="h-4 w-4 text-white/60" />
+                            <div>
+                              <p className="text-sm font-medium text-white">Amount</p>
+                              <p className="text-xs text-white/50">{formatCurrency(order.amount)}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {order.specialRequirements && (
+                          <div className="bg-white/5 rounded-xl p-3 mb-4">
+                            <p className="text-sm text-white/80">
+                              <span className="font-medium">Special Requirements:</span> {order.specialRequirements}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-2 lg:flex-col lg:space-x-0 lg:space-y-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-blue-400 border-blue-500/20 hover:bg-blue-500/10"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-green-400 border-green-500/20 hover:bg-green-500/10"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Contact
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
+
+          {/* Empty State */}
+          {filteredOrders.length === 0 && !loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingCart className="h-12 w-12 text-white/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">No orders found</h3>
+              <p className="text-white/60 mb-6">Orders will appear here once customers place them</p>
+            </motion.div>
+          )}
         </div>
       </div>
-
-      {/* Orders List */}
-      <div className="space-y-6">
-        {filteredOrders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {filteredOrders.length === 0 && (
-        <div className="text-center py-12">
-          <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders found</h3>
-          <p className="text-gray-600">
-            {searchTerm ? 'Try adjusting your search criteria' : 'New orders will appear here once customers book your services'}
-          </p>
-        </div>
-      )}
     </div>
   )
 }

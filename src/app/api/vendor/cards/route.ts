@@ -24,9 +24,7 @@ export async function GET(request: NextRequest) {
       .from('vendor_cards')
       .select(`
         *,
-        categories:category_id (name),
-        orders:orders(count),
-        reviews:reviews(rating)
+        categories:category_id (name)
       `)
       .eq('vendor_id', vendorData.vendorId)
       .order('created_at', { ascending: false })

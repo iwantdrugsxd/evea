@@ -2,15 +2,14 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronRight, Check, Utensils, Camera, Palette, Music, Home as HomeIcon, Car, Flower, Speaker, Armchair, Lightbulb, Shield, Heart, Sparkles, Headphones, Image as ImageIcon, ArrowLeft } from 'lucide-react'
-
-type IconType = typeof Utensils
+import { ChevronRight, Check, ArrowLeft } from 'lucide-react'
+import { EVENT_CATEGORIES } from '@/data/enhanced-services'
 
 interface ServiceCategory {
   id: string
   name: string
   slug: string
-  icon: IconType
+  icon: string
   color: string
   description: string
 }
@@ -23,42 +22,50 @@ interface Subcategory {
   priceRange?: string
 }
 
-const serviceCategories: ServiceCategory[] = [
-  { id: '1', name: 'Catering & Food Services', slug: 'catering-food', icon: Utensils, color: '#F59E0B', description: 'Professional catering and food services' },
-  { id: '2', name: 'Photography & Videography', slug: 'photography-videography', icon: Camera, color: '#EF4444', description: 'Capture special moments professionally' },
-  { id: '3', name: 'Decoration & Styling', slug: 'decoration-styling', icon: Palette, color: '#8B5CF6', description: 'Transform venues with beautiful decorations' },
-  { id: '4', name: 'Entertainment & Music', slug: 'entertainment-music', icon: Music, color: '#10B981', description: 'Live entertainment and musical performances' },
-  { id: '5', name: 'Venue & Space Rental', slug: 'venue-rental', icon: HomeIcon, color: '#3B82F6', description: 'Beautiful venues and event spaces' },
-  { id: '6', name: 'Transportation Services', slug: 'transportation', icon: Car, color: '#6B7280', description: 'Reliable transportation solutions' },
-  { id: '7', name: 'Floral Arrangements', slug: 'floral', icon: Flower, color: '#EC4899', description: 'Stunning floral designs' },
-  { id: '8', name: 'Audio/Visual Equipment', slug: 'av-equipment', icon: Speaker, color: '#F97316', description: 'Professional AV equipment rental' },
-  { id: '9', name: 'Furniture & Props', slug: 'furniture-props', icon: Armchair, color: '#84CC16', description: 'Stylish furniture and props' },
-  { id: '10', name: 'Lighting Solutions', slug: 'lighting', icon: Lightbulb, color: '#FBBF24', description: 'Professional lighting setup' },
-  { id: '11', name: 'Security Services', slug: 'security', icon: Shield, color: '#1F2937', description: 'Professional event security' },
-  { id: '12', name: 'Wedding Planning', slug: 'wedding-planning', icon: Heart, color: '#F472B6', description: 'Complete wedding coordination' },
-  { id: '13', name: 'Makeup & Beauty', slug: 'makeup-beauty', icon: Sparkles, color: '#A855F7', description: 'Professional beauty services' },
-  { id: '14', name: 'DJ & Sound Systems', slug: 'dj-sound', icon: Headphones, color: '#06B6D4', description: 'Professional DJ and sound services' },
-  { id: '15', name: 'Photo Booth Services', slug: 'photo-booth', icon: ImageIcon, color: '#14B8A6', description: 'Fun photo booth rentals' }
-]
+const serviceCategories: ServiceCategory[] = EVENT_CATEGORIES.map(cat => ({
+  id: cat.id,
+  name: cat.name,
+  slug: cat.slug,
+  icon: cat.icon,
+  color: cat.color,
+  description: cat.description
+}))
 
 const subcategoriesData: Record<string, Subcategory[]> = {
-  'catering-food': [
-    { id: '1', name: 'Multi-cuisine Catering', description: 'Diverse menu options', popular: true, priceRange: '$15-$50 per person' },
-    { id: '2', name: 'Live Cooking Stations', description: 'Interactive cooking with live chefs', popular: true, priceRange: '$500-$2000 per station' },
-    { id: '3', name: 'Beverages & Bar Service', description: 'Professional bartending service', priceRange: '$100-$300 per hour' },
-    { id: '4', name: 'Dessert & Cake Services', description: 'Custom cakes and desserts', priceRange: '$200-$1000' },
-    { id: '5', name: 'Specialized Dietary Options', description: 'Vegan, gluten-free accommodations', priceRange: '$18-$60 per person' }
+  'stages': [
+    { id: '1', name: 'Wedding Stages', description: 'Traditional wedding stage setups', popular: true, priceRange: '₹50,000-₹2,00,000' },
+    { id: '2', name: 'Corporate Stages', description: 'Professional corporate event stages', popular: true, priceRange: '₹30,000-₹1,50,000' },
+    { id: '3', name: 'Festival Stages', description: 'Large festival and celebration stages', priceRange: '₹1,00,000-₹5,00,000' }
   ],
-  'photography-videography': [
-    { id: '6', name: 'Wedding Photography', description: 'Complete wedding day coverage', popular: true, priceRange: '$1000-$5000' },
-    { id: '7', name: 'Event Videography', description: 'Professional video coverage', popular: true, priceRange: '$800-$3000' },
-    { id: '8', name: 'Drone Photography', description: 'Aerial photography and videography', priceRange: '$200-$500 per hour' },
-    { id: '9', name: 'Photo Editing & Albums', description: 'Professional editing and albums', priceRange: '$300-$800' }
+  'mandaps': [
+    { id: '4', name: 'Traditional Mandaps', description: 'Classic Indian wedding mandaps', popular: true, priceRange: '₹75,000-₹3,00,000' },
+    { id: '5', name: 'Modern Mandaps', description: 'Contemporary mandap designs', popular: true, priceRange: '₹50,000-₹2,50,000' },
+    { id: '6', name: 'Custom Mandaps', description: 'Bespoke mandap designs', priceRange: '₹1,00,000-₹5,00,000' }
   ],
-  'decoration-styling': [
-    { id: '10', name: 'Theme-based Decoration', description: 'Custom themed decorations', popular: true, priceRange: '$500-$3000' },
-    { id: '11', name: 'Floral Arrangements', description: 'Beautiful flower arrangements', popular: true, priceRange: '$200-$1500' },
-    { id: '12', name: 'Backdrop & Stage Setup', description: 'Professional stage arrangements', priceRange: '$300-$2000' }
+  'decoration': [
+    { id: '7', name: 'Wedding Decoration', description: 'Complete wedding decoration services', popular: true, priceRange: '₹25,000-₹1,50,000' },
+    { id: '8', name: 'Corporate Decoration', description: 'Professional corporate event styling', popular: true, priceRange: '₹15,000-₹75,000' },
+    { id: '9', name: 'Festival Decoration', description: 'Festival and celebration decorations', priceRange: '₹10,000-₹50,000' }
+  ],
+  'lightings': [
+    { id: '10', name: 'Stage Lighting', description: 'Professional stage lighting setups', popular: true, priceRange: '₹20,000-₹1,00,000' },
+    { id: '11', name: 'Ambient Lighting', description: 'Atmospheric lighting solutions', popular: true, priceRange: '₹15,000-₹75,000' },
+    { id: '12', name: 'Special Effects Lighting', description: 'Advanced lighting effects', priceRange: '₹25,000-₹1,25,000' }
+  ],
+  'venues': [
+    { id: '13', name: 'Wedding Venues', description: 'Exclusive wedding venues', popular: true, priceRange: '₹50,000-₹5,00,000' },
+    { id: '14', name: 'Corporate Venues', description: 'Professional corporate event spaces', popular: true, priceRange: '₹25,000-₹2,00,000' },
+    { id: '15', name: 'Outdoor Venues', description: 'Beautiful outdoor event locations', priceRange: '₹30,000-₹3,00,000' }
+  ],
+  'catering': [
+    { id: '16', name: 'Wedding Catering', description: 'Complete wedding catering services', popular: true, priceRange: '₹500-₹2,000 per person' },
+    { id: '17', name: 'Corporate Catering', description: 'Professional corporate catering', popular: true, priceRange: '₹300-₹1,500 per person' },
+    { id: '18', name: 'Festival Catering', description: 'Large-scale festival catering', priceRange: '₹200-₹1,000 per person' }
+  ],
+  'sound-system': [
+    { id: '19', name: 'Professional Audio', description: 'High-quality sound systems', popular: true, priceRange: '₹15,000-₹75,000' },
+    { id: '20', name: 'DJ Equipment', description: 'Complete DJ setups', popular: true, priceRange: '₹10,000-₹50,000' },
+    { id: '21', name: 'Live Music Setup', description: 'Professional live music equipment', priceRange: '₹20,000-₹1,00,000' }
   ]
 }
 

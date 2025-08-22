@@ -21,6 +21,65 @@ export interface ServiceSubcategory {
   sort_order: number
 }
 
+export const EVENT_CATEGORIES = [
+  {
+    id: 'stages',
+    name: 'Stages',
+    slug: 'stages',
+    description: 'Professional stage setups for events',
+    icon: '🎭',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    id: 'mandaps',
+    name: 'Mandaps',
+    slug: 'mandaps',
+    description: 'Traditional mandap structures for ceremonies',
+    icon: '🏛️',
+    color: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'decoration',
+    name: 'Decoration',
+    slug: 'decoration',
+    description: 'Event decoration and styling services',
+    icon: '🌸',
+    color: 'from-pink-500 to-rose-500'
+  },
+  {
+    id: 'lightings',
+    name: 'Lightings',
+    slug: 'lightings',
+    description: 'Professional lighting solutions',
+    icon: '💡',
+    color: 'from-yellow-500 to-orange-500'
+  },
+  {
+    id: 'venues',
+    name: 'Venues',
+    slug: 'venues',
+    description: 'Event venues and spaces',
+    icon: '🏢',
+    color: 'from-green-500 to-emerald-500'
+  },
+  {
+    id: 'catering',
+    name: 'Catering',
+    slug: 'catering',
+    description: 'Food and beverage services',
+    icon: '🍽️',
+    color: 'from-red-500 to-pink-500'
+  },
+  {
+    id: 'sound-system',
+    name: 'Sound System',
+    slug: 'sound-system',
+    description: 'Audio and sound equipment',
+    icon: '🔊',
+    color: 'from-indigo-500 to-purple-500'
+  }
+]
+
 export const enhancedServiceCategories: ServiceCategory[] = [
   {
     id: 'venue-location',

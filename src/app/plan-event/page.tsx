@@ -2,18 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEventPlanningStore, useEventPlanningSelectors } from '@/stores/event-planning-store'
-import { EVENT_TYPES } from '@/types/event-planning'
 import FloatingNavbar from '@/components/layout/FloatingNavbar'
 import Footer from '@/components/layout/Footer'
 import AnimatedBackground from '@/components/3d/AnimatedBackground'
-import EventTypeSelection from '@/components/event-planning/EventTypeSelection'
-import EventDetailsForm from '@/components/event-planning/EventDetailsForm'
-import ServiceSelection from '@/components/event-planning/ServiceSelection'
-import VendorSelection from '@/components/event-planning/VendorSelection'
-import PackageReview from '@/components/event-planning/PackageReview'
-import BookingConfirmation from '@/components/event-planning/BookingConfirmation'
-import ProgressStepper from '@/components/event-planning/ProgressStepper'
+import QuickProfiling from '@/components/event-planning/QuickProfiling'
+import SmartRequirements from '@/components/event-planning/SmartRequirements'
+import PackageGeneration from '@/components/event-planning/PackageGeneration'
+import VendorAllocation from '@/components/event-planning/VendorAllocation'
+import ProfessionalQuote from '@/components/event-planning/ProfessionalQuote'
 import { 
   Calendar, 
   MapPin, 
@@ -26,312 +22,167 @@ import {
   Star
 } from 'lucide-react'
 
-const EventPlanningPage = () => {
-  const {
-    currentStep,
-    steps,
-    eventData,
-    package: eventPackage,
-    loading,
-    error,
-    setCurrentStep,
-    nextStep,
-    previousStep,
-    completeStep,
-    setLoading,
-    setError
-  } = useEventPlanningStore()
+const STAGES = [
+  { id: 'quick-profiling', name: 'Quick Profiling', description: 'Tell us about your event' },
+  { id: 'smart-requirements', name: 'Smart Requirements', description: 'Choose your services' },
+  { id: 'package-generation', name: 'Package Generation', description: 'Review your options' },
+  { id: 'vendor-allocation', name: 'Vendor Allocation', description: 'Match with vendors' },
+  { id: 'professional-quote', name: 'Professional Quote', description: 'Get your quote' }
+]
 
+const EventPlanningPage = () => {
+  const [currentStage, setCurrentStage] = useState(0)
+  const [eventData, setEventData] = useState<any>(null)
+  const [requirementsData, setRequirementsData] = useState<any>(null)
+  const [packageData, setPackageData] = useState<any>(null)
+  const [allocationData, setAllocationData] = useState<any>(null)
   const [showLanding, setShowLanding] = useState(true)
 
-  // Auto-complete steps based on data
-  useEffect(() => {
-    if (eventData.eventType && !steps[0].isCompleted) {
-      completeStep('event-type')
+  const handleStageComplete = (stageData: any) => {
+    switch (currentStage) {
+      case 0:
+        setEventData(stageData)
+        break
+      case 1:
+        setRequirementsData(stageData)
+        break
+      case 2:
+        setPackageData(stageData)
+        break
+      case 3:
+        setAllocationData(stageData)
+        break
+      case 4:
+        // Final stage - quote generated
+        console.log('Quote generated:', stageData)
+        break
     }
-    if (eventData.eventDetails.date && !steps[1].isCompleted) {
-      completeStep('event-details')
+    
+    if (currentStage < STAGES.length - 1) {
+      setCurrentStage(currentStage + 1)
     }
-    if (eventData.selectedServices.length > 0 && !steps[2].isCompleted) {
-      completeStep('service-selection')
-    }
-    if (eventData.selectedVendors.length > 0 && !steps[3].isCompleted) {
-      completeStep('vendor-selection')
-    }
-    if (eventPackage.items.length > 0 && !steps[4].isCompleted) {
-      completeStep('package-review')
-    }
-  }, [eventData, eventPackage, steps, completeStep])
+  }
 
   const handleStartPlanning = () => {
     setShowLanding(false)
-    setCurrentStep(0)
+    setCurrentStage(0)
   }
 
-  const handleStepComplete = (stepId: string) => {
-    completeStep(stepId)
-    nextStep()
-  }
-
-  const renderCurrentStep = () => {
-    const stepComponents = {
-      'event-type': EventTypeSelection,
-      'event-details': EventDetailsForm,
-      'service-selection': ServiceSelection,
-      'vendor-selection': VendorSelection,
-      'package-review': PackageReview,
-      'booking': BookingConfirmation
+  const renderCurrentStage = () => {
+    const stageComponents = {
+      'quick-profiling': QuickProfiling,
+      'smart-requirements': SmartRequirements,
+      'package-generation': PackageGeneration,
+      'vendor-allocation': VendorAllocation,
+      'professional-quote': ProfessionalQuote
     }
 
-    const CurrentComponent = stepComponents[steps[currentStep]?.id as keyof typeof stepComponents]
+    const CurrentComponent = stageComponents[STAGES[currentStage]?.id as keyof typeof stageComponents]
     
     if (!CurrentComponent) return null
 
     return (
       <motion.div
-        key={steps[currentStep]?.id}
+        key={STAGES[currentStage]?.id}
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -50 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
         className="w-full"
       >
-        <CurrentComponent onComplete={handleStepComplete} />
+        <CurrentComponent 
+          eventData={eventData}
+          requirementsData={requirementsData}
+          packageData={packageData}
+          allocationData={allocationData}
+          onComplete={handleStageComplete}
+        />
       </motion.div>
     )
   }
 
   if (showLanding) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        <AnimatedBackground />
         <FloatingNavbar />
         
-        {/* Landing Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* 3D Animated Background */}
-          <AnimatedBackground />
-          
-          <div className="container-custom relative z-10">
+        <div className="relative z-10">
+          <div className="max-w-6xl mx-auto px-4 py-20">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="text-center space-y-8"
+              transition={{ duration: 0.8 }}
+              className="text-center"
             >
-              {/* Badge */}
-              {/* <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 backdrop-blur-lg px-6 py-4 rounded-full border border-blue-500/30 shadow-lg"
+              <motion.h1 
+                className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
               >
-                <Sparkles className="h-5 w-5 text-blue-400" />
-                <span className="text-blue-300 font-semibold text-lg">AI-Powered Event Planning</span>
-              </motion.div> */}
+                Plan Your Perfect Event
+              </motion.h1>
+              
+              <motion.p 
+                className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+              >
+                From concept to celebration, we'll help you create an unforgettable experience in just 6 simple steps
+              </motion.p>
 
-              {/* Main Headline */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.4 }}
-                className="space-y-6"
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
               >
-                <div className="relative">
+                {STAGES.map((stage, index) => (
                   <motion.div
-                    animate={{ 
-                      textShadow: [
-                        "0 0 20px rgba(59, 130, 246, 0.8)",
-                        "0 0 40px rgba(59, 130, 246, 1)",
-                        "0 0 60px rgba(59, 130, 246, 0.8)",
-                        "0 0 20px rgba(59, 130, 246, 0.8)"
-                      ]
-                    }}
-                    transition={{ 
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading text-white leading-tight"
-                  >
-                    Plan Your Perfect Event
-                    <span className="text-blue-400 block mt-2">
-                      in Minutes, Not Months
-                    </span>
-                  </motion.div>
-                  <motion.div
-                    animate={{ 
-                      opacity: [0.3, 0.8, 0.3],
-                      scale: [0.95, 1.05, 0.95]
-                    }}
-                    transition={{ 
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10"
-                  />
-                </div>
-                
-                <p className="text-xl lg:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-                  Our intelligent platform matches you with the best vendors, creates personalized packages, 
-                  and ensures your event is everything you dreamed of.
-                </p>
-              </motion.div>
-
-              {/* Features Grid */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.6 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto"
-              >
-                {[
-                  {
-                    icon: Calendar,
-                    title: 'Smart Scheduling',
-                    description: 'Find the perfect date and time for your event'
-                  },
-                  {
-                    icon: MapPin,
-                    title: 'Location Matching',
-                    description: 'Discover venues that match your style and budget'
-                  },
-                  {
-                    icon: Users,
-                    title: 'Vendor Selection',
-                    description: 'Choose from verified, top-rated service providers'
-                  },
-                  {
-                    icon: DollarSign,
-                    title: 'Budget Optimization',
-                    description: 'Get the best value with our package deals'
-                  }
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature.title}
+                    key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-                    className="bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl hover:border-white/40 transition-all duration-300"
+                    transition={{ delay: 0.8 + index * 0.1, duration: 0.6 }}
+                    className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-xl flex items-center justify-center mb-4">
-                      <feature.icon className="h-6 w-6 text-blue-300" />
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl mb-4 mx-auto">
+                      <span className="text-white font-bold text-lg">{index + 1}</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                    <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
+                    <h3 className="text-lg font-semibold mb-2">{stage.name}</h3>
+                    <p className="text-gray-400 text-sm">{stage.description}</p>
                   </motion.div>
                 ))}
               </motion.div>
 
-              {/* CTA Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.2 }}
-                className="space-y-6"
+              <motion.button
+                onClick={handleStartPlanning}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.2, duration: 0.6 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <button
-                  onClick={handleStartPlanning}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 group relative overflow-hidden"
-                  suppressHydrationWarning
-                >
-                  <span className="relative z-10 flex items-center space-x-3">
-                    <span>Start Planning Today</span>
-                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </button>
-                
-                <div className="flex items-center justify-center space-x-8 text-sm text-white/70">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-400" />
-                    <span>Free Consultation</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-blue-400" />
-                    <span>5-Minute Setup</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span>Verified Vendors</span>
-                  </div>
-                </div>
-              </motion.div>
+                <Sparkles className="h-5 w-5" />
+                <span>Start Planning Now</span>
+                <ArrowRight className="h-5 w-5" />
+              </motion.button>
             </motion.div>
           </div>
-        </section>
-
+        </div>
+        
         <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <FloatingNavbar />
-      
-      <main className="pb-16">
-        <div className="container-custom">
-          {/* Progress Stepper */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
-          >
-            <ProgressStepper 
-              steps={steps}
-              currentStep={currentStep}
-              onStepClick={setCurrentStep}
-            />
-          </motion.div>
-
-          {/* Main Content */}
-          <div className="max-w-6xl mx-auto">
-            <AnimatePresence mode="wait">
-              {renderCurrentStep()}
-            </AnimatePresence>
-          </div>
-
-          {/* Navigation */}
-          {currentStep > 0 && currentStep < steps.length - 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex justify-between items-center mt-12 max-w-4xl mx-auto"
-            >
-              <button
-                onClick={previousStep}
-                className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-gray-700 hover:to-gray-800 transition-all duration-300 border border-gray-500/30"
-                disabled={currentStep === 0}
-              >
-                Previous Step
-              </button>
-              
-              <div className="text-center">
-                <p className="text-sm text-gray-400 mb-2">
-                  Step {currentStep + 1} of {steps.length}
-                </p>
-                <p className="text-lg font-semibold text-white">
-                  {steps[currentStep]?.title}
-                </p>
-              </div>
-              
-              <button
-                onClick={nextStep}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
-                disabled={!steps[currentStep]?.isCompleted}
-                suppressHydrationWarning
-              >
-                Next Step
-              </button>
-            </motion.div>
-          )}
-        </div>
-      </main>
-
-      <Footer />
+    <div className="min-h-screen bg-black text-white">
+      <AnimatePresence mode="wait">
+        {renderCurrentStage()}
+      </AnimatePresence>
     </div>
   )
 }
