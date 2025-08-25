@@ -82,13 +82,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Handle auth routes (redirect if already authenticated)
+  // Handle auth routes (allow access even if authenticated)
   if (authRoutes.includes(pathname)) {
     if (token) {
       try {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET)
         await jwtVerify(token, secret)
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+        // Allow access to login page even if authenticated
+        // Remove this redirect to allow users to access login page
+        // return NextResponse.redirect(new URL('/dashboard', request.url))
       } catch (error) {
         // Invalid token, allow access to auth routes
         const response = NextResponse.next()

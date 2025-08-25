@@ -78,19 +78,23 @@ export default function FloatingNavbar() {
             ? 'bg-black/80 backdrop-blur-lg shadow-lg border-b border-white/20' 
             : 'bg-transparent'
         }`}
+        style={{
+          transform: 'perspective(1000px) rotateX(0deg)',
+          transformStyle: 'preserve-3d'
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/">
-              <Logo size="md" showText={false} />
+            <Link href="/" className="logo-3d-hover">
+              <Logo size="md" showText={false} variant="3d" />
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-8 navbar-3d">
               <Link 
                 href="/marketplace" 
-                className={`font-medium transition-colors duration-300 hover:text-blue-400 ${
+                className={`font-medium transition-colors duration-300 hover:text-blue-400 navbar-3d-item ${
                   isScrolled ? 'text-white' : 'text-white'
                 }`}
               >
@@ -98,7 +102,7 @@ export default function FloatingNavbar() {
               </Link>
               <Link 
                 href="/vendor" 
-                className={`font-medium transition-colors duration-300 hover:text-blue-400 ${
+                className={`font-medium transition-colors duration-300 hover:text-blue-400 navbar-3d-item ${
                   isScrolled ? 'text-white' : 'text-white'
                 }`}
               >
@@ -106,7 +110,7 @@ export default function FloatingNavbar() {
               </Link>
               <Link 
                 href="/about" 
-                className={`font-medium transition-colors duration-300 hover:text-blue-400 ${
+                className={`font-medium transition-colors duration-300 hover:text-blue-400 navbar-3d-item ${
                   isScrolled ? 'text-white' : 'text-white'
                 }`}
               >
@@ -115,12 +119,12 @@ export default function FloatingNavbar() {
             </div>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-4 navbar-3d">
               {/* Search Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-full transition-all duration-300 ${
+                className={`p-2 rounded-full transition-all duration-300 navbar-3d-item ${
                   isScrolled 
                     ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm' 
                     : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
@@ -133,7 +137,7 @@ export default function FloatingNavbar() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-full transition-all duration-300 relative ${
+                className={`p-2 rounded-full transition-all duration-300 relative navbar-3d-item ${
                   isScrolled 
                     ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm' 
                     : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
@@ -149,7 +153,7 @@ export default function FloatingNavbar() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-full transition-all duration-300 relative ${
+                className={`p-2 rounded-full transition-all duration-300 relative navbar-3d-item ${
                   isScrolled 
                     ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm' 
                     : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
@@ -168,7 +172,7 @@ export default function FloatingNavbar() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className={`p-2 rounded-full transition-all duration-300 ${
+                    className={`p-2 rounded-full transition-all duration-300 navbar-3d-item ${
                       isScrolled 
                         ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm' 
                         : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
@@ -252,7 +256,7 @@ export default function FloatingNavbar() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 navbar-3d-item ${
                       isScrolled 
                         ? 'bg-blue-600 text-white hover:bg-blue-700' 
                         : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/30'
@@ -269,7 +273,7 @@ export default function FloatingNavbar() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden p-2 rounded-full transition-all duration-300 ${
+              className={`md:hidden p-2 rounded-full transition-all duration-300 navbar-3d-item ${
                 isScrolled 
                   ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm' 
                   : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'

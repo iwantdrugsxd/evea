@@ -7,9 +7,10 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
   className?: string;
+  variant?: '3d' | 'classic';
 }
 
-export default function Logo({ size = 'md', showText = false, className = "" }: LogoProps) {
+export default function Logo({ size = 'md', showText = false, className = "", variant = '3d' }: LogoProps) {
   const sizeClasses = {
     sm: 'w-12 h-12',
     md: 'w-20 h-20',
@@ -22,6 +23,190 @@ export default function Logo({ size = 'md', showText = false, className = "" }: 
     lg: 'text-2xl'
   };
 
+  if (variant === '3d') {
+    return (
+      <motion.div 
+        className={`flex items-center space-x-3 group ${className}`}
+        whileHover={{ scale: 1.05, y: -2 }}
+        animate={{
+          y: [0, -2, 0]
+        }}
+        transition={{ 
+          duration: 0.3,
+          hover: { duration: 0.2 },
+          animate: {
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        }}
+      >
+        {/* 3D EVEA Logo */}
+        <div className={`relative ${sizeClasses[size]} flex items-center justify-center transition-all duration-300`}>
+          {/* Main Logo Container with Decorative Frame */}
+          <div className="relative w-full h-full">
+            {/* Decorative Frame Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl border-2 border-blue-500/50 overflow-hidden">
+                              {/* Leaf Pattern Border */}
+                <div className="absolute inset-0">
+                  {/* Top Leaf Pattern */}
+                  <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-3/4 h-2">
+                    <div className="flex justify-between">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-40"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-40"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Leaf Pattern */}
+                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-3/4 h-2">
+                    <div className="flex justify-between">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-40"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-40"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Left Leaf Pattern */}
+                  <div className="absolute left-1 top-1/2 transform -translate-y-1/2 w-2 h-3/4">
+                    <div className="flex flex-col justify-between h-full">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-40"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Right Leaf Pattern */}
+                  <div className="absolute right-1 top-1/2 transform -translate-y-1/2 w-2 h-3/4">
+                    <div className="flex flex-col justify-between h-full">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-40"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+                    </div>
+                  </div>
+                </div>
+              
+              {/* Corner Vine Patterns */}
+              <div className="absolute top-2 left-2 w-3 h-3">
+                <div className="w-1 h-1 bg-blue-300 rounded-full opacity-80"></div>
+                <div className="absolute top-1 left-1 w-1 h-1 bg-blue-300 rounded-full opacity-60"></div>
+              </div>
+              <div className="absolute top-2 right-2 w-3 h-3">
+                <div className="w-1 h-1 bg-blue-300 rounded-full opacity-80"></div>
+                <div className="absolute top-1 right-1 w-1 h-1 bg-blue-300 rounded-full opacity-60"></div>
+              </div>
+              <div className="absolute bottom-2 left-2 w-3 h-3">
+                <div className="w-1 h-1 bg-blue-300 rounded-full opacity-80"></div>
+                <div className="absolute bottom-1 left-1 w-1 h-1 bg-blue-300 rounded-full opacity-60"></div>
+              </div>
+              <div className="absolute bottom-2 right-2 w-3 h-3">
+                <div className="w-1 h-1 bg-blue-300 rounded-full opacity-80"></div>
+                <div className="absolute bottom-1 right-1 w-1 h-1 bg-blue-300 rounded-full opacity-60"></div>
+              </div>
+            </div>
+            
+            {/* Large Serif E Letter */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                className="text-white font-black tracking-wider"
+                style={{
+                  fontSize: size === 'sm' ? '1.8rem' : size === 'md' ? '3rem' : '3.5rem',
+                  fontFamily: 'var(--font-playfair-display), "Times New Roman", serif',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.6)',
+                  transform: 'perspective(100px) rotateX(5deg)'
+                }}
+                animate={{
+                  textShadow: [
+                    '2px 2px 4px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.6)',
+                    '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.7)',
+                    '2px 2px 4px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.6)'
+                  ]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                E
+              </motion.div>
+            </div>
+          </div>
+          
+          {/* 3D Shadow Effect */}
+          <motion.div 
+            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4/5 h-2 bg-black/20 rounded-full blur-sm"
+            animate={{
+              scale: [0.8, 1.2, 0.8],
+              opacity: [0.1, 0.3, 0.1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5
+            }}
+          />
+          
+          {/* Inner Glow */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-br from-blue-400/30 via-transparent to-blue-700/30 rounded-2xl"
+            animate={{
+              opacity: [0.3, 0.6, 0.3]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        </div>
+        
+        {/* 3D Text Logo */}
+        {showText && (
+          <div className="hidden sm:block">
+            <motion.div
+              className="flex flex-col"
+              animate={{
+                y: [0, -1, 0]
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <span 
+                className={`font-black tracking-widest transition-colors duration-300 text-white ${textSizes[size]}`}
+                style={{
+                  fontFamily: 'var(--font-playfair-display), "Times New Roman", serif',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.6)',
+                  transform: 'perspective(100px) rotateX(5deg)'
+                }}
+              >
+                EVEA
+              </span>
+              <span 
+                className="text-xs font-medium tracking-wider text-blue-300 opacity-80"
+                style={{
+                  fontFamily: 'var(--font-playfair-display), "Times New Roman", serif',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                }}
+              >
+                ELEGANT EVENTS
+              </span>
+            </motion.div>
+          </div>
+        )}
+      </motion.div>
+    );
+  }
+
+  // Classic Blue Logo (existing implementation)
   return (
     <motion.div 
       className={`flex items-center space-x-3 group ${className}`}

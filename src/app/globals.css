@@ -96,6 +96,553 @@
     font-family: 'Merriweather', serif;
   }
   
+  /* Sidebar Width Classes */
+  .lg\:w-70 {
+    width: 280px;
+  }
+  
+  .lg\:w-20 {
+    width: 80px;
+  }
+  
+  .lg\:pl-70 {
+    padding-left: 280px;
+  }
+  
+  .lg\:pl-20 {
+    padding-left: 80px;
+  }
+  
+  .lg\:ml-70 {
+    margin-left: 280px;
+  }
+  
+  .lg\:ml-20 {
+    margin-left: 80px;
+  }
+  
+  /* Custom Utility Classes */
+  .pt-24 {
+    padding-top: 6rem;
+    padding-left: 300px;
+  }
+  
+  /* Vendor Auth Layout Styles */
+  .vendor-auth-content {
+    padding-top: 4rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  /* Vendor Login Page Styles */
+  .vendor-login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #000000 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .vendor-login-background {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  
+  .vendor-login-bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(3rem);
+  }
+  
+  .vendor-login-bg-circle-1 {
+    top: 0;
+    left: 0;
+    width: 24rem;
+    height: 24rem;
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .vendor-login-bg-circle-2 {
+    bottom: 0;
+    right: 0;
+    width: 24rem;
+    height: 24rem;
+    background: rgba(147, 51, 234, 0.1);
+  }
+  
+  .vendor-login-bg-circle-3 {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24rem;
+    height: 24rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
+  }
+  
+  .vendor-login-content {
+    position: relative;
+    z-index: 10;
+    padding-top: 2rem;
+  }
+  
+  .vendor-login-centered {
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 8rem);
+  }
+  
+  .vendor-login-form-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .vendor-login-form-container {
+    max-width: 28rem;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .vendor-login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  
+  .vendor-login-logo {
+    margin-bottom: 1.5rem;
+  }
+  
+  .vendor-login-logo-icon {
+    width: 5rem;
+    height: 5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+  }
+  
+  .vendor-login-logo-icon-svg {
+    height: 2.5rem;
+    width: 2.5rem;
+    color: white;
+  }
+  
+  .vendor-login-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+  }
+  
+  .vendor-login-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.125rem;
+  }
+  
+  .vendor-login-form-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(2rem);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .vendor-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .vendor-login-form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .vendor-login-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .vendor-login-label-icon {
+    height: 1rem;
+    width: 1rem;
+    margin-right: 0.5rem;
+  }
+  
+  .vendor-login-input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .vendor-login-input:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #3b82f6;
+    border-color: transparent;
+  }
+  
+  .vendor-login-input:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .vendor-login-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .vendor-login-password-container {
+    position: relative;
+  }
+  
+  .vendor-login-password-input {
+    padding-right: 3rem;
+  }
+  
+  .vendor-login-password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .vendor-login-password-toggle:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .vendor-login-password-icon {
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+  
+  .vendor-login-form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .vendor-login-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+  
+  .vendor-login-checkbox-container {
+    position: relative;
+  }
+  
+  .vendor-login-checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .vendor-login-checkbox-custom {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .vendor-login-checkbox-checked {
+    background: #3b82f6;
+    border-color: #3b82f6;
+  }
+  
+  .vendor-login-checkbox-icon {
+    height: 0.75rem;
+    width: 0.75rem;
+    color: white;
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+  }
+  
+  .vendor-login-checkbox-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s ease;
+  }
+  
+  .vendor-login-checkbox-group:hover .vendor-login-checkbox-label {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .vendor-login-forgot-link {
+    font-size: 0.875rem;
+    color: #60a5fa;
+    transition: color 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .vendor-login-forgot-link:hover {
+    color: #93c5fd;
+  }
+  
+  .vendor-login-submit-button {
+    width: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .vendor-login-submit-button:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    transform: scale(1.02);
+  }
+  
+  .vendor-login-submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .vendor-login-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .vendor-login-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .vendor-login-button-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .vendor-login-button-icon {
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+  
+  .vendor-login-signup {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .vendor-login-signup-text {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .vendor-login-signup-link {
+    color: #60a5fa;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+  
+  .vendor-login-signup-link:hover {
+    color: #93c5fd;
+  }
+  
+  .vendor-login-benefits-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .vendor-login-benefits-container {
+    max-width: 32rem;
+  }
+  
+  .vendor-login-benefits-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  
+  .vendor-login-benefits-logo {
+    margin-bottom: 1.5rem;
+  }
+  
+  .vendor-login-benefits-logo-icon {
+    width: 4rem;
+    height: 4rem;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  .vendor-login-benefits-logo-icon-svg {
+    height: 2rem;
+    width: 2rem;
+    color: white;
+  }
+  
+  .vendor-login-benefits-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  
+  .vendor-login-benefits-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.125rem;
+  }
+  
+  .vendor-login-benefits-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .vendor-login-benefits-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  
+  .vendor-login-benefit-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(2rem);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .vendor-login-benefit-card:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .vendor-login-benefit-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .vendor-login-benefit-icon {
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 0.75rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .vendor-login-benefit-card:hover .vendor-login-benefit-icon {
+    transform: scale(1.1);
+  }
+  
+  .vendor-login-benefit-icon-svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    color: white;
+  }
+  
+  .vendor-login-benefit-text {
+    flex: 1;
+  }
+  
+  .vendor-login-benefit-title {
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+  }
+  
+  .vendor-login-benefit-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+  }
+  
+  .vendor-login-stats-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(2rem);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+  
+  .vendor-login-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .vendor-login-stat-item {
+    text-align: center;
+  }
+  
+  .vendor-login-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .vendor-login-stat-icon-svg {
+    height: 1.25rem;
+    width: 1.25rem;
+    color: #60a5fa;
+  }
+  
+  .vendor-login-stat-value {
+    /* font-size: 1.5rem; */
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+  
+  .vendor-login-stat-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
   /* Responsive Container */
   .container-custom {
     @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16;
@@ -169,6 +716,52 @@
   
   .space-responsive-sm {
     @apply space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5 xl:space-y-6;
+  }
+
+  /* 3D Logo Effects */
+  .logo-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .logo-3d-hover {
+    transition: all 0.3s ease;
+  }
+
+  .logo-3d-hover:hover {
+    transform: translateZ(20px) rotateY(5deg) rotateX(5deg);
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  }
+
+  /* Enhanced 3D Navbar Effects */
+  .navbar-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .navbar-3d-item {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+  }
+
+  .navbar-3d-item:hover {
+    transform: translateZ(10px) scale(1.05);
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+  }
+
+  /* 3D Text Effects */
+  .text-3d {
+    text-shadow: 
+      2px 2px 4px rgba(0, 0, 0, 0.3),
+      -1px -1px 2px rgba(255, 255, 255, 0.5);
+    transform: perspective(100px) rotateX(5deg);
+  }
+
+  .text-3d-gold {
+    text-shadow: 
+      2px 2px 4px rgba(0, 0, 0, 0.3),
+      -1px -1px 2px rgba(255, 255, 255, 0.5),
+      0 0 20px rgba(245, 158, 11, 0.3);
   }
   
   .space-responsive-lg {

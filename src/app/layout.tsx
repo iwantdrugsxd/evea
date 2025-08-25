@@ -1,10 +1,14 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import '@/lib/suppress-warnings'
 
 const inter = Inter({ subsets: ['latin'] })
+const playfairDisplay = Playfair_Display({ 
+  subsets: ['latin'],
+  variable: '--font-playfair-display'
+})
 
 export const metadata: Metadata = {
   title: 'EVEA - Event Vendor Ecosystem Application',
@@ -25,7 +29,7 @@ export default function RootLayout({
           defer
         />
       </head>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className={`${inter.className} ${playfairDisplay.variable}`}>
         <AuthProvider>
           {children}
         </AuthProvider>
